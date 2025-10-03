@@ -3,7 +3,7 @@
         "id": "1",
         "title": "Mountain Landscape",
         "description": "A breathtaking view of mountain peaks during golden hour",
-        "imageUrl": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&crop=center",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&crop=center",
         "category": "photography",
         "tags": [
             "nature",
@@ -17,13 +17,13 @@
         "comments": 0,
         "views": 0,
         "featured": true,
-        "downloadUrl": "https://example.com/downloads/mountain-landscape.zip"
+        "downloadUrl": "https:\/\/example.com\/downloads\/mountain-landscape.zip"
     },
     {
         "id": "2",
         "title": "Abstract Digital Art",
         "description": "Vibrant colors and flowing shapes create a mesmerizing digital composition",
-        "imageUrl": "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=600&fit=crop&crop=center",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1541961017774-22349e4a1262?w=800&h=600&fit=crop&crop=center",
         "category": "art",
         "tags": [
             "abstract",
@@ -37,13 +37,13 @@
         "comments": 0,
         "views": 0,
         "featured": false,
-        "downloadUrl": "https://example.com/downloads/abstract-digital-art.zip"
+        "downloadUrl": "https:\/\/example.com\/downloads\/abstract-digital-art.zip"
     },
     {
         "id": "3",
         "title": "Minimalist Design Concept",
         "description": "Clean lines and negative space showcase the power of minimalism",
-        "imageUrl": "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&h=600&fit=crop&crop=center",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1558655146-9f40138edfeb?w=800&h=600&fit=crop&crop=center",
         "category": "design",
         "tags": [
             "minimalist",
@@ -53,9 +53,9 @@
         ],
         "author": "admin",
         "created": "2024-01-13T09:20:00Z",
-        "likes": 0,
+        "likes": 1,
         "comments": 0,
-        "views": 0,
+        "views": 1,
         "featured": true,
         "downloadUrl": null
     },
@@ -63,7 +63,7 @@
         "id": "4",
         "title": "Urban Photography",
         "description": "Capturing the essence of city life through street photography",
-        "imageUrl": "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&h=600&fit=crop&crop=center",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1477959858617-67f85cf4f1df?w=800&h=600&fit=crop&crop=center",
         "category": "photography",
         "tags": [
             "urban",
@@ -83,7 +83,7 @@
         "id": "5",
         "title": "Digital Illustration",
         "description": "A fantasy-inspired digital artwork with intricate details",
-        "imageUrl": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&crop=center",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&crop=center",
         "category": "digital",
         "tags": [
             "illustration",
@@ -97,13 +97,13 @@
         "comments": 0,
         "views": 0,
         "featured": true,
-        "downloadUrl": "https://example.com/downloads/digital-illustration.zip"
+        "downloadUrl": "https:\/\/example.com\/downloads\/digital-illustration.zip"
     },
     {
         "id": "6",
         "title": "Nature Photography",
         "description": "Macro shot of morning dew on flower petals",
-        "imageUrl": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop&crop=center",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop&crop=center",
         "category": "photography",
         "tags": [
             "nature",
@@ -123,7 +123,7 @@
         "id": "7",
         "title": "3D Character Model",
         "description": "Stylized 3D character design with dynamic pose and vibrant textures",
-        "imageUrl": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&h=600&fit=crop&crop=center",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1618005182384-a83a8bd57fbe?w=800&h=600&fit=crop&crop=center",
         "category": "digital",
         "tags": [
             "3d modeling",
@@ -143,7 +143,7 @@
         "id": "8",
         "title": "Portrait Photography Series",
         "description": "Emotive portrait capturing natural light and genuine expressions",
-        "imageUrl": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&h=600&fit=crop&crop=center",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1531746020798-e6953c6e8e04?w=800&h=600&fit=crop&crop=center",
         "category": "photography",
         "tags": [
             "portrait",
@@ -163,7 +163,7 @@
         "id": "9",
         "title": "Botanical Illustration",
         "description": "Detailed digital illustration of botanical elements with watercolor aesthetics",
-        "imageUrl": "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=800&h=600&fit=crop&crop=center",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1502082553048-f009c37129b9?w=800&h=600&fit=crop&crop=center",
         "category": "art",
         "tags": [
             "illustration",
@@ -177,13 +177,13 @@
         "comments": 0,
         "views": 0,
         "featured": true,
-        "downloadUrl": "https://example.com/downloads/botanical-illustration.zip"
+        "downloadUrl": "https:\/\/example.com\/downloads\/botanical-illustration.zip"
     },
     {
         "id": "10",
         "title": "3D Environment Design",
         "description": "Immersive 3D environment with atmospheric lighting and detailed textures",
-        "imageUrl": "https://images.unsplash.com/photo-1614732414444-096e5f1122d5?w=800&h=600&fit=crop&crop=center",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1614732414444-096e5f1122d5?w=800&h=600&fit=crop&crop=center",
         "category": "digital",
         "tags": [
             "3d modeling",
@@ -203,7 +203,7 @@
         "id": "11",
         "title": "Fashion Photography",
         "description": "Editorial fashion photography with bold styling and dramatic composition",
-        "imageUrl": "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&h=600&fit=crop&crop=center",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1483985988355-763728e1935b?w=800&h=600&fit=crop&crop=center",
         "category": "photography",
         "tags": [
             "fashion",
@@ -223,7 +223,7 @@
         "id": "12",
         "title": "Character Concept Art",
         "description": "Original character illustration with detailed costume and personality design",
-        "imageUrl": "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&h=600&fit=crop&crop=center",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1579783902614-a3fb3927b6a5?w=800&h=600&fit=crop&crop=center",
         "category": "art",
         "tags": [
             "concept art",
@@ -237,13 +237,13 @@
         "comments": 0,
         "views": 0,
         "featured": false,
-        "downloadUrl": "https://example.com/downloads/character-concept.zip"
+        "downloadUrl": "https:\/\/example.com\/downloads\/character-concept.zip"
     },
     {
         "id": "13",
         "title": "3D Product Visualization",
         "description": "Photorealistic 3D product rendering with studio lighting setup",
-        "imageUrl": "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=800&h=600&fit=crop&crop=center",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1526170375885-4d8ecf77b99f?w=800&h=600&fit=crop&crop=center",
         "category": "digital",
         "tags": [
             "3d modeling",
@@ -263,7 +263,7 @@
         "id": "14",
         "title": "Architectural Photography",
         "description": "Stunning architectural composition highlighting modern design and symmetry",
-        "imageUrl": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=800&h=600&fit=crop&crop=center",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1511818966892-d7d671e672a2?w=800&h=600&fit=crop&crop=center",
         "category": "photography",
         "tags": [
             "architecture",
@@ -283,7 +283,7 @@
         "id": "15",
         "title": "Storybook Illustration",
         "description": "Whimsical digital illustration perfect for children's book storytelling",
-        "imageUrl": "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&h=600&fit=crop&crop=center",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1513364776144-60967b0f800f?w=800&h=600&fit=crop&crop=center",
         "category": "art",
         "tags": [
             "illustration",
@@ -297,13 +297,13 @@
         "comments": 0,
         "views": 0,
         "featured": true,
-        "downloadUrl": "https://example.com/downloads/storybook-illustration.zip"
+        "downloadUrl": "https:\/\/example.com\/downloads\/storybook-illustration.zip"
     },
     {
         "id": "16",
         "title": "3D Abstract Sculpture",
         "description": "Abstract 3D sculpture exploring form, light, and material properties",
-        "imageUrl": "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=800&h=600&fit=crop&crop=center",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1618005198919-d3d4b5a92ead?w=800&h=600&fit=crop&crop=center",
         "category": "digital",
         "tags": [
             "3d modeling",
