@@ -48,6 +48,19 @@ switch ($action) {
         break;
 }
 
+function loadUsers() {
+    $usersFile = __DIR__ . '/../data/users.json';
+    if (!file_exists($usersFile)) {
+        return [];
+    }
+    return json_decode(file_get_contents($usersFile), true) ?? [];
+}
+
+function saveUsers($users) {
+    $usersFile = __DIR__ . '/../data/users.json';
+    file_put_contents($usersFile, json_encode($users, JSON_PRETTY_PRINT));
+}
+
 function sendOTPForVerification($data) {
     $email = $data['email'] ?? '';
     $name = $data['name'] ?? '';
@@ -61,17 +74,36 @@ function sendOTPForVerification($data) {
     // Generate 6-digit OTP
     $otp = sprintf('%06d', mt_rand(0, 999999));
     
-    // Store OTP with expiration (10 minutes)
-    $otpData = [
-        'otp' => $otp,
-        'email' => $email,
-        'name' => $name,
-        'expires' => time() + 600, // 10 minutes
-        'created' => time()
-    ];
+    // Store OTP in user data (create temporary user entry if registering)
+    $users = loadUsers();
+    $userIndex = -1;
     
-    $otpFile = __DIR__ . '/../data/otp_' . md5($email) . '.json';
-    file_put_contents($otpFile, json_encode($otpData));
+    foreach ($users as $index => $user) {
+        if ($user['email'] === $email) {
+            $userIndex = $index;
+            break;
+        }
+    }
+    
+    if ($userIndex !== -1) {
+        // User exists, update OTP data
+        $users[$userIndex]['otpToken'] = $otp;
+        $users[$userIndex]['otpExpires'] = time() + 600; // 10 minutes
+        $users[$userIndex]['otpCreated'] = time();
+    } else {
+        // New registration, store OTP in temporary user data
+        $tempUser = [
+            'email' => $email,
+            'name' => $name,
+            'otpToken' => $otp,
+            'otpExpires' => time() + 600,
+            'otpCreated' => time(),
+            'isTemporary' => true
+        ];
+        $users[] = $tempUser;
+    }
+    
+    saveUsers($users);
     
     // Send email
     $emailHandler = new EmailHandler();
@@ -95,31 +127,47 @@ function verifyOTP($data) {
         return;
     }
     
-    $otpFile = __DIR__ . '/../data/otp_' . md5($email) . '.json';
+    $users = loadUsers();
+    $userIndex = -1;
     
-    if (!file_exists($otpFile)) {
+    foreach ($users as $index => $user) {
+        if ($user['email'] === $email) {
+            $userIndex = $index;
+            break;
+        }
+    }
+    
+    if ($userIndex === -1 || !isset($users[$userIndex]['otpToken'])) {
         http_response_code(400);
         echo json_encode(['error' => 'OTP not found or expired']);
         return;
     }
     
-    $otpData = json_decode(file_get_contents($otpFile), true);
+    $user = $users[$userIndex];
     
-    if ($otpData['expires'] < time()) {
-        unlink($otpFile); // Remove expired OTP
+    if ($user['otpExpires'] < time()) {
+        // Clear expired OTP
+        $users[$userIndex]['otpToken'] = null;
+        $users[$userIndex]['otpExpires'] = null;
+        $users[$userIndex]['otpCreated'] = null;
+        saveUsers($users);
+        
         http_response_code(400);
         echo json_encode(['error' => 'OTP has expired']);
         return;
     }
     
-    if ($otpData['otp'] !== $otp) {
+    if ($user['otpToken'] !== $otp) {
         http_response_code(400);
         echo json_encode(['error' => 'Invalid OTP']);
         return;
     }
     
-    // OTP verified successfully
-    unlink($otpFile); // Remove used OTP
+    // OTP verified successfully - clear OTP data
+    $users[$userIndex]['otpToken'] = null;
+    $users[$userIndex]['otpExpires'] = null;
+    $users[$userIndex]['otpCreated'] = null;
+    saveUsers($users);
     
     echo json_encode([
         'status' => 'success', 
@@ -139,17 +187,18 @@ function resendOTP($data) {
     }
     
     // Check if there's an existing OTP less than 1 minute old (rate limiting)
-    $otpFile = __DIR__ . '/../data/otp_' . md5($email) . '.json';
-    if (file_exists($otpFile)) {
-        $otpData = json_decode(file_get_contents($otpFile), true);
-        if ($otpData['created'] > (time() - 60)) {
-            http_response_code(429);
-            echo json_encode(['error' => 'Please wait at least 1 minute before requesting a new OTP']);
-            return;
+    $users = loadUsers();
+    foreach ($users as $user) {
+        if ($user['email'] === $email && isset($user['otpCreated'])) {
+            if ($user['otpCreated'] > (time() - 60)) {
+                http_response_code(429);
+                echo json_encode(['error' => 'Please wait at least 1 minute before requesting a new OTP']);
+                return;
+            }
         }
     }
     
-    // Send new OTP (reuse the sendOTPForVerification function)
+    // Send new OTP
     sendOTPForVerification($data);
 }
 
@@ -162,43 +211,32 @@ function handleForgotPassword($data) {
         return;
     }
     
-    // Check if user exists
-    $usersFile = __DIR__ . '/../data/users.json';
-    if (!file_exists($usersFile)) {
-        http_response_code(404);
-        echo json_encode(['error' => 'User not found']);
-        return;
-    }
+    $users = loadUsers();
+    $userIndex = -1;
     
-    $users = json_decode(file_get_contents($usersFile), true);
-    $user = null;
-    foreach ($users as $u) {
-        if ($u['email'] === $email) {
-            $user = $u;
+    foreach ($users as $index => $user) {
+        if ($user['email'] === $email) {
+            $userIndex = $index;
             break;
         }
     }
     
-    if (!$user) {
+    if ($userIndex === -1) {
         http_response_code(404);
         echo json_encode(['error' => 'User not found']);
         return;
     }
     
+    $user = $users[$userIndex];
+    
     // Generate reset token
     $resetToken = bin2hex(random_bytes(32));
     
-    // Store reset token with expiration (1 hour)
-    $resetData = [
-        'token' => $resetToken,
-        'email' => $email,
-        'user_id' => $user['id'],
-        'expires' => time() + 3600, // 1 hour
-        'created' => time()
-    ];
+    // Store reset token in user data
+    $users[$userIndex]['passwordResetToken'] = $resetToken;
+    $users[$userIndex]['passwordResetExpires'] = time() + 3600; // 1 hour
     
-    $resetFile = __DIR__ . '/../data/reset_' . md5($email) . '.json';
-    file_put_contents($resetFile, json_encode($resetData));
+    saveUsers($users);
     
     // Send password reset email
     $emailHandler = new EmailHandler();
@@ -222,65 +260,43 @@ function handlePasswordReset($data) {
         return;
     }
     
-    // Find reset token file
-    $dataDir = __DIR__ . '/../data';
-    $resetFiles = glob($dataDir . '/reset_*.json');
-    $resetData = null;
-    $resetFile = null;
+    $users = loadUsers();
+    $userIndex = -1;
     
-    foreach ($resetFiles as $file) {
-        $data = json_decode(file_get_contents($file), true);
-        if ($data['token'] === $token) {
-            $resetData = $data;
-            $resetFile = $file;
+    // Find user with matching reset token
+    foreach ($users as $index => $user) {
+        if (isset($user['passwordResetToken']) && $user['passwordResetToken'] === $token) {
+            $userIndex = $index;
             break;
         }
     }
     
-    if (!$resetData) {
+    if ($userIndex === -1) {
         http_response_code(400);
         echo json_encode(['error' => 'Invalid or expired reset token']);
         return;
     }
     
-    if ($resetData['expires'] < time()) {
-        unlink($resetFile); // Remove expired token
+    $user = $users[$userIndex];
+    
+    if ($user['passwordResetExpires'] < time()) {
+        // Clear expired token
+        $users[$userIndex]['passwordResetToken'] = null;
+        $users[$userIndex]['passwordResetExpires'] = null;
+        saveUsers($users);
+        
         http_response_code(400);
         echo json_encode(['error' => 'Reset token has expired']);
         return;
     }
     
     // Update user password
-    $usersFile = __DIR__ . '/../data/users.json';
-    if (!file_exists($usersFile)) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Users file not found']);
-        return;
-    }
+    $users[$userIndex]['password'] = password_hash($newPassword, PASSWORD_BCRYPT);
+    $users[$userIndex]['passwordResetToken'] = null;
+    $users[$userIndex]['passwordResetExpires'] = null;
     
-    $users = json_decode(file_get_contents($usersFile), true);
-    
-    // Hash the new password (using same method as registration)
-    $hashedPassword = hashPassword($newPassword);
-    
-    for ($i = 0; $i < count($users); $i++) {
-        if ($users[$i]['id'] === $resetData['user_id']) {
-            $users[$i]['password'] = $hashedPassword;
-            break;
-        }
-    }
-    
-    // Save updated users
-    file_put_contents($usersFile, json_encode($users, JSON_PRETTY_PRINT));
-    
-    // Remove used reset token
-    unlink($resetFile);
+    saveUsers($users);
     
     echo json_encode(['status' => 'success', 'message' => 'Password reset successfully']);
-}
-
-function hashPassword($password) {
-    // Use PHP's secure password hashing (bcrypt)
-    return password_hash($password, PASSWORD_BCRYPT);
 }
 ?>
