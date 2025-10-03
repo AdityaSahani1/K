@@ -473,7 +473,7 @@
 }
 
 .search-modal-header {
-    padding: var(--spacing-2xl) var(--spacing-2xl) var(--spacing-lg);
+    padding: var(--spacing-2xl) 60px var(--spacing-lg) var(--spacing-2xl);
     text-align: center;
     border-bottom: 1px solid var(--border-color);
 }
