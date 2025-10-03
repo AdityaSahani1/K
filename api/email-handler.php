@@ -14,7 +14,7 @@ class EmailHandler {
     
     public function __construct() {
         $this->fromEmail = getenv('SMTP_FROM_EMAIL') ?: 'adityamsahani9819@gmail.com';
-        $this->fromName = getenv('SMTP_FROM_NAME') ?: 'Creative Portfolio';
+        $this->fromName = getenv('SMTP_FROM_NAME') ?: 'Artistry Studio';
         
         $this->mail = new PHPMailer(true);
         $this->setupSMTP();
@@ -39,7 +39,7 @@ class EmailHandler {
             $this->mail->clearAddresses();
             $this->mail->addAddress($toEmail, $toName);
             
-            $this->mail->Subject = 'Email Verification - Creative Portfolio';
+            $this->mail->Subject = 'Email Verification - Artistry Studio';
             
             $body = "
             <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc;'>
@@ -51,7 +51,7 @@ class EmailHandler {
                     <h2 style='color: #1f2937; margin-bottom: 20px;'>Hello {$toName},</h2>
                     
                     <p style='color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 25px;'>
-                        Thank you for signing up to Creative Portfolio! To complete your registration, please verify your email address using the OTP code below:
+                        Thank you for signing up to Artistry Studio! To complete your registration, please verify your email address using the OTP code below:
                     </p>
                     
                     <div style='text-align: center; margin: 30px 0;'>
@@ -71,7 +71,7 @@ class EmailHandler {
                     <hr style='border: none; height: 1px; background-color: #e5e7eb; margin: 25px 0;'>
                     
                     <p style='color: #6b7280; font-size: 12px; text-align: center; margin: 0;'>
-                        © 2025 Creative Portfolio. All rights reserved.
+                        © 2025 Artistry Studio. All rights reserved.
                     </p>
                 </div>
             </div>
@@ -92,7 +92,7 @@ class EmailHandler {
             $this->mail->clearAddresses();
             $this->mail->addAddress($toEmail, $toName);
             
-            $this->mail->Subject = 'Password Reset - Creative Portfolio';
+            $this->mail->Subject = 'Password Reset - Artistry Studio';
             
             $resetLink = "http://" . $_SERVER['HTTP_HOST'] . "/reset-password.php?token=" . $resetToken;
             
@@ -106,7 +106,7 @@ class EmailHandler {
                     <h2 style='color: #1f2937; margin-bottom: 20px;'>Hello {$toName},</h2>
                     
                     <p style='color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 25px;'>
-                        We received a request to reset your password for your Creative Portfolio account. Click the button below to reset your password:
+                        We received a request to reset your password for your Artistry Studio account. Click the button below to reset your password:
                     </p>
                     
                     <div style='text-align: center; margin: 30px 0;'>
@@ -126,7 +126,7 @@ class EmailHandler {
                     <hr style='border: none; height: 1px; background-color: #e5e7eb; margin: 25px 0;'>
                     
                     <p style='color: #6b7280; font-size: 12px; text-align: center; margin: 0;'>
-                        © 2025 Creative Portfolio. All rights reserved.
+                        © 2025 Artistry Studio. All rights reserved.
                     </p>
                 </div>
             </div>
@@ -182,7 +182,7 @@ class EmailHandler {
                     <hr style='border: none; height: 1px; background-color: #e5e7eb; margin: 25px 0;'>
                     
                     <p style='color: #6b7280; font-size: 12px; text-align: center; margin: 0;'>
-                        © 2025 Creative Portfolio. All rights reserved.
+                        © 2025 Artistry Studio. All rights reserved.
                     </p>
                 </div>
             </div>
