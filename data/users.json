@@ -1,22 +1,13 @@
 [
-  {
-    "id": "admin",
-    "username": "admin",
-    "email": "admin@portfolio.com",
-    "password": "$2y$12$Nnt3V31pezhFQ1NB/RqF.uwHMMLmcSdGw6X7hMLmyAoPAKA7k4Jm2",
-    "role": "admin",
-    "created": "2024-01-01T00:00:00Z",
-    "bio": "Portfolio administrator and creative director",
-    "isVerified": true,
-    "emailVerificationToken": null,
-    "otpToken": null,
-    "otpExpires": null,
-    "otpCreated": null,
-    "passwordResetToken": null,
-    "passwordResetExpires": null,
-    "lastLogin": null,
-    "loginAttempts": 0,
-    "accountLocked": false,
-    "lockExpires": null
-  }
+    {
+        "id": "user_68dfd05bd3c07",
+        "name": "Aditya",
+        "username": "adi_xxa_",
+        "email": "adityamsahani9819@gmail.com",
+        "password": "$2y$12$KubvTo08anzaM2At\/wzON.tmxe\/H\/I4QR\/FbOGOnqLxCGzKOsBRAW",
+        "role": "user",
+        "created": "2025-10-03 13:32:12",
+        "bio": "",
+        "isVerified": true
+    }
 ]

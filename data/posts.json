@@ -118,5 +118,205 @@
         "views": 0,
         "featured": false,
         "downloadUrl": null
+    },
+    {
+        "id": "7",
+        "title": "3D Character Model",
+        "description": "Stylized 3D character design with dynamic pose and vibrant textures",
+        "imageUrl": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&h=600&fit=crop&crop=center",
+        "category": "digital",
+        "tags": [
+            "3d modeling",
+            "character design",
+            "digital art",
+            "stylized"
+        ],
+        "author": "admin",
+        "created": "2024-01-09T16:20:00Z",
+        "likes": 0,
+        "comments": 0,
+        "views": 0,
+        "featured": true,
+        "downloadUrl": null
+    },
+    {
+        "id": "8",
+        "title": "Portrait Photography Series",
+        "description": "Emotive portrait capturing natural light and genuine expressions",
+        "imageUrl": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&h=600&fit=crop&crop=center",
+        "category": "photography",
+        "tags": [
+            "portrait",
+            "natural light",
+            "people",
+            "emotive"
+        ],
+        "author": "admin",
+        "created": "2024-01-08T13:45:00Z",
+        "likes": 0,
+        "comments": 0,
+        "views": 0,
+        "featured": false,
+        "downloadUrl": null
+    },
+    {
+        "id": "9",
+        "title": "Botanical Illustration",
+        "description": "Detailed digital illustration of botanical elements with watercolor aesthetics",
+        "imageUrl": "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=800&h=600&fit=crop&crop=center",
+        "category": "art",
+        "tags": [
+            "illustration",
+            "botanical",
+            "watercolor",
+            "nature"
+        ],
+        "author": "admin",
+        "created": "2024-01-07T10:15:00Z",
+        "likes": 0,
+        "comments": 0,
+        "views": 0,
+        "featured": true,
+        "downloadUrl": "https://example.com/downloads/botanical-illustration.zip"
+    },
+    {
+        "id": "10",
+        "title": "3D Environment Design",
+        "description": "Immersive 3D environment with atmospheric lighting and detailed textures",
+        "imageUrl": "https://images.unsplash.com/photo-1614732414444-096e5f1122d5?w=800&h=600&fit=crop&crop=center",
+        "category": "digital",
+        "tags": [
+            "3d modeling",
+            "environment",
+            "lighting",
+            "design"
+        ],
+        "author": "admin",
+        "created": "2024-01-06T14:30:00Z",
+        "likes": 0,
+        "comments": 0,
+        "views": 0,
+        "featured": false,
+        "downloadUrl": null
+    },
+    {
+        "id": "11",
+        "title": "Fashion Photography",
+        "description": "Editorial fashion photography with bold styling and dramatic composition",
+        "imageUrl": "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&h=600&fit=crop&crop=center",
+        "category": "photography",
+        "tags": [
+            "fashion",
+            "editorial",
+            "styling",
+            "dramatic"
+        ],
+        "author": "admin",
+        "created": "2024-01-05T11:00:00Z",
+        "likes": 0,
+        "comments": 0,
+        "views": 0,
+        "featured": true,
+        "downloadUrl": null
+    },
+    {
+        "id": "12",
+        "title": "Character Concept Art",
+        "description": "Original character illustration with detailed costume and personality design",
+        "imageUrl": "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&h=600&fit=crop&crop=center",
+        "category": "art",
+        "tags": [
+            "concept art",
+            "character design",
+            "illustration",
+            "fantasy"
+        ],
+        "author": "admin",
+        "created": "2024-01-04T09:30:00Z",
+        "likes": 0,
+        "comments": 0,
+        "views": 0,
+        "featured": false,
+        "downloadUrl": "https://example.com/downloads/character-concept.zip"
+    },
+    {
+        "id": "13",
+        "title": "3D Product Visualization",
+        "description": "Photorealistic 3D product rendering with studio lighting setup",
+        "imageUrl": "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=800&h=600&fit=crop&crop=center",
+        "category": "digital",
+        "tags": [
+            "3d modeling",
+            "product design",
+            "photorealistic",
+            "rendering"
+        ],
+        "author": "admin",
+        "created": "2024-01-03T15:20:00Z",
+        "likes": 0,
+        "comments": 0,
+        "views": 0,
+        "featured": true,
+        "downloadUrl": null
+    },
+    {
+        "id": "14",
+        "title": "Architectural Photography",
+        "description": "Stunning architectural composition highlighting modern design and symmetry",
+        "imageUrl": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=800&h=600&fit=crop&crop=center",
+        "category": "photography",
+        "tags": [
+            "architecture",
+            "modern",
+            "symmetry",
+            "design"
+        ],
+        "author": "admin",
+        "created": "2024-01-02T12:10:00Z",
+        "likes": 0,
+        "comments": 0,
+        "views": 0,
+        "featured": false,
+        "downloadUrl": null
+    },
+    {
+        "id": "15",
+        "title": "Storybook Illustration",
+        "description": "Whimsical digital illustration perfect for children's book storytelling",
+        "imageUrl": "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&h=600&fit=crop&crop=center",
+        "category": "art",
+        "tags": [
+            "illustration",
+            "storybook",
+            "whimsical",
+            "children"
+        ],
+        "author": "admin",
+        "created": "2024-01-01T08:45:00Z",
+        "likes": 0,
+        "comments": 0,
+        "views": 0,
+        "featured": true,
+        "downloadUrl": "https://example.com/downloads/storybook-illustration.zip"
+    },
+    {
+        "id": "16",
+        "title": "3D Abstract Sculpture",
+        "description": "Abstract 3D sculpture exploring form, light, and material properties",
+        "imageUrl": "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=800&h=600&fit=crop&crop=center",
+        "category": "digital",
+        "tags": [
+            "3d modeling",
+            "abstract",
+            "sculpture",
+            "art"
+        ],
+        "author": "admin",
+        "created": "2023-12-31T16:00:00Z",
+        "likes": 0,
+        "comments": 0,
+        "views": 0,
+        "featured": false,
+        "downloadUrl": null
     }
 ]
