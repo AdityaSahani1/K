@@ -143,22 +143,26 @@ class EmailHandler {
     }
     
     public function sendContactEmail($name, $email, $subject, $message) {
+        $emailsSent = [];
+        $errors = [];
+        
+        // Send to admin
         try {
             $this->mail->clearAddresses();
+            $this->mail->clearReplyTos();
             $this->mail->addAddress($this->fromEmail, $this->fromName);
             $this->mail->addReplyTo($email, $name);
             
             $this->mail->Subject = 'Contact: ' . $subject;
             
-            $body = "
+            $adminBody = "
             <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
                 <div style='background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 20px; border-radius: 8px 8px 0 0;'>
                     <h2 style='color: white; margin: 0;'>New Contact Message</h2>
                 </div>
-                
                 <div style='background: white; padding: 20px; border: 1px solid #e5e7eb; border-radius: 0 0 8px 8px;'>
-                    <p style='margin: 10px 0;'><strong>From:</strong> {$name} ({$email})</p>
-                    <p style='margin: 10px 0;'><strong>Subject:</strong> {$subject}</p>
+                    <p><strong>From:</strong> {$name} ({$email})</p>
+                    <p><strong>Subject:</strong> {$subject}</p>
                     <div style='background: #f9fafb; padding: 15px; border-radius: 6px; margin-top: 15px;'>
                         <p style='color: #4b5563; margin: 0;'>" . nl2br(htmlspecialchars($message)) . "</p>
                     </div>
@@ -166,40 +170,51 @@ class EmailHandler {
             </div>
             ";
             
-            $this->mail->Body = $body;
+            $this->mail->Body = $adminBody;
             $this->mail->send();
-            
-            // Send confirmation copy to sender
+            $emailsSent[] = 'admin';
+        } catch (Exception $e) {
+            $errors[] = "Admin email failed: " . $e->getMessage();
+            error_log("Admin email failed: " . $this->mail->ErrorInfo);
+        }
+        
+        // Send confirmation to sender
+        try {
             $this->mail->clearAddresses();
+            $this->mail->clearReplyTos();
             $this->mail->addAddress($email, $name);
             $this->mail->Subject = 'Message Received - ' . $subject;
             
-            $confirmBody = "
+            $senderBody = "
             <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
                 <div style='background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 20px; border-radius: 8px 8px 0 0;'>
                     <h2 style='color: white; margin: 0;'>Message Received</h2>
                 </div>
-                
                 <div style='background: white; padding: 20px; border: 1px solid #e5e7eb; border-radius: 0 0 8px 8px;'>
                     <p>Hi {$name},</p>
-                    <p>Thank you for contacting Artistry Studio! I've received your message and will get back to you soon.</p>
+                    <p>Thanks for reaching out! I received your message and will respond soon.</p>
                     <div style='background: #f9fafb; padding: 15px; border-radius: 6px; margin: 15px 0;'>
-                        <p style='margin: 0;'><strong>Your message:</strong></p>
-                        <p style='color: #4b5563; margin: 10px 0 0 0;'>" . nl2br(htmlspecialchars($message)) . "</p>
+                        <p style='color: #4b5563; margin: 0;'>" . nl2br(htmlspecialchars($message)) . "</p>
                     </div>
-                    <p style='color: #6b7280; font-size: 12px; margin-top: 20px;'>© 2025 Artistry Studio</p>
+                    <p style='color: #6b7280; font-size: 12px;'>© 2025 Artistry Studio</p>
                 </div>
             </div>
             ";
             
-            $this->mail->Body = $confirmBody;
+            $this->mail->Body = $senderBody;
             $this->mail->send();
-            
-            return true;
+            $emailsSent[] = 'sender';
         } catch (Exception $e) {
-            error_log("Email sending failed: " . $this->mail->ErrorInfo);
-            return false;
+            $errors[] = "Sender email failed: " . $e->getMessage();
+            error_log("Sender email failed: " . $this->mail->ErrorInfo);
         }
+        
+        // Return true only if at least the admin email was sent
+        if (in_array('admin', $emailsSent)) {
+            return true;
+        }
+        
+        return false;
     }
 }
 ?>
