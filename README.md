@@ -1,9 +1,5 @@
-for some reason, the password of admin from the json file got removed automatically and is giving errors
-
-i noticed that for otp or reset link a new file is being created, will that be deleted automatically when used or expired
-if not don't create another file instead store them in user json that easy we won't use much space 
-
-if storing in the json file store like this for all users
+where did you stored the admin details also I don't see the other key Baki pair in other users date like the one given here below about the admin
+and since these are are use them too they are not just for show here, if the key name is something else change accordingly in the json file or this example
 [
   {
     "id": "admin",
@@ -29,28 +25,16 @@ if storing in the json file store like this for all users
 
 
 
+the most important thing to fix:
+images inside posts are still not in center, maybe eithersome other css is overwriting or some other elemnts causing problem but in the posts; the image inside the card isnt showing the center part of the image.
 
+load more button refreshes or changes the posts and takes on top instead of just revealing more posts without changing whats already present above, load more button doesnt look good and isnt in center
+show 30 posts by default then show the load more button
 
-the email is working but the details are messed up, like in contact form 
-the email got sent and received both by the set credentials meaning the admin, the contact mail wasn't even in the senders(users mail) how will he see what he sent 
-I want that contact form contain the retail of who sent the form
-i know there's a parameter in context form for email but what if the user wrote wrong mail in the form, shouldn't the email has logged in with be used too
+view count is updating in the json file but the count on the post doesnt change immediately, it changes upon a refresh, and after adding a comment it automatically refreshes the post page taking on the top
 
+add sort filter and search in profile page too
 
-redesign the liked saved comments in profile completely from scratch 
+redesign the liked saved comments entire section, i only liked the way small cards of posts are being displayed.
 
-registration is failing it's says user not found or registration failed
-
-email notification of contact page is too long
-
-reset all stat data back to zero of the post
-
-in the search popup model the heading and cross button are overlapping
-
-the post popup model on small screen isn't good, the image is covering half of the screen and other things aren't completly visible
-
-in comment section after adding a comment it is visible but there is no gap at the bottom
-
-add ten more post in post.json file
-
-and finally recheck everthing about authentication and email being sent properly
+redesign the counts on profile too
