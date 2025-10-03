@@ -91,15 +91,27 @@ function sendOTPForVerification($data) {
         $users[$userIndex]['otpExpires'] = time() + 600; // 10 minutes
         $users[$userIndex]['otpCreated'] = time();
     } else {
-        // New registration, store OTP in temporary user data
-        $tempUser = [
-            'email' => $email,
-            'name' => $name,
-            'otpToken' => $otp,
-            'otpExpires' => time() + 600,
-            'otpCreated' => time(),
-            'isTemporary' => true
-        ];
+        // New registration, store complete user data with OTP
+        $userData = $data['userData'] ?? null;
+        
+        if ($userData) {
+            // Complete user data provided (from registration)
+            $tempUser = $userData;
+            $tempUser['otpToken'] = $otp;
+            $tempUser['otpExpires'] = time() + 600;
+            $tempUser['otpCreated'] = time();
+            $tempUser['isTemporary'] = true;
+        } else {
+            // Just email/name provided (for resend or other purposes)
+            $tempUser = [
+                'email' => $email,
+                'name' => $name,
+                'otpToken' => $otp,
+                'otpExpires' => time() + 600,
+                'otpCreated' => time(),
+                'isTemporary' => true
+            ];
+        }
         $users[] = $tempUser;
     }
     
@@ -147,9 +159,9 @@ function verifyOTP($data) {
     
     if ($user['otpExpires'] < time()) {
         // Clear expired OTP
-        $users[$userIndex]['otpToken'] = null;
-        $users[$userIndex]['otpExpires'] = null;
-        $users[$userIndex]['otpCreated'] = null;
+        unset($users[$userIndex]['otpToken']);
+        unset($users[$userIndex]['otpExpires']);
+        unset($users[$userIndex]['otpCreated']);
         saveUsers($users);
         
         http_response_code(400);
@@ -163,10 +175,20 @@ function verifyOTP($data) {
         return;
     }
     
-    // OTP verified successfully - clear OTP data
-    $users[$userIndex]['otpToken'] = null;
-    $users[$userIndex]['otpExpires'] = null;
-    $users[$userIndex]['otpCreated'] = null;
+    // OTP verified successfully - complete registration if temporary
+    unset($users[$userIndex]['otpToken']);
+    unset($users[$userIndex]['otpExpires']);
+    unset($users[$userIndex]['otpCreated']);
+    
+    if (isset($users[$userIndex]['isTemporary']) && $users[$userIndex]['isTemporary']) {
+        // This is a new registration, finalize it
+        unset($users[$userIndex]['isTemporary']);
+        $users[$userIndex]['isVerified'] = true;
+    } else {
+        // Existing user verifying email
+        $users[$userIndex]['isVerified'] = true;
+    }
+    
     saveUsers($users);
     
     echo json_encode([
