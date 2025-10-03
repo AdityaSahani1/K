@@ -1,0 +1,122 @@
+[
+    {
+        "id": "1",
+        "title": "Mountain Landscape",
+        "description": "A breathtaking view of mountain peaks during golden hour",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&crop=center",
+        "category": "photography",
+        "tags": [
+            "nature",
+            "landscape",
+            "mountains",
+            "sunset"
+        ],
+        "author": "admin",
+        "created": "2024-01-15T10:30:00Z",
+        "likes": 1,
+        "comments": 0,
+        "views": 2,
+        "featured": true,
+        "downloadUrl": "https:\/\/example.com\/downloads\/mountain-landscape.zip"
+    },
+    {
+        "id": "2",
+        "title": "Abstract Digital Art",
+        "description": "Vibrant colors and flowing shapes create a mesmerizing digital composition",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1541961017774-22349e4a1262?w=800&h=600&fit=crop&crop=center",
+        "category": "art",
+        "tags": [
+            "abstract",
+            "digital",
+            "colorful",
+            "modern"
+        ],
+        "author": "admin",
+        "created": "2024-01-14T15:45:00Z",
+        "likes": 0,
+        "comments": 0,
+        "views": 1,
+        "featured": false,
+        "downloadUrl": "https:\/\/example.com\/downloads\/abstract-digital-art.zip"
+    },
+    {
+        "id": "3",
+        "title": "Minimalist Design Concept",
+        "description": "Clean lines and negative space showcase the power of minimalism",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1558655146-9f40138edfeb?w=800&h=600&fit=crop&crop=center",
+        "category": "design",
+        "tags": [
+            "minimalist",
+            "clean",
+            "modern",
+            "simple"
+        ],
+        "author": "admin",
+        "created": "2024-01-13T09:20:00Z",
+        "likes": 0,
+        "comments": 0,
+        "views": 2,
+        "featured": true,
+        "downloadUrl": null
+    },
+    {
+        "id": "4",
+        "title": "Urban Photography",
+        "description": "Capturing the essence of city life through street photography",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1477959858617-67f85cf4f1df?w=800&h=600&fit=crop&crop=center",
+        "category": "photography",
+        "tags": [
+            "urban",
+            "street",
+            "city",
+            "architecture"
+        ],
+        "author": "admin",
+        "created": "2024-01-12T14:10:00Z",
+        "likes": 0,
+        "comments": 0,
+        "views": 1,
+        "featured": false,
+        "downloadUrl": null
+    },
+    {
+        "id": "5",
+        "title": "Digital Illustration",
+        "description": "A fantasy-inspired digital artwork with intricate details",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&crop=center",
+        "category": "digital",
+        "tags": [
+            "illustration",
+            "fantasy",
+            "digital art",
+            "creative"
+        ],
+        "author": "admin",
+        "created": "2024-01-11T11:55:00Z",
+        "likes": 1,
+        "comments": 0,
+        "views": 1,
+        "featured": true,
+        "downloadUrl": "https:\/\/example.com\/downloads\/digital-illustration.zip"
+    },
+    {
+        "id": "6",
+        "title": "Nature Photography",
+        "description": "Macro shot of morning dew on flower petals",
+        "imageUrl": "https:\/\/images.unsplash.com\/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop&crop=center",
+        "category": "photography",
+        "tags": [
+            "nature",
+            "macro",
+            "flowers",
+            "morning"
+        ],
+        "author": "admin",
+        "created": "2024-01-10T07:30:00Z",
+        "likes": 0,
+        "comments": 0,
+        "views": 1,
+        "featured": false,
+        "downloadUrl": null
+    }
+]
