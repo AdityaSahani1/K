@@ -9,5 +9,16 @@
         "created": "2025-10-03 13:32:12",
         "bio": "",
         "isVerified": true
+    },
+    {
+        "id": "user_68dfd13648bf4",
+        "name": "Nitin",
+        "username": "nitin_bhau",
+        "email": "nitin12hai@gmail.com",
+        "password": "$2y$12$YIZJJIfAtGrWGUEoennU0O0A9M.KgQx.5BTSu0ojc31hZl1zKhYRC",
+        "role": "user",
+        "created": "2025-10-03 13:35:50",
+        "bio": "",
+        "isVerified": true
     }
 ]
