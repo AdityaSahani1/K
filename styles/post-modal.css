@@ -215,6 +215,8 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-md);
 }
 
 .comment {
@@ -284,11 +286,11 @@
 @media (max-width: 968px) {
     .post-detail {
         grid-template-columns: 1fr;
-        grid-template-rows: 50vh auto;
+        grid-template-rows: 40vh auto;
     }
     
     .post-detail-image {
-        max-height: 50vh;
+        max-height: 40vh;
     }
 }
 
@@ -300,12 +302,16 @@
     
     .post-detail {
         grid-template-columns: 1fr;
-        grid-template-rows: 50vh auto;
+        grid-template-rows: 35vh auto;
+    }
+    
+    .post-detail-image {
+        max-height: 35vh;
     }
     
     .post-detail-info {
         padding: var(--spacing-lg);
-        max-height: calc(50vh - 40px);
+        max-height: calc(65vh - 40px);
     }
     
     .post-modal-close {
