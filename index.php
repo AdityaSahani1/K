@@ -17,8 +17,8 @@ $showSearch = false;
     <section class="hero">
         <div class="hero-content">
             <div class="hero-text">
-                <h1 class="hero-title">Creative Portfolio</h1>
-                <p class="hero-subtitle">Discover amazing artwork, photography, and design from talented creators worldwide</p>
+                <h1 class="hero-title">Artistry Studio</h1>
+                <p class="hero-subtitle">Explore stunning photography, illustration, and 3D modeling from a creative professional</p>
                 <div class="hero-buttons">
                     <a href="gallery.php" class="cta-btn">
                         <i class="fas fa-images"></i>
