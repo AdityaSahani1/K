@@ -148,49 +148,53 @@ class EmailHandler {
             $this->mail->addAddress($this->fromEmail, $this->fromName);
             $this->mail->addReplyTo($email, $name);
             
-            $this->mail->Subject = 'Contact Form: ' . $subject;
+            $this->mail->Subject = 'Contact: ' . $subject;
             
             $body = "
-            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc;'>
-                <div style='background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;'>
-                    <h1 style='color: white; margin: 0; font-size: 28px;'>Contact Form Message</h1>
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                <div style='background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 20px; border-radius: 8px 8px 0 0;'>
+                    <h2 style='color: white; margin: 0;'>New Contact Message</h2>
                 </div>
                 
-                <div style='background: white; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb;'>
-                    <h2 style='color: #1f2937; margin-bottom: 20px;'>New message from {$name}</h2>
-                    
-                    <table style='width: 100%; margin-bottom: 25px;'>
-                        <tr>
-                            <td style='padding: 10px 0; color: #6b7280; font-weight: bold;'>Name:</td>
-                            <td style='padding: 10px 0; color: #1f2937;'>{$name}</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px 0; color: #6b7280; font-weight: bold;'>Email:</td>
-                            <td style='padding: 10px 0; color: #1f2937;'>{$email}</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px 0; color: #6b7280; font-weight: bold;'>Subject:</td>
-                            <td style='padding: 10px 0; color: #1f2937;'>{$subject}</td>
-                        </tr>
-                    </table>
-                    
-                    <div style='background: #f9fafb; padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6;'>
-                        <h3 style='color: #1f2937; margin: 0 0 15px 0;'>Message:</h3>
-                        <p style='color: #4b5563; line-height: 1.6; margin: 0;'>" . nl2br(htmlspecialchars($message)) . "</p>
+                <div style='background: white; padding: 20px; border: 1px solid #e5e7eb; border-radius: 0 0 8px 8px;'>
+                    <p style='margin: 10px 0;'><strong>From:</strong> {$name} ({$email})</p>
+                    <p style='margin: 10px 0;'><strong>Subject:</strong> {$subject}</p>
+                    <div style='background: #f9fafb; padding: 15px; border-radius: 6px; margin-top: 15px;'>
+                        <p style='color: #4b5563; margin: 0;'>" . nl2br(htmlspecialchars($message)) . "</p>
                     </div>
-                    
-                    <hr style='border: none; height: 1px; background-color: #e5e7eb; margin: 25px 0;'>
-                    
-                    <p style='color: #6b7280; font-size: 12px; text-align: center; margin: 0;'>
-                        © 2025 Artistry Studio. All rights reserved.
-                    </p>
                 </div>
             </div>
             ";
             
             $this->mail->Body = $body;
-            
             $this->mail->send();
+            
+            // Send confirmation copy to sender
+            $this->mail->clearAddresses();
+            $this->mail->addAddress($email, $name);
+            $this->mail->Subject = 'Message Received - ' . $subject;
+            
+            $confirmBody = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                <div style='background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 20px; border-radius: 8px 8px 0 0;'>
+                    <h2 style='color: white; margin: 0;'>Message Received</h2>
+                </div>
+                
+                <div style='background: white; padding: 20px; border: 1px solid #e5e7eb; border-radius: 0 0 8px 8px;'>
+                    <p>Hi {$name},</p>
+                    <p>Thank you for contacting Artistry Studio! I've received your message and will get back to you soon.</p>
+                    <div style='background: #f9fafb; padding: 15px; border-radius: 6px; margin: 15px 0;'>
+                        <p style='margin: 0;'><strong>Your message:</strong></p>
+                        <p style='color: #4b5563; margin: 10px 0 0 0;'>" . nl2br(htmlspecialchars($message)) . "</p>
+                    </div>
+                    <p style='color: #6b7280; font-size: 12px; margin-top: 20px;'>© 2025 Artistry Studio</p>
+                </div>
+            </div>
+            ";
+            
+            $this->mail->Body = $confirmBody;
+            $this->mail->send();
+            
             return true;
         } catch (Exception $e) {
             error_log("Email sending failed: " . $this->mail->ErrorInfo);
