@@ -269,7 +269,8 @@ async function handleRegister(e) {
             body: JSON.stringify({
                 action: 'send_otp',
                 email: email,
-                name: name
+                name: name,
+                userData: registerData.user
             })
         });
 
