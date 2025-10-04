@@ -1,1 +1,11 @@
-[]
+[
+    {
+        "id": "68e1308656e9e",
+        "name": "Aditya",
+        "email": "adityasahani9819@gmail.com",
+        "subject": "Testing bro what's up",
+        "message": "This is Aditya, the developer and tester of this site SnapSera.",
+        "created": "2025-10-04 14:34:46",
+        "status": "new"
+    }
+]
