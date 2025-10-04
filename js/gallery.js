@@ -243,12 +243,9 @@ function loadGalleryPosts() {
 }
 
 function createGalleryPostCard(post) {
-    const heights = [280, 320, 350, 300]; // Varied heights for masonry effect (reduced max height)
-    const randomHeight = heights[Math.floor(Math.random() * heights.length)];
-    
     return `
         <article class="gallery-post-card" data-post-id="${post.id}">
-            <div class="gallery-post-image" style="height: ${randomHeight}px;">
+            <div class="gallery-post-image">
                 <img src="${post.imageUrl}" alt="${post.title}" loading="lazy">
                 <div class="post-overlay">
                     <div class="overlay-actions">
