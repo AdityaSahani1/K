@@ -3,7 +3,7 @@
 let allPosts = [];
 let filteredPosts = [];
 let currentPage = 1;
-const postsPerPage = 12;
+const postsPerPage = 30;
 
 document.addEventListener('DOMContentLoaded', function() {
     initGalleryPage();
@@ -206,19 +206,27 @@ function loadGalleryPosts() {
     
     const startIndex = (currentPage - 1) * postsPerPage;
     const endIndex = startIndex + postsPerPage;
-    const postsToShow = filteredPosts.slice(0, endIndex);
+    const postsToShow = filteredPosts.slice(startIndex, endIndex);
     
-    if (postsToShow.length === 0) {
+    if (currentPage === 1 && postsToShow.length === 0) {
         galleryGrid.innerHTML = `
             <div class="no-posts">
                 <i class="fas fa-images"></i>
                 <p>No posts found matching your criteria.</p>
             </div>
         `;
+        if (loadMoreBtn) {
+            loadMoreBtn.style.display = 'none';
+        }
         return;
     }
     
-    galleryGrid.innerHTML = postsToShow.map(post => createGalleryPostCard(post)).join('');
+    if (currentPage === 1) {
+        galleryGrid.innerHTML = postsToShow.map(post => createGalleryPostCard(post)).join('');
+    } else {
+        const newPostsHTML = postsToShow.map(post => createGalleryPostCard(post)).join('');
+        galleryGrid.insertAdjacentHTML('beforeend', newPostsHTML);
+    }
     
     // Show/hide load more button
     if (loadMoreBtn) {

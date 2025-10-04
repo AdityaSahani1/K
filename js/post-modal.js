@@ -195,6 +195,8 @@ async function trackPostView(postId) {
             
             await saveData('views.json', views);
             await saveData('posts.json', posts);
+            
+            updateModalViewCount(postId);
         }
     } catch (error) {
         console.error('Error tracking post view:', error);
@@ -256,8 +258,9 @@ async function submitPostComment(postId) {
         
         showNotification('Comment posted!', 'success');
         
-        // Reload the modal to show new comment
-        setTimeout(() => openPostModal(postId), 500);
+        // Add comment to DOM without reloading
+        addCommentToDOM(newComment);
+        updateModalCommentCount(postId);
         
     } catch (error) {
         console.error('Error posting comment:', error);
@@ -391,6 +394,59 @@ async function downloadPost(postId) {
         console.error('Error downloading post:', error);
         showNotification('Error starting download', 'error');
     }
+}
+
+// Update view count in modal view
+async function updateModalViewCount(postId) {
+    try {
+        const posts = await loadData('posts.json');
+        const post = posts.find(p => p.id === postId);
+        const postViews = post ? (post.views || 0) : 0;
+        
+        const viewCountElement = document.querySelector('#post-detail .post-detail-meta span:nth-child(1)');
+        if (viewCountElement && viewCountElement.innerHTML.includes('fa-eye')) {
+            viewCountElement.innerHTML = `<i class="far fa-eye"></i> ${postViews}`;
+        }
+    } catch (error) {
+        console.error('Error updating modal view count:', error);
+    }
+}
+
+// Update comment count in modal view
+async function updateModalCommentCount(postId) {
+    try {
+        const posts = await loadData('posts.json');
+        const post = posts.find(p => p.id === postId);
+        const postComments = post ? (post.comments || 0) : 0;
+        
+        const commentCountElement = document.querySelector('#post-detail .post-detail-meta span:nth-child(2)');
+        if (commentCountElement && commentCountElement.innerHTML.includes('fa-comment')) {
+            commentCountElement.innerHTML = `<i class="far fa-comment"></i> ${postComments}`;
+        }
+    } catch (error) {
+        console.error('Error updating modal comment count:', error);
+    }
+}
+
+// Add comment to DOM without reloading
+function addCommentToDOM(comment) {
+    const commentsList = document.getElementById('comments-list');
+    if (!commentsList) return;
+    
+    const commentHTML = `
+        <div class="comment">
+            <div class="comment-author">
+                <i class="fas fa-user-circle"></i>
+                <span>${comment.author}</span>
+            </div>
+            <p class="comment-content">${comment.content}</p>
+            <div class="comment-date">${formatDate(comment.created)}</div>
+        </div>
+    `;
+    
+    commentsList.insertAdjacentHTML('beforeend', commentHTML);
+    
+    commentsList.scrollTop = commentsList.scrollHeight;
 }
 
 // Backwards compatibility aliases for existing code
