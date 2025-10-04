@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Portfolio - Admin Panel';
+$pageTitle = 'SnapSera - Admin Panel';
 $pageSpecificCSS = 'admin.css';
 $pageSpecificJS = ['admin.js'];
 $currentPage = 'admin';

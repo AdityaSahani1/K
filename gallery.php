@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Portfolio - Gallery';
+$pageTitle = 'SnapSera - Gallery';
 $pageSpecificCSS = ['gallery.css', 'post-modal.css'];
 $pageSpecificJS = ['post-modal.js', 'gallery.js'];
 $currentPage = 'gallery';

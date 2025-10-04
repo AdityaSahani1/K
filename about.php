@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Portfolio - About';
+$pageTitle = 'SnapSera - About';
 $pageSpecificCSS = 'about.css';
 $currentPage = 'about';
 $showSearch = false;

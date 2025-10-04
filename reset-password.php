@@ -1,5 +1,5 @@
 <?php
-$pageTitle = "Reset Password - Portfolio";
+$pageTitle = "Reset Password - SnapSera";
 $currentPage = '';
 $showSearch = false;
 ?>

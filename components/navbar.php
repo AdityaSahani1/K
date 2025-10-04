@@ -6,7 +6,7 @@ $showSearch = $showSearch ?? false;
 <nav class="navbar">
     <div class="nav-container">
         <div class="nav-logo">
-            <a href="index.php">Artistry Studio</a>
+            <a href="index.php">SnapSera</a>
         </div>
         
         <div class="nav-menu" id="nav-menu">
