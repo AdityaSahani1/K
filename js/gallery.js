@@ -243,26 +243,37 @@ function loadGalleryPosts() {
 }
 
 function createGalleryPostCard(post) {
+    const ratios = ['', 'ratio-square', 'ratio-portrait', 'ratio-wide', 'ratio-tall'];
+    const randomRatio = ratios[Math.floor(Math.random() * ratios.length)];
+    
     return `
-        <article class="gallery-post-card" data-post-id="${post.id}">
-            <div class="gallery-post-image">
-                <img src="${post.imageUrl}" alt="${post.title}" loading="lazy">
-                <div class="post-overlay">
-                    <div class="overlay-actions">
-                        <button class="overlay-btn like-btn" data-post-id="${post.id}" title="Like">
-                            <i class="far fa-heart"></i>
-                        </button>
-                        <button class="overlay-btn save-btn" data-post-id="${post.id}" title="Save">
-                            <i class="far fa-bookmark"></i>
-                        </button>
-                        <button class="overlay-btn share-btn" data-post-id="${post.id}" title="Share">
-                            <i class="fas fa-share-alt"></i>
-                        </button>
+        <div class="gallery-post-wrapper">
+            <article class="gallery-post-card" data-post-id="${post.id}">
+                <div class="gallery-post-image ${randomRatio}">
+                    <img src="${post.imageUrl}" alt="${post.title}" loading="lazy">
+                    <div class="post-overlay">
+                        <div class="overlay-actions">
+                            <button class="overlay-btn like-btn" data-post-id="${post.id}" title="Like">
+                                <i class="far fa-heart"></i>
+                            </button>
+                            <button class="overlay-btn save-btn" data-post-id="${post.id}" title="Save">
+                                <i class="far fa-bookmark"></i>
+                            </button>
+                            <button class="overlay-btn share-btn" data-post-id="${post.id}" title="Share">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                        </div>
                     </div>
+                    <div class="category-badge ${post.category}">${post.category}</div>
                 </div>
-                <div class="category-badge ${post.category}">${post.category}</div>
+            </article>
+            <div class="gallery-post-info">
+                <h3 class="gallery-post-title">${post.title}</h3>
+                <button class="post-menu-btn" data-post-id="${post.id}" title="More options">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
             </div>
-        </article>
+        </div>
     `;
 }
 
@@ -513,7 +524,7 @@ function addPostInteractionListeners() {
     document.querySelectorAll('.gallery-post-card, .top-post-card').forEach(card => {
         card.addEventListener('click', function(e) {
             // Don't open modal if clicking on buttons or menus
-            if (e.target.closest('.overlay-actions, .post-menu, .menu-dropdown')) return;
+            if (e.target.closest('.overlay-actions, .post-menu, .menu-dropdown, .post-menu-btn, .post-menu-dropdown, .gallery-post-info')) return;
             
             const postId = this.dataset.postId;
             openPostModal(postId);
@@ -522,7 +533,63 @@ function addPostInteractionListeners() {
 }
 
 function addPostMenuListeners() {
-    // Menu button listeners
+    // New post menu button listeners
+    document.querySelectorAll('.post-menu-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const postId = this.dataset.postId;
+            
+            // Close all other dropdowns
+            document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
+                menu.remove();
+            });
+            
+            // Create dropdown
+            const dropdown = document.createElement('div');
+            dropdown.className = 'post-menu-dropdown';
+            dropdown.innerHTML = `
+                <button class="post-menu-item" data-action="save" data-post-id="${postId}">
+                    <i class="far fa-bookmark"></i>
+                    <span>Save</span>
+                </button>
+                <button class="post-menu-item" data-action="share" data-post-id="${postId}">
+                    <i class="fas fa-share-alt"></i>
+                    <span>Share</span>
+                </button>
+                <button class="post-menu-item" data-action="download" data-post-id="${postId}">
+                    <i class="fas fa-download"></i>
+                    <span>Download</span>
+                </button>
+            `;
+            
+            // Position dropdown below button
+            const infoSection = this.closest('.gallery-post-info');
+            if (infoSection) {
+                infoSection.appendChild(dropdown);
+                
+                // Add event listeners to menu items
+                dropdown.querySelectorAll('.post-menu-item').forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const action = this.dataset.action;
+                        const pid = this.dataset.postId;
+                        
+                        // Remove dropdown
+                        dropdown.remove();
+                        
+                        // Handle action
+                        handlePostMenuAction(action, pid);
+                    });
+                });
+            }
+        });
+    });
+    
+    // Old menu button listeners (for backwards compatibility)
     document.querySelectorAll('.menu-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -579,12 +646,141 @@ function addPostMenuListeners() {
         });
     });
     
-    // Close menu when clicking outside
-    document.addEventListener('click', function() {
+    // Close menus when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.post-menu-btn') && !e.target.closest('.post-menu-dropdown')) {
+            document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
+                menu.remove();
+            });
+        }
         document.querySelectorAll('.menu-dropdown').forEach(menu => {
             menu.classList.remove('show');
         });
     });
+}
+
+// Handle post menu actions
+function handlePostMenuAction(action, postId) {
+    switch (action) {
+        case 'save':
+            if (!requireAuth()) return;
+            const saveBtn = document.querySelector(`[data-post-id="${postId}"].save-btn`);
+            if (saveBtn) {
+                toggleSave(postId, saveBtn);
+            } else {
+                toggleSaveFromMenu(postId);
+            }
+            break;
+        case 'share':
+            sharePostNative(postId);
+            break;
+        case 'download':
+            downloadPostFromGallery(postId);
+            break;
+    }
+}
+
+// Toggle save from menu (when save button not visible)
+async function toggleSaveFromMenu(postId) {
+    try {
+        let saves = await loadData('saves.json');
+        
+        const existingSave = saves.find(save => save.postId === postId && save.userId === currentUser.id);
+        
+        if (existingSave) {
+            saves = saves.filter(save => !(save.postId === postId && save.userId === currentUser.id));
+            showNotification('Post removed from saved', 'success');
+        } else {
+            saves.push({
+                id: generateId(),
+                postId: postId,
+                userId: currentUser.id,
+                created: new Date().toISOString()
+            });
+            showNotification('Post saved!', 'success');
+        }
+        
+        await saveData('saves.json', saves);
+        
+    } catch (error) {
+        console.error('Error toggling save:', error);
+        showNotification('Error updating save', 'error');
+    }
+}
+
+// Share post using native share or copy link
+async function sharePostNative(postId) {
+    const url = `${window.location.origin}/gallery.php?post=${postId}`;
+    
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: 'Check out this post',
+                url: url
+            });
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                copyToClipboard(url);
+            }
+        }
+    } else {
+        copyToClipboard(url);
+    }
+}
+
+// Download post from gallery
+async function downloadPostFromGallery(postId) {
+    try {
+        const posts = await loadData('posts.json');
+        const post = posts?.find(p => p.id === postId);
+        
+        if (!post || !post.downloadUrl) {
+            showNotification('Download not available for this post', 'warning');
+            return;
+        }
+        
+        const link = document.createElement('a');
+        link.href = post.downloadUrl;
+        link.download = `${post.title}.zip`;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showNotification('Download started!', 'success');
+    } catch (error) {
+        console.error('Error downloading post:', error);
+        showNotification('Error starting download', 'error');
+    }
+}
+
+// Copy to clipboard helper
+function copyToClipboard(text) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+            showNotification('Link copied to clipboard!', 'success');
+        }).catch(() => {
+            fallbackCopyToClipboard(text);
+        });
+    } else {
+        fallbackCopyToClipboard(text);
+    }
+}
+
+function fallbackCopyToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+        document.execCommand('copy');
+        showNotification('Link copied to clipboard!', 'success');
+    } catch (error) {
+        showNotification('Could not copy link', 'error');
+    }
+    document.body.removeChild(textArea);
 }
 
 // Post modal functions now handled by post-modal.js

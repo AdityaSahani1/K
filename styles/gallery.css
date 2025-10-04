@@ -959,6 +959,13 @@
     }
 }
 
+.gallery-post-wrapper {
+    break-inside: avoid;
+    margin-bottom: var(--spacing-lg);
+    display: inline-block;
+    width: 100%;
+}
+
 .gallery-post-card {
     background-color: var(--bg-primary);
     border-radius: var(--radius-xl);
@@ -967,10 +974,6 @@
     box-shadow: 0 4px 15px var(--shadow-color);
     position: relative;
     cursor: pointer;
-    break-inside: avoid;
-    margin-bottom: var(--spacing-lg);
-    display: inline-block;
-    width: 100%;
 }
 
 .gallery-post-card:hover {
@@ -982,6 +985,23 @@
     position: relative;
     aspect-ratio: 4/3;
     overflow: hidden;
+}
+
+/* Varied aspect ratios for masonry effect */
+.gallery-post-image.ratio-square {
+    aspect-ratio: 1/1;
+}
+
+.gallery-post-image.ratio-portrait {
+    aspect-ratio: 3/4;
+}
+
+.gallery-post-image.ratio-wide {
+    aspect-ratio: 16/9;
+}
+
+.gallery-post-image.ratio-tall {
+    aspect-ratio: 2/3;
 }
 
 .gallery-post-image img {
@@ -996,6 +1016,103 @@
     transform: scale(1.1);
 }
 
+/* Gallery Post Info Section - Below the card */
+.gallery-post-info {
+    padding: var(--spacing-sm) 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+    position: relative;
+}
+
+.gallery-post-title {
+    flex: 1;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.post-menu-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: var(--text-secondary);
+    font-size: 16px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.post-menu-btn:hover {
+    background-color: var(--bg-secondary);
+    color: var(--accent-primary);
+}
+
+.post-menu-dropdown {
+    position: absolute;
+    top: calc(100% + 5px);
+    right: 0;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 25px var(--shadow-color);
+    min-width: 180px;
+    z-index: 1000;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    animation: dropdownFadeIn 0.2s ease;
+    overflow: hidden;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.post-menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+.post-menu-item:hover {
+    background-color: var(--bg-secondary);
+    color: var(--accent-primary);
+}
+
+.post-menu-item i {
+    width: 18px;
+    text-align: center;
+}
+
 @media (max-width: 768px) {
     .gallery-post-image {
         aspect-ratio: 1/1;
@@ -1005,10 +1122,25 @@
         object-fit: cover;
         object-position: center center;
     }
+    
+    /* Disable varied ratios on mobile for consistency */
+    .gallery-post-image.ratio-square,
+    .gallery-post-image.ratio-portrait,
+    .gallery-post-image.ratio-wide,
+    .gallery-post-image.ratio-tall {
+        aspect-ratio: 1/1;
+    }
 }
 
 @media (max-width: 480px) {
     .gallery-post-image {
+        aspect-ratio: 4/3;
+    }
+    
+    .gallery-post-image.ratio-square,
+    .gallery-post-image.ratio-portrait,
+    .gallery-post-image.ratio-wide,
+    .gallery-post-image.ratio-tall {
         aspect-ratio: 4/3;
     }
 }
