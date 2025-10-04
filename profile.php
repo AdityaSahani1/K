@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Portfolio - Profile';
+$pageTitle = 'SnapSera - Profile';
 $pageSpecificCSS = 'profile.css';
 $pageSpecificJS = ['profile.js'];
 $currentPage = 'profile';

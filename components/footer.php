@@ -3,7 +3,7 @@
     <div class="container">
         <div class="footer-content">
             <div class="footer-section">
-                <h3>Portfolio</h3>
+                <h3>SnapSera</h3>
                 <p>Discover amazing artwork, photography, and design from talented creators worldwide.</p>
             </div>
             <div class="footer-section">
@@ -35,7 +35,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2024 Portfolio. All rights reserved.</p>
+            <p>&copy; 2025 SnapSera. All rights reserved.</p>
         </div>
     </div>
 </footer>

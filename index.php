@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Portfolio - Home';
+$pageTitle = 'SnapSera - Home';
 $pageSpecificCSS = ['home.css', 'post-modal.css'];
 $pageSpecificJS = ['post-modal.js', 'home.js'];
 $currentPage = 'home';
@@ -17,7 +17,7 @@ $showSearch = false;
     <section class="hero">
         <div class="hero-content">
             <div class="hero-text">
-                <h1 class="hero-title">Artistry Studio</h1>
+                <h1 class="hero-title">SnapSera</h1>
                 <p class="hero-subtitle">Explore stunning photography, illustration, and 3D modeling from a creative professional</p>
                 <div class="hero-buttons">
                     <a href="gallery.php" class="cta-btn">

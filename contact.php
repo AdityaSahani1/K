@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Contact - Portfolio';
+$pageTitle = 'Contact - SnapSera';
 $pageSpecificCSS = 'contact.css';
 $pageSpecificJS = ['contact.js'];
 $currentPage = 'contact';
