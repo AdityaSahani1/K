@@ -95,16 +95,8 @@ async function openPostModal(postId) {
                         </div>
                     `}
                     
-                    <div class="comments-list">
-                        ${comments.length > 0 ? comments.map(comment => `
-                            <div class="comment">
-                                <div class="comment-header">
-                                    <span class="comment-author">${comment.author}</span>
-                                    <span class="comment-date">${formatDate(comment.created)}</span>
-                                </div>
-                                <div class="comment-content">${comment.content}</div>
-                            </div>
-                        `).join('') : '<p style="color: var(--text-muted); text-align: center; padding: var(--spacing-lg);">No comments yet. Be the first to comment!</p>'}
+                    <div class="comments-list" id="comments-list">
+                        ${comments.length > 0 ? await renderComments(comments) : '<p style="color: var(--text-muted); text-align: center; padding: var(--spacing-lg);">No comments yet. Be the first to comment!</p>'}
                     </div>
                 </div>
             </div>
@@ -212,6 +204,212 @@ async function loadPostComments(postId) {
     } catch (error) {
         console.error('Error loading comments:', error);
         return [];
+    }
+}
+
+// Render comments with likes and replies
+async function renderComments(comments) {
+    const commentLikes = currentUser ? await loadData('comment-likes.json') : [];
+    
+    return comments.map(comment => {
+        const isLiked = currentUser && commentLikes.some(like => like.commentId === comment.id && like.userId === currentUser.id);
+        const likeCount = commentLikes.filter(like => like.commentId === comment.id).length;
+        const replies = comments.filter(c => c.replyTo === comment.id);
+        
+        return `
+            <div class="comment" data-comment-id="${comment.id}">
+                <div class="comment-header">
+                    <span class="comment-author">${comment.author}</span>
+                    <span class="comment-date">${formatDate(comment.created)}</span>
+                </div>
+                <div class="comment-content">
+                    ${comment.replyToUsername ? `<span class="reply-to">@${comment.replyToUsername}</span> ` : ''}
+                    ${comment.content}
+                </div>
+                <div class="comment-actions">
+                    ${currentUser ? `
+                        <button class="comment-action-btn comment-like-btn ${isLiked ? 'liked' : ''}" onclick="toggleCommentLike('${comment.id}', this)">
+                            <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> ${likeCount > 0 ? likeCount : ''}
+                        </button>
+                        <button class="comment-action-btn comment-reply-btn" onclick="showReplyInput('${comment.id}', '${comment.author}')">
+                            <i class="fas fa-reply"></i> Reply
+                        </button>
+                    ` : ''}
+                </div>
+                <div class="reply-input-container" id="reply-input-${comment.id}" style="display: none;">
+                    <textarea class="reply-textarea" placeholder="Write a reply..." id="reply-text-${comment.id}"></textarea>
+                    <div class="reply-actions">
+                        <button class="btn-secondary" onclick="hideReplyInput('${comment.id}')">Cancel</button>
+                        <button class="btn-primary" onclick="submitReply('${comment.id}', '${comment.author}')">Reply</button>
+                    </div>
+                </div>
+                ${replies.length > 0 ? `
+                    <div class="comment-replies">
+                        ${replies.map(reply => `
+                            <div class="comment reply" data-comment-id="${reply.id}">
+                                <div class="comment-header">
+                                    <span class="comment-author">${reply.author}</span>
+                                    <span class="comment-date">${formatDate(reply.created)}</span>
+                                </div>
+                                <div class="comment-content">
+                                    <span class="reply-to">@${reply.replyToUsername}</span> ${reply.content}
+                                </div>
+                                <div class="comment-actions">
+                                    ${currentUser ? `
+                                        <button class="comment-action-btn comment-like-btn ${commentLikes.some(like => like.commentId === reply.id && like.userId === currentUser.id) ? 'liked' : ''}" onclick="toggleCommentLike('${reply.id}', this)">
+                                            <i class="${commentLikes.some(like => like.commentId === reply.id && like.userId === currentUser.id) ? 'fas' : 'far'} fa-heart"></i> ${commentLikes.filter(like => like.commentId === reply.id).length > 0 ? commentLikes.filter(like => like.commentId === reply.id).length : ''}
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }).filter(c => !comments.find(comment => comment.id === comments.find(co => co.id === c.match(/data-comment-id="([^"]+)"/)?.[1])?.replyTo)).join('');
+}
+
+// Toggle comment like
+async function toggleCommentLike(commentId, button) {
+    if (!currentUser) {
+        showAuthModal();
+        return;
+    }
+    
+    try {
+        let commentLikes = await loadData('comment-likes.json');
+        const existingLike = commentLikes.find(like => like.commentId === commentId && like.userId === currentUser.id);
+        
+        if (existingLike) {
+            commentLikes = commentLikes.filter(like => !(like.commentId === commentId && like.userId === currentUser.id));
+            button.classList.remove('liked');
+            button.innerHTML = '<i class="far fa-heart"></i>';
+        } else {
+            commentLikes.push({
+                id: generateId(),
+                commentId: commentId,
+                userId: currentUser.id,
+                created: new Date().toISOString()
+            });
+            button.classList.add('liked');
+            button.innerHTML = '<i class="fas fa-heart"></i> 1';
+        }
+        
+        const likeCount = commentLikes.filter(like => like.commentId === commentId).length;
+        if (likeCount > 0) {
+            button.innerHTML = `<i class="${existingLike ? 'far' : 'fas'} fa-heart"></i> ${likeCount}`;
+        }
+        
+        await saveData('comment-likes.json', commentLikes);
+    } catch (error) {
+        console.error('Error toggling comment like:', error);
+        showNotification('Error updating like', 'error');
+    }
+}
+
+// Show reply input
+function showReplyInput(commentId, authorUsername) {
+    const replyInput = document.getElementById(`reply-input-${commentId}`);
+    if (replyInput) {
+        replyInput.style.display = 'block';
+        document.getElementById(`reply-text-${commentId}`).focus();
+    }
+}
+
+// Hide reply input
+function hideReplyInput(commentId) {
+    const replyInput = document.getElementById(`reply-input-${commentId}`);
+    if (replyInput) {
+        replyInput.style.display = 'none';
+        document.getElementById(`reply-text-${commentId}`).value = '';
+    }
+}
+
+// Submit reply
+async function submitReply(commentId, replyToUsername) {
+    if (!currentUser) {
+        showAuthModal();
+        return;
+    }
+    
+    const replyText = document.getElementById(`reply-text-${commentId}`).value.trim();
+    
+    if (!replyText) {
+        showNotification('Please enter a reply', 'warning');
+        return;
+    }
+    
+    try {
+        let comments = await loadData('comments.json');
+        const originalComment = comments.find(c => c.id === commentId);
+        
+        if (!originalComment) {
+            showNotification('Original comment not found', 'error');
+            return;
+        }
+        
+        const newReply = {
+            id: generateId(),
+            postId: originalComment.postId,
+            author: currentUser.username,
+            content: replyText,
+            replyTo: commentId,
+            replyToUsername: replyToUsername,
+            created: new Date().toISOString()
+        };
+        
+        comments.push(newReply);
+        
+        // Update post comment count
+        let posts = await loadData('posts.json');
+        const post = posts.find(p => p.id === originalComment.postId);
+        if (post) {
+            post.comments = (post.comments || 0) + 1;
+        }
+        
+        await saveData('comments.json', comments);
+        await saveData('posts.json', posts);
+        
+        // Create notification for the original commenter
+        if (replyToUsername !== currentUser.username) {
+            await createNotification(replyToUsername, commentId, originalComment.postId);
+        }
+        
+        showNotification('Reply posted!', 'success');
+        hideReplyInput(commentId);
+        
+        // Refresh comments display
+        const postId = originalComment.postId;
+        const updatedComments = await loadPostComments(postId);
+        document.getElementById('comments-list').innerHTML = await renderComments(updatedComments);
+        updateModalCommentCount(postId);
+        
+    } catch (error) {
+        console.error('Error posting reply:', error);
+        showNotification('Error posting reply', 'error');
+    }
+}
+
+// Create notification
+async function createNotification(username, commentId, postId) {
+    try {
+        let notifications = await loadData('notifications.json');
+        
+        notifications.push({
+            id: generateId(),
+            username: username,
+            type: 'reply',
+            commentId: commentId,
+            postId: postId,
+            from: currentUser.username,
+            read: false,
+            created: new Date().toISOString()
+        });
+        
+        await saveData('notifications.json', notifications);
+    } catch (error) {
+        console.error('Error creating notification:', error);
     }
 }
 

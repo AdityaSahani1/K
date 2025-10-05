@@ -42,6 +42,10 @@ switch ($action) {
         handlePasswordReset($input);
         break;
         
+    case 'change_password':
+        handleChangePassword($input);
+        break;
+        
     default:
         http_response_code(400);
         echo json_encode(['error' => 'Invalid action']);
@@ -320,5 +324,80 @@ function handlePasswordReset($data) {
     saveUsers($users);
     
     echo json_encode(['status' => 'success', 'message' => 'Password reset successfully']);
+}
+
+function handleChangePassword($data) {
+    $userId = $data['userId'] ?? '';
+    $currentPassword = $data['currentPassword'] ?? '';
+    $newPassword = $data['newPassword'] ?? '';
+    
+    if (empty($userId) || empty($currentPassword) || empty($newPassword)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'All fields are required']);
+        return;
+    }
+    
+    if (strlen($newPassword) < 6) {
+        http_response_code(400);
+        echo json_encode(['error' => 'New password must be at least 6 characters long']);
+        return;
+    }
+    
+    $users = loadUsers();
+    $userIndex = -1;
+    
+    foreach ($users as $index => $user) {
+        if ($user['id'] === $userId) {
+            $userIndex = $index;
+            break;
+        }
+    }
+    
+    if ($userIndex === -1) {
+        http_response_code(404);
+        echo json_encode(['error' => 'User not found']);
+        return;
+    }
+    
+    $user = $users[$userIndex];
+    
+    // Verify current password
+    $passwordValid = false;
+    
+    if (strpos($user['password'], '$2y$') === 0) {
+        // Password is hashed with bcrypt
+        $passwordValid = password_verify($currentPassword, $user['password']);
+    } else {
+        // Legacy password - try legacy hash first
+        $legacyHash = hashPasswordLegacy($currentPassword);
+        $passwordValid = ($user['password'] === $legacyHash);
+        
+        if (!$passwordValid && $user['password'] === $currentPassword) {
+            $passwordValid = true;
+        }
+    }
+    
+    if (!$passwordValid) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Current password is incorrect']);
+        return;
+    }
+    
+    // Update password with new secure hash
+    $users[$userIndex]['password'] = password_hash($newPassword, PASSWORD_BCRYPT);
+    
+    saveUsers($users);
+    
+    echo json_encode(['status' => 'success', 'message' => 'Password changed successfully']);
+}
+
+function hashPasswordLegacy($password) {
+    $hash = 0;
+    for ($i = 0; $i < strlen($password); $i++) {
+        $char = ord($password[$i]);
+        $hash = (($hash << 5) - $hash) + $char;
+        $hash = $hash & $hash;
+    }
+    return base_convert($hash, 10, 36);
 }
 ?>
