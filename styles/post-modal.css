@@ -248,6 +248,121 @@
     line-height: 1.5;
 }
 
+/* Comment Actions */
+.comment-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+}
+
+.comment-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.comment-action-btn:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.comment-action-btn.liked {
+    color: var(--accent-danger);
+}
+
+.comment-action-btn.liked:hover {
+    color: #dc2626;
+}
+
+/* Reply Input */
+.reply-input-container {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+}
+
+.reply-textarea {
+    width: 100%;
+    min-height: 60px;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: inherit;
+    resize: vertical;
+    margin-bottom: var(--spacing-sm);
+}
+
+.reply-textarea:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.reply-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: flex-end;
+}
+
+.reply-actions button {
+    padding: var(--spacing-xs) var(--spacing-md);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all var(--transition-fast);
+}
+
+.reply-actions .btn-primary {
+    background-color: var(--accent-primary);
+    color: white;
+}
+
+.reply-actions .btn-primary:hover {
+    background-color: var(--accent-secondary);
+}
+
+.reply-actions .btn-secondary {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.reply-actions .btn-secondary:hover {
+    background-color: var(--bg-tertiary);
+}
+
+/* Reply To Username */
+.reply-to {
+    color: var(--accent-primary);
+    font-weight: 600;
+    margin-right: var(--spacing-xs);
+}
+
+/* Comment Replies */
+.comment-replies {
+    margin-top: var(--spacing-md);
+    margin-left: var(--spacing-xl);
+    padding-left: var(--spacing-md);
+    border-left: 2px solid var(--border-color);
+}
+
+.comment.reply {
+    background-color: var(--bg-tertiary);
+    border-left-color: var(--accent-secondary);
+}
+
 /* Post Modal Close Button */
 .post-modal-close {
     position: absolute;

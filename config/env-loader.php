@@ -27,7 +27,9 @@ function loadEnvFromFile($filePath) {
     }
 }
 
-if (file_exists(__DIR__ . '/../env.txt')) {
+if (file_exists(__DIR__ . '/../.env')) {
+    loadEnvFromFile(__DIR__ . '/../.env');
+} elseif (file_exists(__DIR__ . '/../env.txt')) {
     loadEnvFromFile(__DIR__ . '/../env.txt');
 }
 

@@ -288,7 +288,7 @@ async function loadUserComments() {
         const comments = await loadData('comments.json');
         const posts = await loadData('posts.json');
         
-        // Get comments by the current user
+        // Get all comments and replies by the current user
         const userComments = comments.filter(comment => comment.author === currentUser.username);
         
         if (userComments.length === 0) {
@@ -311,15 +311,18 @@ async function loadUserComments() {
         container.innerHTML = userComments.map(comment => {
             const post = posts.find(p => p.id === comment.postId);
             const postTitle = post ? post.title : 'Unknown Post';
+            const isReply = comment.replyTo ? true : false;
+            const replyTag = isReply ? `<span class="reply-tag"><i class="fas fa-reply"></i> Reply to @${comment.replyToUsername}</span>` : '';
             
             return `
-                <div class="user-comment">
+                <div class="user-comment" data-comment-id="${comment.id}" data-post-id="${comment.postId}" onclick="navigateToComment('${comment.postId}', '${comment.id}')">
                     <div class="comment-header">
-                        <a href="gallery.php?post=${comment.postId}" class="comment-post-title">
+                        <a href="gallery.php?post=${comment.postId}" class="comment-post-title" onclick="event.stopPropagation()">
                             ${postTitle}
                         </a>
                         <span class="comment-date">${formatDate(comment.created)}</span>
                     </div>
+                    ${replyTag}
                     <div class="comment-content">${comment.content}</div>
                 </div>
             `;
@@ -334,6 +337,12 @@ async function loadUserComments() {
             </div>
         `;
     }
+}
+
+function navigateToComment(postId, commentId) {
+    // Store the comment ID in session storage for scrolling
+    sessionStorage.setItem('scrollToCommentId', commentId);
+    window.location.href = `gallery.php?post=${postId}`;
 }
 
 function createProfilePostCard(post) {

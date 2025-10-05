@@ -75,7 +75,9 @@ $showSearch = false;
     <!-- Add/Edit Post Modal -->
     <div class="modal" id="post-form-modal">
         <div class="modal-content large">
-            <span class="close" id="post-form-close">&times;</span>
+            <button class="modal-close-btn" id="post-form-close">
+                <i class="fas fa-times"></i>
+            </button>
             <h2 id="post-form-title">Add New Post</h2>
             
             <form id="post-form">
@@ -135,7 +137,9 @@ $showSearch = false;
     <!-- Manage Users Modal -->
     <div class="modal" id="users-modal">
         <div class="modal-content large">
-            <span class="close" id="users-close">&times;</span>
+            <button class="modal-close-btn" id="users-close">
+                <i class="fas fa-times"></i>
+            </button>
             <h2>Manage Users</h2>
             
             <!-- Search and Sort -->
@@ -177,7 +181,9 @@ $showSearch = false;
     <!-- Edit User Modal -->
     <div class="modal" id="edit-user-modal">
         <div class="modal-content">
-            <span class="close" id="edit-user-close">&times;</span>
+            <button class="modal-close-btn" id="edit-user-close">
+                <i class="fas fa-times"></i>
+            </button>
             <h2>Edit User</h2>
             <form id="edit-user-form">
                 <div class="form-group">
@@ -228,7 +234,9 @@ $showSearch = false;
     <!-- Analytics Modal -->
     <div class="modal" id="analytics-modal">
         <div class="modal-content large">
-            <span class="close" id="analytics-close">&times;</span>
+            <button class="modal-close-btn" id="analytics-close">
+                <i class="fas fa-times"></i>
+            </button>
             <h2>Analytics Dashboard</h2>
             
             <div class="analytics-grid">

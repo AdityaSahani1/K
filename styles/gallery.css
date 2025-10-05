@@ -976,10 +976,11 @@
     cursor: pointer;
 }
 
-.gallery-post-card:hover {
+/* Hover effects removed as requested */
+/* .gallery-post-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 12px 30px var(--shadow-hover);
-}
+} */
 
 .gallery-post-image {
     position: relative;
@@ -1012,9 +1013,10 @@
     transition: transform var(--transition-slow);
 }
 
-.gallery-post-card:hover .gallery-post-image img {
+/* Image zoom on hover removed */
+/* .gallery-post-card:hover .gallery-post-image img {
     transform: scale(1.1);
-}
+} */
 
 /* Gallery Post Info Section - Below the card */
 .gallery-post-info {
@@ -1111,6 +1113,109 @@
 .post-menu-item i {
     width: 18px;
     text-align: center;
+}
+
+/* Share Menu Dropdown */
+.share-menu-dropdown {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 20px 60px var(--shadow-color);
+    min-width: 280px;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    padding: var(--spacing-sm) 0;
+    padding-top: calc(var(--spacing-xl) + var(--spacing-lg));
+}
+
+.share-menu-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.share-menu-close {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all var(--transition-fast);
+    z-index: 10;
+}
+
+.share-menu-close:hover {
+    background: var(--accent-danger);
+    color: white;
+    transform: rotate(90deg);
+}
+
+.share-menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.share-menu-item:hover {
+    background-color: var(--bg-secondary);
+}
+
+.share-menu-item i {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--accent-primary);
+}
+
+.share-menu-item:hover i {
+    color: var(--accent-secondary);
+}
+
+/* Responsive positioning for share menu */
+@media (max-width: 480px) {
+    .share-menu-dropdown {
+        min-width: calc(100vw - var(--spacing-2xl));
+        max-width: calc(100vw - var(--spacing-2xl));
+        left: 50%;
+        top: 50%;
+    }
+    
+    .post-menu-dropdown {
+        position: absolute;
+        right: 0;
+        left: auto;
+        max-width: calc(100vw - var(--spacing-xl));
+    }
 }
 
 @media (max-width: 768px) {

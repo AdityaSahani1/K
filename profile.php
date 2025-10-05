@@ -99,7 +99,9 @@ $showSearch = false;
     <!-- Edit Profile Modal -->
     <div class="modal" id="edit-profile-modal">
         <div class="modal-content">
-            <span class="close" id="edit-profile-close">&times;</span>
+            <button class="modal-close-btn" id="edit-profile-close">
+                <i class="fas fa-times"></i>
+            </button>
             <h2>Edit Profile</h2>
             <form id="edit-profile-form">
                 <div class="form-group">
@@ -133,7 +135,9 @@ $showSearch = false;
     <!-- Change Password Modal -->
     <div class="modal" id="change-password-modal">
         <div class="modal-content">
-            <span class="close" id="change-password-close">&times;</span>
+            <button class="modal-close-btn" id="change-password-close">
+                <i class="fas fa-times"></i>
+            </button>
             <h2>Change Password</h2>
             <form id="change-password-form">
                 <div class="form-group">
@@ -159,7 +163,9 @@ $showSearch = false;
     <!-- Post Modal -->
     <div class="modal" id="post-modal">
         <div class="modal-content post-modal-content">
-            <span class="close" id="post-close">&times;</span>
+            <button class="modal-close-btn" id="post-close">
+                <i class="fas fa-times"></i>
+            </button>
             <div class="post-detail" id="post-detail">
                 <!-- Post detail content will be loaded here -->
             </div>

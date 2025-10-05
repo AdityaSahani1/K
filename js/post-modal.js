@@ -107,9 +107,36 @@ async function openPostModal(postId) {
         
         showModal('post-modal');
         
+        // Check if we need to scroll to a specific comment (from profile page)
+        const scrollToCommentId = sessionStorage.getItem('scrollToCommentId');
+        if (scrollToCommentId) {
+            // Wait for modal animation to complete before scrolling
+            setTimeout(() => {
+                scrollToComment(scrollToCommentId);
+                sessionStorage.removeItem('scrollToCommentId');
+            }, 300);
+        }
+        
     } catch (error) {
         console.error('Error opening post modal:', error);
         showNotification('Error loading post details', 'error');
+    }
+}
+
+// Scroll to a specific comment
+function scrollToComment(commentId) {
+    const commentElement = document.querySelector(`[data-comment-id="${commentId}"]`);
+    if (commentElement) {
+        const commentsSection = document.querySelector('.comments-section');
+        if (commentsSection) {
+            // Scroll the modal to the comment
+            commentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Highlight the comment temporarily
+            commentElement.style.backgroundColor = 'var(--accent-primary-light, rgba(59, 130, 246, 0.1))';
+            setTimeout(() => {
+                commentElement.style.backgroundColor = '';
+            }, 2000);
+        }
     }
 }
 
