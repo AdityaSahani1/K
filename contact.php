@@ -37,7 +37,7 @@ $showSearch = false;
                             </div>
                             <div class="contact-details">
                                 <h3>Email</h3>
-                                <p>adityamsahani9819@gmail.com</p>
+                                <p>snapsera.team@gmail.com</p>
                             </div>
                         </div>
                         
@@ -139,7 +139,7 @@ $showSearch = false;
                 
                 <div class="faq-item">
                     <h3>Can I see more of your work?</h3>
-                    <p>Absolutely! Check out my <a href="gallery.php">gallery</a> for a comprehensive view of my portfolio across different categories.</p>
+                    <p>Absolutely! Check out my <a href="gallery.php">gallery</a> for a comprehensive view of my work across different categories.</p>
                 </div>
             </div>
         </div>

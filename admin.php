@@ -17,7 +17,7 @@ $showSearch = false;
     <section class="admin-header">
         <div class="container">
             <h1>Admin Panel</h1>
-            <p>Manage your portfolio posts and content</p>
+            <p>Manage your SnapSera posts and content</p>
         </div>
     </section>
 

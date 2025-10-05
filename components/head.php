@@ -1,5 +1,5 @@
 <?php
-$pageTitle = $pageTitle ?? 'Portfolio';
+$pageTitle = $pageTitle ?? 'SnapSera';
 $pageSpecificCSS = $pageSpecificCSS ?? [];
 if (!is_array($pageSpecificCSS)) {
     $pageSpecificCSS = [$pageSpecificCSS];

@@ -13,7 +13,7 @@ class EmailHandler {
     private $fromName;
     
     public function __construct() {
-        $this->fromEmail = getenv('SMTP_FROM_EMAIL') ?: 'adityamsahani9819@gmail.com';
+        $this->fromEmail = getenv('SMTP_FROM_EMAIL') ?: 'snapsera.team@gmail.com';
         $this->fromName = getenv('SMTP_FROM_NAME') ?: 'SnapSera';
         
         $this->mail = new PHPMailer(true);

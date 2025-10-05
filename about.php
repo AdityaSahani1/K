@@ -81,7 +81,7 @@ $showSearch = false;
                     <div class="profile-avatar">
                         <i class="fas fa-user"></i>
                     </div>
-                    <span class="profile-name">@creativeportfolio</span>
+                    <span class="profile-name">@SnapSera</span>
                 </div>
                 
                 <div class="social-connections">
@@ -107,7 +107,7 @@ $showSearch = false;
                         <div class="node-content">
                             <i class="fab fa-behance"></i>
                             <span class="node-label">Behance</span>
-                            <span class="node-subtitle">Portfolio</span>
+                            <span class="node-subtitle">SnapSera</span>
                         </div>
                         <div class="connection-line"></div>
                     </a>
@@ -158,7 +158,7 @@ $showSearch = false;
                 Interested in collaborating or have a project in mind? 
                 I'd love to hear from you and discuss how we can bring your vision to life.
             </p>
-            <a href="mailto:contact@portfolio.com" class="contact-btn">
+            <a href="snapsera.team@gmail.com" class="contact-btn">
                 <i class="fas fa-envelope"></i>
                 Send a Message
             </a>

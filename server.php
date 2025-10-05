@@ -1,5 +1,5 @@
 <?php
-// PHP Portfolio Server
+// PHP SnapSera Server
 // This file acts as a router for the PHP built-in web server
 
 // Get the current directory

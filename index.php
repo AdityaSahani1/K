@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Portfolio - Home';
+$pageTitle = 'SnapSera - Home';
 $pageSpecificCSS = ['home.css', 'post-modal.css'];
 $pageSpecificJS = ['post-modal.js', 'home.js'];
 $currentPage = 'home';

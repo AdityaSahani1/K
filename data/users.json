@@ -1,13 +1,13 @@
 [
     {
         "id": "admin",
-        "name": "Admin",
-        "username": "admin",
-        "email": "admin@snapsera.com",
+        "name": "SnapSera",
+        "username": "snapsera",
+        "email": "snapsera.team@gmail.com",
         "password": "$2y$12$UvOLHuahSYtgqCFpMQm2OeomfK75BJVWJ02HkUDLMsvn5C4VGW9Em",
         "role": "admin",
         "created": "2024-01-01T00:00:00Z",
-        "bio": "Portfolio administrator and creative director",
+        "bio": "SnapSera administrator and creative director",
         "isVerified": true,
         "emailVerificationToken": null,
         "otpToken": null,
