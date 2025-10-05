@@ -546,10 +546,14 @@ function addPostMenuListeners() {
                 menu.remove();
             });
             
-            // Create dropdown
+            // Create dropdown with Share option
             const dropdown = document.createElement('div');
             dropdown.className = 'post-menu-dropdown';
             dropdown.innerHTML = `
+                <button class="post-menu-item" data-action="like" data-post-id="${postId}">
+                    <i class="far fa-heart"></i>
+                    <span>Like</span>
+                </button>
                 <button class="post-menu-item" data-action="save" data-post-id="${postId}">
                     <i class="far fa-bookmark"></i>
                     <span>Save</span>
@@ -662,6 +666,15 @@ function addPostMenuListeners() {
 // Handle post menu actions
 function handlePostMenuAction(action, postId) {
     switch (action) {
+        case 'like':
+            if (!requireAuth()) return;
+            const likeBtn = document.querySelector(`[data-post-id="${postId}"].like-btn`);
+            if (likeBtn) {
+                toggleLike(postId, likeBtn);
+            } else {
+                toggleLikeFromMenu(postId);
+            }
+            break;
         case 'save':
             if (!requireAuth()) return;
             const saveBtn = document.querySelector(`[data-post-id="${postId}"].save-btn`);
@@ -672,11 +685,55 @@ function handlePostMenuAction(action, postId) {
             }
             break;
         case 'share':
+            // Open share menu with options
             sharePostNative(postId);
             break;
         case 'download':
             downloadPostFromGallery(postId);
             break;
+    }
+}
+
+// Toggle like from menu (when like button not visible)
+async function toggleLikeFromMenu(postId) {
+    try {
+        let likes = await loadData('likes.json');
+        let posts = await loadData('posts.json');
+        
+        const existingLike = likes.find(like => like.postId === postId && like.userId === currentUser.id);
+        
+        if (existingLike) {
+            likes = likes.filter(like => !(like.postId === postId && like.userId === currentUser.id));
+            
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                post.likes = Math.max(0, (post.likes || 0) - 1);
+                await saveData('posts.json', posts);
+            }
+            
+            showNotification('Like removed', 'success');
+        } else {
+            likes.push({
+                id: generateId(),
+                postId: postId,
+                userId: currentUser.id,
+                created: new Date().toISOString()
+            });
+            
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                post.likes = (post.likes || 0) + 1;
+                await saveData('posts.json', posts);
+            }
+            
+            showNotification('Post liked!', 'success');
+        }
+        
+        await saveData('likes.json', likes);
+        
+    } catch (error) {
+        console.error('Error toggling like:', error);
+        showNotification('Error updating like', 'error');
     }
 }
 
@@ -708,24 +765,106 @@ async function toggleSaveFromMenu(postId) {
     }
 }
 
-// Share post using native share or copy link
+// Share post - show share menu with options
 async function sharePostNative(postId) {
     const url = `${window.location.origin}/gallery.php?post=${postId}`;
     
-    if (navigator.share) {
-        try {
-            await navigator.share({
-                title: 'Check out this post',
-                url: url
-            });
-        } catch (error) {
-            if (error.name !== 'AbortError') {
-                copyToClipboard(url);
-            }
-        }
-    } else {
-        copyToClipboard(url);
+    // Close any existing share menus
+    document.querySelectorAll('.share-menu-dropdown').forEach(menu => menu.remove());
+    
+    // Get the post data for title
+    const posts = await loadData('posts.json');
+    const post = posts.find(p => p.id === postId);
+    const title = post ? post.title : 'Check out this post';
+    
+    // Create share menu dropdown
+    const shareMenu = document.createElement('div');
+    shareMenu.className = 'share-menu-dropdown';
+    shareMenu.innerHTML = `
+        <button class="share-menu-close">
+            <i class="fas fa-times"></i>
+        </button>
+        <button class="share-menu-item" data-action="whatsapp">
+            <i class="fab fa-whatsapp"></i>
+            <span>Share on WhatsApp</span>
+        </button>
+        <button class="share-menu-item" data-action="instagram">
+            <i class="fab fa-instagram"></i>
+            <span>Share on Instagram</span>
+        </button>
+        <button class="share-menu-item" data-action="copy">
+            <i class="fas fa-link"></i>
+            <span>Copy Link</span>
+        </button>
+        <button class="share-menu-item" data-action="native">
+            <i class="fas fa-share"></i>
+            <span>Share</span>
+        </button>
+    `;
+    
+    // Position the menu in the center of the screen
+    document.body.appendChild(shareMenu);
+    
+    // Show the menu
+    setTimeout(() => shareMenu.classList.add('show'), 10);
+    
+    // Add close button listener
+    const closeBtn = shareMenu.querySelector('.share-menu-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => shareMenu.remove());
     }
+    
+    // Add event listeners to share menu items
+    shareMenu.querySelectorAll('.share-menu-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const action = this.dataset.action;
+            shareMenu.remove();
+            
+            switch(action) {
+                case 'whatsapp':
+                    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(title + ' - ' + url)}`;
+                    window.open(whatsappUrl, '_blank');
+                    break;
+                case 'instagram':
+                    // Instagram doesn't support direct URL sharing, so copy link and notify user
+                    copyToClipboard(url);
+                    showNotification('Link copied! Paste it in your Instagram post or story', 'info');
+                    break;
+                case 'copy':
+                    copyToClipboard(url);
+                    break;
+                case 'native':
+                    // Use native share API if available
+                    if (navigator.share) {
+                        navigator.share({
+                            title: title,
+                            url: url
+                        }).catch((error) => {
+                            if (error.name !== 'AbortError') {
+                                copyToClipboard(url);
+                            }
+                        });
+                    } else {
+                        copyToClipboard(url);
+                        showNotification('Link copied to clipboard!', 'success');
+                    }
+                    break;
+            }
+        });
+    });
+    
+    // Close menu when clicking outside
+    setTimeout(() => {
+        document.addEventListener('click', function closeShareMenu(e) {
+            if (!e.target.closest('.share-menu-dropdown')) {
+                shareMenu.remove();
+                document.removeEventListener('click', closeShareMenu);
+            }
+        });
+    }, 100);
 }
 
 // Download post from gallery

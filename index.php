@@ -17,7 +17,7 @@ $showSearch = false;
     <section class="hero">
         <div class="hero-content">
             <div class="hero-text">
-                <h1 class="hero-title">Artistry Studio</h1>
+                <h1 class="hero-title">SnapSera</h1>
                 <p class="hero-subtitle">Explore stunning photography, illustration, and 3D modeling from a creative professional</p>
                 <div class="hero-buttons">
                     <a href="gallery.php" class="cta-btn">
@@ -83,7 +83,9 @@ $showSearch = false;
     <!-- Auth Modal -->
     <div class="modal" id="auth-modal">
         <div class="modal-content">
-            <span class="close" id="auth-close">&times;</span>
+            <button class="modal-close-btn" id="auth-close">
+                <i class="fas fa-times"></i>
+            </button>
             
             <!-- Login Form -->
             <div class="auth-form" id="login-form">

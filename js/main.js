@@ -444,52 +444,92 @@ async function getCurrentPost(postId) {
 }
 
 // Share menu functionality
-function showShareMenu(postId, button) {
+async function showShareMenu(postId, button) {
     const existingMenu = document.querySelector('.share-menu');
     if (existingMenu) {
         existingMenu.remove();
     }
     
+    // Get post data for title
+    const posts = await loadData('posts.json');
+    const post = posts.find(p => p.id === postId);
+    const title = post ? post.title : 'Check out this post';
+    const url = `${window.location.origin}/gallery.php?post=${postId}`;
+    
     const shareMenu = document.createElement('div');
-    shareMenu.className = 'share-menu';
+    shareMenu.className = 'share-menu-dropdown';
     shareMenu.innerHTML = `
-        <div class="share-options">
-            <button class="share-option" data-platform="whatsapp">
-                <i class="fab fa-whatsapp"></i> WhatsApp
-            </button>
-            <button class="share-option" data-platform="instagram">
-                <i class="fab fa-instagram"></i> Instagram
-            </button>
-            <button class="share-option" data-platform="copy">
-                <i class="fas fa-link"></i> Copy Link
-            </button>
-            <button class="share-option" data-platform="share">
-                <i class="fas fa-share"></i> Share
-            </button>
-        </div>
+        <button class="share-menu-close">
+            <i class="fas fa-times"></i>
+        </button>
+        <button class="share-menu-item" data-platform="whatsapp">
+            <i class="fab fa-whatsapp"></i>
+            <span>Share on WhatsApp</span>
+        </button>
+        <button class="share-menu-item" data-platform="instagram">
+            <i class="fab fa-instagram"></i>
+            <span>Share on Instagram</span>
+        </button>
+        <button class="share-menu-item" data-platform="copy">
+            <i class="fas fa-link"></i>
+            <span>Copy Link</span>
+        </button>
+        <button class="share-menu-item" data-platform="native">
+            <i class="fas fa-share"></i>
+            <span>Share</span>
+        </button>
     `;
     
     document.body.appendChild(shareMenu);
     
-    // Position menu near button
-    const buttonRect = button.getBoundingClientRect();
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-    
-    shareMenu.style.position = 'absolute';
-    shareMenu.style.top = (buttonRect.bottom + scrollTop + 10) + 'px';
-    shareMenu.style.left = Math.max(10, (buttonRect.left + scrollLeft - 80)) + 'px';
-    shareMenu.style.zIndex = '2000';
-    
     // Show menu with animation
     setTimeout(() => shareMenu.classList.add('show'), 10);
     
+    // Add close button listener
+    const closeBtn = shareMenu.querySelector('.share-menu-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => shareMenu.remove());
+    }
+    
     // Add event listeners
-    shareMenu.querySelectorAll('.share-option').forEach(option => {
-        option.addEventListener('click', function() {
+    shareMenu.querySelectorAll('.share-menu-item').forEach(option => {
+        option.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
             const platform = this.dataset.platform;
-            sharePost(postId, platform);
             shareMenu.remove();
+            
+            switch(platform) {
+                case 'whatsapp':
+                    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(title + ' - ' + url)}`;
+                    window.open(whatsappUrl, '_blank');
+                    break;
+                case 'instagram':
+                    copyToClipboard(url);
+                    showNotification('Link copied! Paste it in your Instagram post or story', 'info');
+                    break;
+                case 'copy':
+                    copyToClipboard(url);
+                    showNotification('Link copied to clipboard!', 'success');
+                    break;
+                case 'native':
+                    // Use native share API if available
+                    if (navigator.share) {
+                        navigator.share({
+                            title: title,
+                            url: url
+                        }).catch((error) => {
+                            if (error.name !== 'AbortError') {
+                                copyToClipboard(url);
+                            }
+                        });
+                    } else {
+                        copyToClipboard(url);
+                        showNotification('Link copied to clipboard!', 'success');
+                    }
+                    break;
+            }
         });
     });
     
@@ -497,11 +537,8 @@ function showShareMenu(postId, button) {
     setTimeout(() => {
         document.addEventListener('click', function closeShareMenu(e) {
             if (!shareMenu.contains(e.target)) {
-                shareMenu.classList.remove('show');
-                setTimeout(() => {
-                    shareMenu.remove();
-                    document.removeEventListener('click', closeShareMenu);
-                }, 200);
+                shareMenu.remove();
+                document.removeEventListener('click', closeShareMenu);
             }
         });
     }, 100);

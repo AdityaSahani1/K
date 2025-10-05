@@ -450,6 +450,28 @@
     margin-top: var(--spacing-xs);
 }
 
+.reply-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: 0.25rem 0.75rem;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: var(--spacing-sm);
+    margin-top: var(--spacing-xs);
+}
+
+.reply-tag i {
+    font-size: 0.75rem;
+}
+
+.user-comment {
+    cursor: pointer;
+}
+
 .comment-content {
     color: var(--text-secondary);
     line-height: 1.8;

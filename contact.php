@@ -150,7 +150,9 @@ $showSearch = false;
     <!-- Auth Modal -->
     <div class="modal" id="auth-modal">
         <div class="modal-content">
-            <span class="close" id="auth-close">&times;</span>
+            <button class="modal-close-btn" id="auth-close">
+                <i class="fas fa-times"></i>
+            </button>
             
             <!-- Login Form -->
             <div class="auth-form" id="login-form">

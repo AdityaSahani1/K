@@ -196,7 +196,7 @@ class EmailHandler {
                     <div style='background: #f9fafb; padding: 15px; border-radius: 6px; margin: 15px 0;'>
                         <p style='color: #4b5563; margin: 0;'>" . nl2br(htmlspecialchars($message)) . "</p>
                     </div>
-                    <p style='color: #6b7280; font-size: 12px;'>© 2025 Artistry Studio</p>
+                    <p style='color: #6b7280; font-size: 12px;'>© 2025 SnapSera</p>
                 </div>
             </div>
             ";
