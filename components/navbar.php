@@ -33,6 +33,21 @@ $showSearch = $showSearch ?? false;
             <button class="theme-toggle" id="theme-toggle">
                 <i class="fas fa-moon"></i>
             </button>
+            <div class="notification-menu" id="notification-menu" style="display: none;">
+                <button class="notification-btn" id="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notification-badge" style="display: none;">0</span>
+                </button>
+                <div class="notification-dropdown" id="notification-dropdown">
+                    <div class="notification-header">
+                        <h3>Notifications</h3>
+                        <button class="mark-all-read" id="mark-all-read">Mark all as read</button>
+                    </div>
+                    <div class="notification-list" id="notification-list">
+                        <p class="no-notifications">No notifications</p>
+                    </div>
+                </div>
+            </div>
             <div class="user-menu" id="user-menu">
                 <button class="user-btn" id="user-btn">
                     <i class="fas fa-user"></i>

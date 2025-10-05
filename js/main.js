@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initAuth();
     loadCurrentUser();
     initScrollFunctionality();
+    initNotifications();
 });
 
 // Theme Management
@@ -676,4 +677,146 @@ function addScrollProgressIndicator() {
             progressBar.style.width = scrolled + '%';
         }
     });
+}
+
+// Notifications
+function initNotifications() {
+    if (!currentUser) return;
+    
+    const notificationMenu = document.getElementById('notification-menu');
+    const notificationBtn = document.getElementById('notification-btn');
+    const notificationDropdown = document.getElementById('notification-dropdown');
+    const markAllReadBtn = document.getElementById('mark-all-read');
+    
+    if (notificationMenu) {
+        notificationMenu.style.display = 'block';
+    }
+    
+    if (notificationBtn && notificationDropdown) {
+        notificationBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            notificationDropdown.classList.toggle('show');
+            if (notificationDropdown.classList.contains('show')) {
+                loadNotifications();
+            }
+        });
+        
+        document.addEventListener('click', function() {
+            notificationDropdown.classList.remove('show');
+        });
+    }
+    
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', markAllNotificationsRead);
+    }
+    
+    // Load notification count on init
+    updateNotificationBadge();
+    
+    // Poll for new notifications every 30 seconds
+    setInterval(updateNotificationBadge, 30000);
+}
+
+async function loadNotifications() {
+    if (!currentUser) return;
+    
+    try {
+        const notifications = await loadData('notifications.json');
+        const userNotifications = notifications
+            .filter(n => n.username === currentUser.username)
+            .sort((a, b) => new Date(b.created) - new Date(a.created));
+        
+        const notificationList = document.getElementById('notification-list');
+        if (!notificationList) return;
+        
+        if (userNotifications.length === 0) {
+            notificationList.innerHTML = '<p class="no-notifications">No notifications</p>';
+            return;
+        }
+        
+        notificationList.innerHTML = userNotifications.map(notification => `
+            <div class="notification-item ${notification.read ? 'read' : 'unread'}" data-notification-id="${notification.id}">
+                <div class="notification-content" onclick="handleNotificationClick('${notification.id}', '${notification.postId}', '${notification.commentId}')">
+                    <p><strong>${notification.from}</strong> replied to your comment</p>
+                    <span class="notification-time">${formatDate(notification.created)}</span>
+                </div>
+                <button class="notification-delete" onclick="deleteNotification('${notification.id}')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading notifications:', error);
+    }
+}
+
+async function updateNotificationBadge() {
+    if (!currentUser) return;
+    
+    try {
+        const notifications = await loadData('notifications.json');
+        const unreadCount = notifications.filter(n => n.username === currentUser.username && !n.read).length;
+        
+        const badge = document.getElementById('notification-badge');
+        if (badge) {
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    } catch (error) {
+        console.error('Error updating notification badge:', error);
+    }
+}
+
+async function handleNotificationClick(notificationId, postId, commentId) {
+    try {
+        // Mark as read
+        let notifications = await loadData('notifications.json');
+        const notification = notifications.find(n => n.id === notificationId);
+        if (notification) {
+            notification.read = true;
+            await saveData('notifications.json', notifications);
+            updateNotificationBadge();
+        }
+        
+        // Navigate to the post
+        window.location.href = `gallery.php?post=${postId}`;
+    } catch (error) {
+        console.error('Error handling notification click:', error);
+    }
+}
+
+async function deleteNotification(notificationId) {
+    try {
+        let notifications = await loadData('notifications.json');
+        notifications = notifications.filter(n => n.id !== notificationId);
+        await saveData('notifications.json', notifications);
+        loadNotifications();
+        updateNotificationBadge();
+    } catch (error) {
+        console.error('Error deleting notification:', error);
+    }
+}
+
+async function markAllNotificationsRead() {
+    if (!currentUser) return;
+    
+    try {
+        let notifications = await loadData('notifications.json');
+        notifications.forEach(n => {
+            if (n.username === currentUser.username) {
+                n.read = true;
+            }
+        });
+        await saveData('notifications.json', notifications);
+        loadNotifications();
+        updateNotificationBadge();
+        showNotification('All notifications marked as read', 'success');
+    } catch (error) {
+        console.error('Error marking all notifications as read:', error);
+    }
 }

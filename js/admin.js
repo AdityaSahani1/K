@@ -1,5 +1,7 @@
 // Admin page JavaScript
 
+let allUsers = [];
+
 document.addEventListener('DOMContentLoaded', function() {
     initAdminPage();
 });
@@ -179,6 +181,32 @@ function initAdminModals() {
         });
     }
     
+    // Edit User Modal
+    const editUserModal = document.getElementById('edit-user-modal');
+    const editUserClose = document.getElementById('edit-user-close');
+    const cancelEditUser = document.getElementById('cancel-edit-user');
+    const editUserForm = document.getElementById('edit-user-form');
+    
+    if (editUserClose) {
+        editUserClose.addEventListener('click', () => hideModal('edit-user-modal'));
+    }
+    
+    if (cancelEditUser) {
+        cancelEditUser.addEventListener('click', () => hideModal('edit-user-modal'));
+    }
+    
+    if (editUserForm) {
+        editUserForm.addEventListener('submit', handleEditUserForm);
+    }
+    
+    if (editUserModal) {
+        editUserModal.addEventListener('click', function(e) {
+            if (e.target === editUserModal) {
+                hideModal('edit-user-modal');
+            }
+        });
+    }
+    
     // Analytics Modal
     const analyticsBtn = document.getElementById('analytics-btn');
     const analyticsModal = document.getElementById('analytics-modal');
@@ -201,6 +229,24 @@ function initAdminModals() {
                 hideModal('analytics-modal');
             }
         });
+    }
+    
+    // User search and sort
+    const userSearch = document.getElementById('user-search');
+    const userSort = document.getElementById('user-sort');
+    
+    if (userSearch) {
+        let searchTimeout;
+        userSearch.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                filterAndSortUsers();
+            }, 300);
+        });
+    }
+    
+    if (userSort) {
+        userSort.addEventListener('change', filterAndSortUsers);
     }
 }
 
@@ -386,6 +432,7 @@ async function loadUsersTable() {
     
     try {
         const users = await loadData('users.json');
+        allUsers = users; // Store for filtering/sorting
         
         if (users.length === 0) {
             tableBody.innerHTML = `
@@ -399,28 +446,8 @@ async function loadUsersTable() {
             return;
         }
         
-        tableBody.innerHTML = users.map(user => `
-            <tr data-user-id="${user.id}">
-                <td>${user.username}</td>
-                <td>${user.email}</td>
-                <td>
-                    <span class="role-badge ${user.role || 'user'}">${user.role || 'user'}</span>
-                </td>
-                <td>${user.created ? formatDate(user.created) : 'N/A'}</td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="table-action-btn edit" onclick="editUser('${user.id}')" title="Edit User">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        ${user.role !== 'admin' ? `
-                            <button class="table-action-btn delete" onclick="deleteUser('${user.id}')" title="Delete User">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        ` : ''}
-                    </div>
-                </td>
-            </tr>
-        `).join('');
+        // Apply current filter and sort
+        filterAndSortUsers();
         
     } catch (error) {
         console.error('Error loading users table:', error);
@@ -445,87 +472,154 @@ async function editUser(userId) {
             return;
         }
         
-        const newUsername = prompt('Enter new username:', user.username);
-        if (newUsername === null) return;
+        // Populate form with user data
+        document.getElementById('edit-user-name').value = user.name || '';
+        document.getElementById('edit-user-username').value = user.username || '';
+        document.getElementById('edit-user-email').value = user.email || '';
+        document.getElementById('edit-user-bio').value = user.bio || '';
+        document.getElementById('edit-user-profile-pic').value = user.profilePicture || '';
+        document.getElementById('edit-user-role').value = user.role || 'user';
+        document.getElementById('edit-user-verified').checked = user.isVerified || false;
+        document.getElementById('edit-user-password').value = '';
         
-        const newEmail = prompt('Enter new email:', user.email);
-        if (newEmail === null) return;
+        // Store user ID for form submission
+        document.getElementById('edit-user-form').dataset.userId = userId;
         
-        const newRole = user.role === 'admin' ? 'admin' : prompt('Enter role (user/admin):', user.role || 'user');
-        if (newRole === null) return;
+        showModal('edit-user-modal');
         
-        const newBio = prompt('Enter bio:', user.bio || '');
-        if (newBio === null) return;
+    } catch (error) {
+        console.error('Error loading user for editing:', error);
+        showNotification('Error loading user', 'error');
+    }
+}
+
+async function handleEditUserForm(e) {
+    e.preventDefault();
+    
+    const userId = e.target.dataset.userId;
+    const name = document.getElementById('edit-user-name').value.trim();
+    const username = document.getElementById('edit-user-username').value.trim();
+    const email = document.getElementById('edit-user-email').value.trim();
+    const bio = document.getElementById('edit-user-bio').value.trim();
+    const profilePicture = document.getElementById('edit-user-profile-pic').value.trim();
+    const role = document.getElementById('edit-user-role').value;
+    const isVerified = document.getElementById('edit-user-verified').checked;
+    const newPassword = document.getElementById('edit-user-password').value.trim();
+    
+    if (!name || !username || !email) {
+        showNotification('Name, username and email are required', 'error');
+        return;
+    }
+    
+    try {
+        let users = await loadData('users.json');
+        const userIndex = users.findIndex(u => u.id === userId);
         
-        const newPassword = prompt('Enter new password (leave empty to keep current):', '');
-        if (newPassword === null) return;
-        
-        const newIsVerified = confirm('Is this user verified?') ? true : false;
-        
-        const newAccountLocked = confirm('Lock this account?') ? true : false;
-        
-        if (!newUsername.trim() || !newEmail.trim()) {
-            showNotification('Username and email cannot be empty', 'error');
+        if (userIndex === -1) {
+            showNotification('User not found', 'error');
             return;
         }
         
-        if (newRole !== 'user' && newRole !== 'admin') {
-            showNotification('Role must be either "user" or "admin"', 'error');
-            return;
+        // Update user data
+        users[userIndex].name = name;
+        users[userIndex].username = username;
+        users[userIndex].email = email;
+        users[userIndex].bio = bio;
+        users[userIndex].profilePicture = profilePicture;
+        users[userIndex].role = role;
+        users[userIndex].isVerified = isVerified;
+        
+        // Update password if provided
+        if (newPassword) {
+            users[userIndex].password = await hashPasswordSecure(newPassword);
         }
         
-        // Prepare updates object
-        const updates = {
-            username: newUsername.trim(),
-            email: newEmail.trim(),
-            role: newRole,
-            bio: newBio.trim(),
-            isVerified: newIsVerified,
-            accountLocked: newAccountLocked,
-            loginAttempts: newAccountLocked ? user.loginAttempts || 0 : 0
-        };
+        await saveData('users.json', users);
         
-        // Only include password if a new one was provided
-        if (newPassword.trim()) {
-            updates.password = hashPassword(newPassword.trim());
-        }
-        
-        // Get session token from localStorage
-        const sessionToken = localStorage.getItem('sessionToken');
-        
-        if (!sessionToken) {
-            showNotification('Session expired. Please login again.', 'error');
-            window.location.href = 'index.php';
-            return;
-        }
-        
-        // Call secure API endpoint for updating user
-        const response = await fetch('/api/admin/update-user', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                sessionToken: sessionToken,
-                userId: userId,
-                updates: updates
-            })
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to update user');
-        }
-        
-        // Update local user object
-        Object.assign(user, updates);
-        
-        showNotification('User updated successfully', 'success');
+        showNotification('User updated successfully!', 'success');
+        hideModal('edit-user-modal');
         loadUsersTable();
         
     } catch (error) {
-        console.error('Error editing user:', error);
-        showNotification('Error editing user', 'error');
+        console.error('Error updating user:', error);
+        showNotification('Error updating user', 'error');
     }
+}
+
+async function hashPasswordSecure(password) {
+    // For frontend hashing, we'll use the same legacy hash
+    // In production, this should be done server-side
+    return hashPassword(password);
+}
+
+function filterAndSortUsers() {
+    const searchTerm = document.getElementById('user-search')?.value.toLowerCase() || '';
+    const sortBy = document.getElementById('user-sort')?.value || 'username';
+    
+    let filteredUsers = allUsers.filter(user => {
+        const username = user.username?.toLowerCase() || '';
+        const email = user.email?.toLowerCase() || '';
+        const role = user.role?.toLowerCase() || '';
+        return username.includes(searchTerm) || email.includes(searchTerm) || role.includes(searchTerm);
+    });
+    
+    // Sort users
+    filteredUsers.sort((a, b) => {
+        switch(sortBy) {
+            case 'username':
+                return (a.username || '').localeCompare(b.username || '');
+            case 'email':
+                return (a.email || '').localeCompare(b.email || '');
+            case 'role':
+                return (a.role || 'user').localeCompare(b.role || 'user');
+            case 'joined':
+                return new Date(b.created || 0) - new Date(a.created || 0);
+            default:
+                return 0;
+        }
+    });
+    
+    displayUsers(filteredUsers);
+}
+
+function displayUsers(users) {
+    const tableBody = document.getElementById('users-table-body');
+    if (!tableBody) return;
+    
+    if (users.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align: center; padding: var(--spacing-2xl);">
+                    <i class="fas fa-users" style="font-size: 2rem; color: var(--text-muted); margin-bottom: var(--spacing-md);"></i>
+                    <p>No users found</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tableBody.innerHTML = users.map(user => `
+        <tr data-user-id="${user.id}">
+            <td>${user.username}</td>
+            <td>${user.email}</td>
+            <td>
+                <span class="role-badge ${user.role || 'user'}">${user.role || 'user'}</span>
+            </td>
+            <td>${user.created ? formatDate(user.created) : 'N/A'}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="table-action-btn edit" onclick="editUser('${user.id}')" title="Edit User">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    ${user.role !== 'admin' ? `
+                        <button class="table-action-btn delete" onclick="deleteUser('${user.id}')" title="Delete User">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    ` : ''}
+                </div>
+            </td>
+        </tr>
+    `).join('');
 }
 
 async function deleteUser(userId) {

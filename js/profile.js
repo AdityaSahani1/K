@@ -551,11 +551,29 @@ async function handleChangePassword(e) {
     }
     
     try {
-        // Note: Password verification and change should be done server-side for security
-        // This frontend-only approach is not secure for production
-        showNotification('Password change via profile is disabled. Please use password reset via email.', 'info');
-        clearPasswordForm();
-        hideModal('change-password-modal');
+        // Verify current password and change to new one via API
+        const response = await fetch('/api/auth-actions.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'change_password',
+                userId: currentUser.id,
+                currentPassword: currentPassword,
+                newPassword: newPassword
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showNotification('Password changed successfully!', 'success');
+            clearPasswordForm();
+            hideModal('change-password-modal');
+        } else {
+            showNotification(data.error || 'Failed to change password', 'error');
+        }
         
     } catch (error) {
         console.error('Error changing password:', error);

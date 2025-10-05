@@ -138,6 +138,23 @@ $showSearch = false;
             <span class="close" id="users-close">&times;</span>
             <h2>Manage Users</h2>
             
+            <!-- Search and Sort -->
+            <div class="section-header" style="margin-bottom: var(--spacing-lg);">
+                <div class="search-bar">
+                    <input type="text" id="user-search" placeholder="Search users...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="sort-controls">
+                    <label>Sort by:</label>
+                    <select id="user-sort">
+                        <option value="username">Username</option>
+                        <option value="email">Email</option>
+                        <option value="role">Role</option>
+                        <option value="joined">Joined Date</option>
+                    </select>
+                </div>
+            </div>
+            
             <div class="users-table">
                 <table>
                     <thead>
@@ -154,6 +171,57 @@ $showSearch = false;
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal" id="edit-user-modal">
+        <div class="modal-content">
+            <span class="close" id="edit-user-close">&times;</span>
+            <h2>Edit User</h2>
+            <form id="edit-user-form">
+                <div class="form-group">
+                    <label for="edit-user-name">Full Name</label>
+                    <input type="text" id="edit-user-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-username">Username</label>
+                    <input type="text" id="edit-user-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-email">Email</label>
+                    <input type="email" id="edit-user-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-bio">Bio</label>
+                    <textarea id="edit-user-bio" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-profile-pic">Profile Picture URL</label>
+                    <input type="url" id="edit-user-profile-pic">
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-role">Role</label>
+                    <select id="edit-user-role" required>
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="edit-user-verified">
+                        Email Verified
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-password">New Password (leave empty to keep current)</label>
+                    <input type="password" id="edit-user-password" minlength="6">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="cancel-edit-user">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                </div>
+            </form>
         </div>
     </div>
 

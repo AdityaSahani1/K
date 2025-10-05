@@ -52,3 +52,7 @@ env.txt
 .idea/
 *.sublime-project
 *.sublime-workspace
+
+# Replit
+!.replit
+!replit.nix
