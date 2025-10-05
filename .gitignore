@@ -41,6 +41,8 @@ wheels/
 # Data files (OTP, reset tokens - these are temporary)
 data/otp_*.json
 data/reset_*.json
+data/*.tmp
+data/*_temp.json
 
 # Environment variables
 .env

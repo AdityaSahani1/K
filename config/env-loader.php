@@ -18,11 +18,9 @@ function loadEnvFromFile($filePath) {
             $key = trim($key);
             $value = trim($value);
             
-            if (!getenv($key)) {
-                putenv("$key=$value");
-                $_ENV[$key] = $value;
-                $_SERVER[$key] = $value;
-            }
+            putenv("$key=$value");
+            $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
         }
     }
 }

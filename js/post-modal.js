@@ -238,7 +238,9 @@ async function loadPostComments(postId) {
 async function renderComments(comments) {
     const commentLikes = currentUser ? await loadData('comment-likes.json') : [];
     
-    return comments.map(comment => {
+    const parentComments = comments.filter(comment => !comment.replyTo);
+    
+    return parentComments.map(comment => {
         const isLiked = currentUser && commentLikes.some(like => like.commentId === comment.id && like.userId === currentUser.id);
         const likeCount = commentLikes.filter(like => like.commentId === comment.id).length;
         const replies = comments.filter(c => c.replyTo === comment.id);
@@ -294,7 +296,7 @@ async function renderComments(comments) {
                 ` : ''}
             </div>
         `;
-    }).filter(c => !comments.find(comment => comment.id === comments.find(co => co.id === c.match(/data-comment-id="([^"]+)"/)?.[1])?.replyTo)).join('');
+    }).join('');
 }
 
 // Toggle comment like
@@ -483,8 +485,9 @@ async function submitPostComment(postId) {
         
         showNotification('Comment posted!', 'success');
         
-        // Add comment to DOM without reloading
-        addCommentToDOM(newComment);
+        // Refresh comments display to show the new comment with all features
+        const updatedComments = await loadPostComments(postId);
+        document.getElementById('comments-list').innerHTML = await renderComments(updatedComments);
         updateModalCommentCount(postId);
         
     } catch (error) {
