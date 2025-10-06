@@ -1,5 +1,6 @@
 <?php
-// Server-side login endpoint with secure password verification
+require_once __DIR__ . '/../config/database.php';
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -26,101 +27,51 @@ if (empty($username) || empty($password)) {
     exit();
 }
 
-// Load users
-$usersFile = __DIR__ . '/../data/users.json';
-if (!file_exists($usersFile)) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Invalid username or password']);
-    exit();
-}
-
-$users = json_decode(file_get_contents($usersFile), true) ?? [];
-
-// Find user by username or email
-$user = null;
-foreach ($users as $u) {
-    if ($u['username'] === $username || $u['email'] === $username) {
-        $user = $u;
-        break;
-    }
-}
-
-if (!$user) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Invalid username or password']);
-    exit();
-}
-
-// Verify password
-$passwordValid = false;
-$needsUpgrade = false;
-
-// Check if password is already hashed with password_hash (starts with $2y$ for bcrypt)
-if (strpos($user['password'], '$2y$') === 0) {
-    // New secure hash - use password_verify
-    $passwordValid = password_verify($password, $user['password']);
-} else {
-    // Try legacy hash
-    $legacyHash = hashPasswordLegacy($password);
-    $passwordValid = ($user['password'] === $legacyHash);
+try {
+    $db = Database::getInstance();
     
-    // If legacy hash didn't match, try plain text (for backward compatibility)
-    if (!$passwordValid && $user['password'] === $password) {
-        $passwordValid = true;
+    $user = $db->fetchOne(
+        "SELECT * FROM users WHERE username = ? OR email = ? LIMIT 1",
+        [$username, $username]
+    );
+    
+    if (!$user) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Invalid username or password']);
+        exit();
     }
     
-    // If valid with legacy hash or plain text, upgrade to secure hash
-    if ($passwordValid) {
-        $needsUpgrade = true;
-        $user['password'] = password_hash($password, PASSWORD_BCRYPT);
-        // Update user in array
-        for ($i = 0; $i < count($users); $i++) {
-            if ($users[$i]['id'] === $user['id']) {
-                $users[$i]['password'] = $user['password'];
-                break;
-            }
-        }
-        // Save updated users
-        file_put_contents($usersFile, json_encode($users, JSON_PRETTY_PRINT));
+    if (!password_verify($password, $user['password'])) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Invalid username or password']);
+        exit();
     }
-}
-
-if (!$passwordValid) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Invalid username or password']);
-    exit();
-}
-
-// Generate session token
-$sessionToken = bin2hex(random_bytes(32));
-
-// Update last login
-$user['lastLogin'] = date('Y-m-d H:i:s');
-
-// Return success response
-echo json_encode([
-    'status' => 'success',
-    'message' => 'Login successful',
-    'sessionToken' => $sessionToken,
-    'user' => [
-        'id' => $user['id'],
-        'username' => $user['username'],
-        'email' => $user['email'],
-        'name' => $user['name'] ?? $user['username'],
-        'role' => $user['role'] ?? 'user',
-        'bio' => $user['bio'] ?? '',
-        'profilePicture' => $user['profilePicture'] ?? ''
-    ]
-]);
-
-// Legacy hash function for backward compatibility
-function hashPasswordLegacy($password) {
-    $hash = 0;
-    for ($i = 0; $i < strlen($password); $i++) {
-        $char = ord($password[$i]);
-        $hash = (($hash << 5) - $hash) + $char;
-        $hash = $hash & $hash;
-    }
-    return base_convert($hash, 10, 36);
+    
+    $sessionToken = bin2hex(random_bytes(32));
+    
+    $db->execute(
+        "UPDATE users SET lastLogin = datetime('now') WHERE id = ?",
+        [$user['id']]
+    );
+    
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Login successful',
+        'sessionToken' => $sessionToken,
+        'user' => [
+            'id' => $user['id'],
+            'username' => $user['username'],
+            'email' => $user['email'],
+            'name' => $user['name'] ?? $user['username'],
+            'role' => $user['role'] ?? 'user',
+            'bio' => $user['bio'] ?? '',
+            'profilePicture' => $user['profilePicture'] ?? ''
+        ]
+    ]);
+    
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Server error']);
+    error_log("Login error: " . $e->getMessage());
 }
 ?>

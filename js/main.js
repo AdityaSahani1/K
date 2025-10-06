@@ -695,27 +695,6 @@ function isElementInViewport(element) {
     );
 }
 
-// Add scroll progress indicator (optional enhancement)
-function addScrollProgressIndicator() {
-    // Create progress bar element
-    const progressBar = document.createElement('div');
-    progressBar.className = 'scroll-progress';
-    progressBar.innerHTML = '<div class="scroll-progress-bar"></div>';
-    document.body.appendChild(progressBar);
-    
-    // Update progress on scroll
-    window.addEventListener('scroll', function() {
-        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-        const scrolled = (winScroll / height) * 100;
-        
-        const progressBar = document.querySelector('.scroll-progress-bar');
-        if (progressBar) {
-            progressBar.style.width = scrolled + '%';
-        }
-    });
-}
-
 // Notifications
 function initNotifications() {
     if (!currentUser) return;

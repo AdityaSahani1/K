@@ -1,5 +1,7 @@
 <?php
-// Authentication actions (OTP, password reset, etc.)
+require_once __DIR__ . '/../config/database.php';
+require_once 'email-handler.php';
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -16,8 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-require_once 'email-handler.php';
-
 $input = json_decode(file_get_contents('php://input'), true);
 $action = $input['action'] ?? '';
 
@@ -25,415 +25,343 @@ switch ($action) {
     case 'send_otp':
         sendOTPForVerification($input);
         break;
-        
     case 'verify_otp':
         verifyOTP($input);
         break;
-        
     case 'resend_otp':
         resendOTP($input);
         break;
-        
     case 'forgot_password':
         handleForgotPassword($input);
         break;
-        
     case 'reset_password':
         handlePasswordReset($input);
         break;
-        
     case 'change_password':
         handleChangePassword($input);
         break;
-        
     default:
         http_response_code(400);
         echo json_encode(['error' => 'Invalid action']);
         break;
 }
 
-function loadUsers() {
-    $usersFile = __DIR__ . '/../data/users.json';
-    if (!file_exists($usersFile)) {
-        return [];
-    }
-    return json_decode(file_get_contents($usersFile), true) ?? [];
-}
-
-function saveUsers($users) {
-    $dataDir = __DIR__ . '/../data';
-    $usersFile = $dataDir . '/users.json';
-    
-    if (!file_exists($dataDir)) {
-        if (!mkdir($dataDir, 0755, true)) {
-            error_log("Failed to create data directory: $dataDir");
-            return false;
-        }
-    }
-    
-    $result = file_put_contents($usersFile, json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
-    
-    if ($result === false) {
-        error_log("Failed to save users file: $usersFile");
-        return false;
-    }
-    
-    return true;
-}
-
 function sendOTPForVerification($data) {
-    $email = $data['email'] ?? '';
-    $name = $data['name'] ?? '';
-    
-    if (empty($email) || empty($name)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Email and name are required']);
-        return;
-    }
-    
-    // Generate 6-digit OTP
-    $otp = sprintf('%06d', mt_rand(0, 999999));
-    
-    // Store OTP in user data (create temporary user entry if registering)
-    $users = loadUsers();
-    $userIndex = -1;
-    
-    foreach ($users as $index => $user) {
-        if ($user['email'] === $email) {
-            $userIndex = $index;
-            break;
-        }
-    }
-    
-    if ($userIndex !== -1) {
-        // User exists, update OTP data
-        $users[$userIndex]['otpToken'] = $otp;
-        $users[$userIndex]['otpExpires'] = time() + 600; // 10 minutes
-        $users[$userIndex]['otpCreated'] = time();
-    } else {
-        // New registration, store complete user data with OTP
-        $userData = $data['userData'] ?? null;
+    try {
+        $email = $data['email'] ?? '';
+        $name = $data['name'] ?? '';
         
-        if ($userData) {
-            // Complete user data provided (from registration)
-            $tempUser = $userData;
-            $tempUser['otpToken'] = $otp;
-            $tempUser['otpExpires'] = time() + 600;
-            $tempUser['otpCreated'] = time();
-            $tempUser['isTemporary'] = true;
-        } else {
-            // Just email/name provided (for resend or other purposes)
-            $tempUser = [
-                'email' => $email,
-                'name' => $name,
-                'otpToken' => $otp,
-                'otpExpires' => time() + 600,
-                'otpCreated' => time(),
-                'isTemporary' => true
-            ];
+        if (empty($email) || empty($name)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Email and name are required']);
+            return;
         }
-        $users[] = $tempUser;
-    }
-    
-    if (!saveUsers($users)) {
+        
+        $otp = sprintf('%06d', mt_rand(0, 999999));
+        $db = Database::getInstance();
+        $conn = $db->getConnection();
+        
+        // Check if user exists
+        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $stmt->close();
+        
+        $otpExpires = date('Y-m-d H:i:s', time() + 600);
+        $otpCreated = date('Y-m-d H:i:s');
+        
+        if ($user) {
+            // Update existing user
+            $stmt = $conn->prepare("UPDATE users SET otpToken = ?, otpExpires = ?, otpCreated = ? WHERE email = ?");
+            $stmt->bind_param("ssss", $otp, $otpExpires, $otpCreated, $email);
+            $stmt->execute();
+            $stmt->close();
+        } else {
+            // New registration - insert user with OTP
+            $userData = $data['userData'] ?? null;
+            if ($userData) {
+                $stmt = $conn->prepare("INSERT INTO users (id, name, username, email, password, role, created, bio, isVerified, otpToken, otpExpires, otpCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)");
+                $stmt->bind_param("sssssssssss",
+                    $userData['id'],
+                    $userData['name'],
+                    $userData['username'],
+                    $userData['email'],
+                    $userData['password'],
+                    $userData['role'],
+                    $userData['created'],
+                    $userData['bio'],
+                    $otp,
+                    $otpExpires,
+                    $otpCreated
+                );
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
+        
+        // Send email
+        $emailHandler = new EmailHandler();
+        $emailSent = $emailHandler->sendOTPEmail($email, $name, $otp);
+        
+        if ($emailSent) {
+            echo json_encode(['status' => 'success', 'message' => 'OTP sent successfully']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to send OTP email. Please check SMTP configuration.']);
+        }
+    } catch (Exception $e) {
         http_response_code(500);
-        echo json_encode(['error' => 'Failed to save user data. Please check file permissions.']);
-        return;
-    }
-    
-    // Send email
-    $emailHandler = new EmailHandler();
-    $emailSent = $emailHandler->sendOTPEmail($email, $name, $otp);
-    
-    if ($emailSent) {
-        echo json_encode(['status' => 'success', 'message' => 'OTP sent successfully']);
-    } else {
-        http_response_code(500);
-        echo json_encode(['error' => 'Failed to send OTP email. Please check SMTP configuration.']);
+        echo json_encode(['error' => 'Server error']);
+        error_log("Send OTP error: " . $e->getMessage());
     }
 }
 
 function verifyOTP($data) {
-    $email = $data['email'] ?? '';
-    $otp = $data['otp'] ?? '';
-    
-    if (empty($email) || empty($otp)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Email and OTP are required']);
-        return;
-    }
-    
-    $users = loadUsers();
-    $userIndex = -1;
-    
-    foreach ($users as $index => $user) {
-        if ($user['email'] === $email) {
-            $userIndex = $index;
-            break;
-        }
-    }
-    
-    if ($userIndex === -1 || !isset($users[$userIndex]['otpToken'])) {
-        http_response_code(400);
-        echo json_encode(['error' => 'OTP not found or expired']);
-        return;
-    }
-    
-    $user = $users[$userIndex];
-    
-    if ($user['otpExpires'] < time()) {
-        // Clear expired OTP
-        unset($users[$userIndex]['otpToken']);
-        unset($users[$userIndex]['otpExpires']);
-        unset($users[$userIndex]['otpCreated']);
-        saveUsers($users); // Best effort - OTP cleanup failure is non-critical
+    try {
+        $email = $data['email'] ?? '';
+        $otp = $data['otp'] ?? '';
         
-        http_response_code(400);
-        echo json_encode(['error' => 'OTP has expired']);
-        return;
-    }
-    
-    if ($user['otpToken'] !== $otp) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Invalid OTP']);
-        return;
-    }
-    
-    // OTP verified successfully - complete registration if temporary
-    unset($users[$userIndex]['otpToken']);
-    unset($users[$userIndex]['otpExpires']);
-    unset($users[$userIndex]['otpCreated']);
-    
-    if (isset($users[$userIndex]['isTemporary']) && $users[$userIndex]['isTemporary']) {
-        // This is a new registration, finalize it
-        unset($users[$userIndex]['isTemporary']);
-        $users[$userIndex]['isVerified'] = true;
-    } else {
-        // Existing user verifying email
-        $users[$userIndex]['isVerified'] = true;
-    }
-    
-    if (!saveUsers($users)) {
+        if (empty($email) || empty($otp)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Email and OTP are required']);
+            return;
+        }
+        
+        $db = Database::getInstance();
+        $conn = $db->getConnection();
+        
+        $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? LIMIT 1");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $stmt->close();
+        
+        if (!$user || !$user['otpToken']) {
+            http_response_code(400);
+            echo json_encode(['error' => 'OTP not found or expired']);
+            return;
+        }
+        
+        if (strtotime($user['otpExpires']) < time()) {
+            http_response_code(400);
+            echo json_encode(['error' => 'OTP has expired']);
+            return;
+        }
+        
+        if ($user['otpToken'] !== $otp) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid OTP']);
+            return;
+        }
+        
+        // OTP verified - clear OTP and set verified
+        $stmt = $conn->prepare("UPDATE users SET otpToken = NULL, otpExpires = NULL, otpCreated = NULL, isVerified = 1 WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $stmt->close();
+        
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Email verified successfully',
+            'verified' => true
+        ]);
+    } catch (Exception $e) {
         http_response_code(500);
-        echo json_encode(['error' => 'Failed to save verification. Please check file permissions.']);
-        return;
+        echo json_encode(['error' => 'Server error']);
+        error_log("Verify OTP error: " . $e->getMessage());
     }
-    
-    echo json_encode([
-        'status' => 'success', 
-        'message' => 'Email verified successfully',
-        'verified' => true
-    ]);
 }
 
 function resendOTP($data) {
-    $email = $data['email'] ?? '';
-    $name = $data['name'] ?? '';
-    
-    if (empty($email) || empty($name)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Email and name are required']);
-        return;
-    }
-    
-    // Check if there's an existing OTP less than 1 minute old (rate limiting)
-    $users = loadUsers();
-    foreach ($users as $user) {
-        if ($user['email'] === $email && isset($user['otpCreated'])) {
-            if ($user['otpCreated'] > (time() - 60)) {
+    try {
+        $email = $data['email'] ?? '';
+        $name = $data['name'] ?? '';
+        
+        if (empty($email) || empty($name)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Email and name are required']);
+            return;
+        }
+        
+        $db = Database::getInstance();
+        $conn = $db->getConnection();
+        
+        // Check rate limiting
+        $stmt = $conn->prepare("SELECT otpCreated FROM users WHERE email = ? LIMIT 1");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $stmt->close();
+        
+        if ($user && $user['otpCreated']) {
+            $otpAge = time() - strtotime($user['otpCreated']);
+            if ($otpAge < 60) {
                 http_response_code(429);
                 echo json_encode(['error' => 'Please wait at least 1 minute before requesting a new OTP']);
                 return;
             }
         }
+        
+        sendOTPForVerification($data);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Server error']);
+        error_log("Resend OTP error: " . $e->getMessage());
     }
-    
-    // Send new OTP
-    sendOTPForVerification($data);
 }
 
 function handleForgotPassword($data) {
-    $email = $data['email'] ?? '';
-    
-    if (empty($email)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Email is required']);
-        return;
-    }
-    
-    $users = loadUsers();
-    $userIndex = -1;
-    
-    foreach ($users as $index => $user) {
-        if ($user['email'] === $email) {
-            $userIndex = $index;
-            break;
+    try {
+        $email = $data['email'] ?? '';
+        
+        if (empty($email)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Email is required']);
+            return;
         }
-    }
-    
-    if ($userIndex === -1) {
-        http_response_code(404);
-        echo json_encode(['error' => 'User not found']);
-        return;
-    }
-    
-    $user = $users[$userIndex];
-    
-    // Generate reset token
-    $resetToken = bin2hex(random_bytes(32));
-    
-    // Store reset token in user data
-    $users[$userIndex]['passwordResetToken'] = $resetToken;
-    $users[$userIndex]['passwordResetExpires'] = time() + 3600; // 1 hour
-    
-    if (!saveUsers($users)) {
+        
+        $db = Database::getInstance();
+        $conn = $db->getConnection();
+        
+        $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? LIMIT 1");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $stmt->close();
+        
+        if (!$user) {
+            http_response_code(404);
+            echo json_encode(['error' => 'User not found']);
+            return;
+        }
+        
+        $resetToken = bin2hex(random_bytes(32));
+        $resetExpires = date('Y-m-d H:i:s', time() + 3600);
+        
+        $stmt = $conn->prepare("UPDATE users SET passwordResetToken = ?, passwordResetExpires = ? WHERE email = ?");
+        $stmt->bind_param("sss", $resetToken, $resetExpires, $email);
+        $stmt->execute();
+        $stmt->close();
+        
+        $emailHandler = new EmailHandler();
+        $emailSent = $emailHandler->sendPasswordResetEmail($email, $user['name'] ?? $user['username'], $resetToken);
+        
+        if ($emailSent) {
+            echo json_encode(['status' => 'success', 'message' => 'Password reset link sent to your email']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to send password reset email. Please check SMTP configuration.']);
+        }
+    } catch (Exception $e) {
         http_response_code(500);
-        echo json_encode(['error' => 'Failed to save reset token. Please check file permissions.']);
-        return;
-    }
-    
-    // Send password reset email
-    $emailHandler = new EmailHandler();
-    $emailSent = $emailHandler->sendPasswordResetEmail($email, $user['name'] ?? $user['username'], $resetToken);
-    
-    if ($emailSent) {
-        echo json_encode(['status' => 'success', 'message' => 'Password reset link sent to your email']);
-    } else {
-        http_response_code(500);
-        echo json_encode(['error' => 'Failed to send password reset email. Please check SMTP configuration.']);
+        echo json_encode(['error' => 'Server error']);
+        error_log("Forgot password error: " . $e->getMessage());
     }
 }
 
 function handlePasswordReset($data) {
-    $token = $data['token'] ?? '';
-    $newPassword = $data['password'] ?? '';
-    
-    if (empty($token) || empty($newPassword)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Token and new password are required']);
-        return;
-    }
-    
-    $users = loadUsers();
-    $userIndex = -1;
-    
-    // Find user with matching reset token
-    foreach ($users as $index => $user) {
-        if (isset($user['passwordResetToken']) && $user['passwordResetToken'] === $token) {
-            $userIndex = $index;
-            break;
-        }
-    }
-    
-    if ($userIndex === -1) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Invalid or expired reset token']);
-        return;
-    }
-    
-    $user = $users[$userIndex];
-    
-    if ($user['passwordResetExpires'] < time()) {
-        // Clear expired token
-        $users[$userIndex]['passwordResetToken'] = null;
-        $users[$userIndex]['passwordResetExpires'] = null;
-        saveUsers($users); // Best effort - token cleanup failure is non-critical
+    try {
+        $token = $data['token'] ?? '';
+        $newPassword = $data['password'] ?? '';
         
-        http_response_code(400);
-        echo json_encode(['error' => 'Reset token has expired']);
-        return;
-    }
-    
-    // Update user password
-    $users[$userIndex]['password'] = password_hash($newPassword, PASSWORD_BCRYPT);
-    $users[$userIndex]['passwordResetToken'] = null;
-    $users[$userIndex]['passwordResetExpires'] = null;
-    
-    if (!saveUsers($users)) {
+        if (empty($token) || empty($newPassword)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Token and new password are required']);
+            return;
+        }
+        
+        $db = Database::getInstance();
+        $conn = $db->getConnection();
+        
+        $stmt = $conn->prepare("SELECT * FROM users WHERE passwordResetToken = ? LIMIT 1");
+        $stmt->bind_param("s", $token);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $stmt->close();
+        
+        if (!$user) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid or expired reset token']);
+            return;
+        }
+        
+        if (strtotime($user['passwordResetExpires']) < time()) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Reset token has expired']);
+            return;
+        }
+        
+        $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+        $stmt = $conn->prepare("UPDATE users SET password = ?, passwordResetToken = NULL, passwordResetExpires = NULL WHERE passwordResetToken = ?");
+        $stmt->bind_param("ss", $hashedPassword, $token);
+        $stmt->execute();
+        $stmt->close();
+        
+        echo json_encode(['status' => 'success', 'message' => 'Password reset successfully']);
+    } catch (Exception $e) {
         http_response_code(500);
-        echo json_encode(['error' => 'Failed to save new password. Please check file permissions.']);
-        return;
+        echo json_encode(['error' => 'Server error']);
+        error_log("Password reset error: " . $e->getMessage());
     }
-    
-    echo json_encode(['status' => 'success', 'message' => 'Password reset successfully']);
 }
 
 function handleChangePassword($data) {
-    $userId = $data['userId'] ?? '';
-    $currentPassword = $data['currentPassword'] ?? '';
-    $newPassword = $data['newPassword'] ?? '';
-    
-    if (empty($userId) || empty($currentPassword) || empty($newPassword)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'All fields are required']);
-        return;
-    }
-    
-    if (strlen($newPassword) < 6) {
-        http_response_code(400);
-        echo json_encode(['error' => 'New password must be at least 6 characters long']);
-        return;
-    }
-    
-    $users = loadUsers();
-    $userIndex = -1;
-    
-    foreach ($users as $index => $user) {
-        if ($user['id'] === $userId) {
-            $userIndex = $index;
-            break;
-        }
-    }
-    
-    if ($userIndex === -1) {
-        http_response_code(404);
-        echo json_encode(['error' => 'User not found']);
-        return;
-    }
-    
-    $user = $users[$userIndex];
-    
-    // Verify current password
-    $passwordValid = false;
-    
-    if (strpos($user['password'], '$2y$') === 0) {
-        // Password is hashed with bcrypt
-        $passwordValid = password_verify($currentPassword, $user['password']);
-    } else {
-        // Legacy password - try legacy hash first
-        $legacyHash = hashPasswordLegacy($currentPassword);
-        $passwordValid = ($user['password'] === $legacyHash);
+    try {
+        $userId = $data['userId'] ?? '';
+        $currentPassword = $data['currentPassword'] ?? '';
+        $newPassword = $data['newPassword'] ?? '';
         
-        if (!$passwordValid && $user['password'] === $currentPassword) {
-            $passwordValid = true;
+        if (empty($userId) || empty($currentPassword) || empty($newPassword)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'All fields are required']);
+            return;
         }
-    }
-    
-    if (!$passwordValid) {
-        http_response_code(401);
-        echo json_encode(['error' => 'Current password is incorrect']);
-        return;
-    }
-    
-    // Update password with new secure hash
-    $users[$userIndex]['password'] = password_hash($newPassword, PASSWORD_BCRYPT);
-    
-    if (!saveUsers($users)) {
+        
+        if (strlen($newPassword) < 6) {
+            http_response_code(400);
+            echo json_encode(['error' => 'New password must be at least 6 characters long']);
+            return;
+        }
+        
+        $db = Database::getInstance();
+        $conn = $db->getConnection();
+        
+        $stmt = $conn->prepare("SELECT password FROM users WHERE id = ? LIMIT 1");
+        $stmt->bind_param("s", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $stmt->close();
+        
+        if (!$user) {
+            http_response_code(404);
+            echo json_encode(['error' => 'User not found']);
+            return;
+        }
+        
+        if (!password_verify($currentPassword, $user['password'])) {
+            http_response_code(401);
+            echo json_encode(['error' => 'Current password is incorrect']);
+            return;
+        }
+        
+        $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+        $stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
+        $stmt->bind_param("ss", $hashedPassword, $userId);
+        $stmt->execute();
+        $stmt->close();
+        
+        echo json_encode(['status' => 'success', 'message' => 'Password changed successfully']);
+    } catch (Exception $e) {
         http_response_code(500);
-        echo json_encode(['error' => 'Failed to save new password. Please check file permissions.']);
-        return;
+        echo json_encode(['error' => 'Server error']);
+        error_log("Change password error: " . $e->getMessage());
     }
-    
-    echo json_encode(['status' => 'success', 'message' => 'Password changed successfully']);
-}
-
-function hashPasswordLegacy($password) {
-    $hash = 0;
-    for ($i = 0; $i < strlen($password); $i++) {
-        $char = ord($password[$i]);
-        $hash = (($hash << 5) - $hash) + $char;
-        $hash = $hash & $hash;
-    }
-    return base_convert($hash, 10, 36);
 }
 ?>

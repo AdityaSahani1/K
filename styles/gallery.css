@@ -1013,11 +1013,6 @@
     transition: transform var(--transition-slow);
 }
 
-/* Image zoom on hover removed */
-/* .gallery-post-card:hover .gallery-post-image img {
-    transform: scale(1.1);
-} */
-
 /* Gallery Post Info Section - Below the card */
 .gallery-post-info {
     padding: var(--spacing-sm) 0;

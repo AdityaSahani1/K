@@ -1,5 +1,7 @@
 <?php
-// Contact form handler
+require_once __DIR__ . '/../config/database.php';
+require_once 'email-handler.php';
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -15,8 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['error' => 'Method not allowed']);
     exit();
 }
-
-require_once 'email-handler.php';
 
 $input = json_decode(file_get_contents('php://input'), true);
 
@@ -56,55 +56,35 @@ if (strlen($message) < 10 || strlen($message) > 2000) {
     exit();
 }
 
-// Send contact email
-$emailHandler = new EmailHandler();
-$emailSent = $emailHandler->sendContactEmail($name, $email, $subject, $message);
-
-if ($emailSent) {
-    // Save contact message to data file for admin review
-    $contactMessage = [
-        'id' => uniqid(),
-        'name' => $name,
-        'email' => $email,
-        'subject' => $subject,
-        'message' => $message,
-        'created' => date('Y-m-d H:i:s'),
-        'status' => 'new'
-    ];
+try {
+    // Send contact email
+    $emailHandler = new EmailHandler();
+    $emailSent = $emailHandler->sendContactEmail($name, $email, $subject, $message);
     
-    $dataDir = __DIR__ . '/../data';
-    $contactsFile = $dataDir . '/contacts.json';
-    
-    if (!file_exists($dataDir)) {
-        if (!mkdir($dataDir, 0755, true)) {
-            error_log("Failed to create data directory: $dataDir");
-            http_response_code(500);
-            echo json_encode(['error' => 'Failed to save contact message. Please contact administrator.']);
-            return;
-        }
-    }
-    
-    $contacts = [];
-    if (file_exists($contactsFile)) {
-        $contacts = json_decode(file_get_contents($contactsFile), true) ?? [];
-    }
-    
-    $contacts[] = $contactMessage;
-    $result = file_put_contents($contactsFile, json_encode($contacts, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
-    
-    if ($result === false) {
-        error_log("Failed to save contact message to file: $contactsFile");
+    if ($emailSent) {
+        // Save contact message to database
+        $db = Database::getInstance();
+        $conn = $db->getConnection();
+        
+        $created = date('Y-m-d H:i:s');
+        $status = 'unread';
+        
+        $stmt = $conn->prepare("INSERT INTO contacts (name, email, subject, message, created, status) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssss", $name, $email, $subject, $message, $created, $status);
+        $stmt->execute();
+        $stmt->close();
+        
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Thank you for your message! We will get back to you soon.'
+        ]);
+    } else {
         http_response_code(500);
-        echo json_encode(['error' => 'Failed to save contact message. Please check file permissions.']);
-        return;
+        echo json_encode(['error' => 'Failed to send message. Please check SMTP configuration.']);
     }
-    
-    echo json_encode([
-        'status' => 'success', 
-        'message' => 'Thank you for your message! We will get back to you soon.'
-    ]);
-} else {
+} catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'Failed to send message. Please check SMTP configuration.']);
+    echo json_encode(['error' => 'Server error']);
+    error_log("Contact form error: " . $e->getMessage());
 }
 ?>

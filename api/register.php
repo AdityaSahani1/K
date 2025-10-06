@@ -1,5 +1,6 @@
 <?php
-// Server-side registration endpoint with secure password hashing
+require_once __DIR__ . '/../config/database.php';
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -22,7 +23,6 @@ $username = trim($input['username'] ?? '');
 $email = trim($input['email'] ?? '');
 $password = $input['password'] ?? '';
 
-// Validation
 if (empty($name) || empty($username) || empty($email) || empty($password)) {
     http_response_code(400);
     echo json_encode(['error' => 'All fields are required']);
@@ -47,44 +47,45 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit();
 }
 
-// Load existing users
-$usersFile = __DIR__ . '/../data/users.json';
-$users = [];
-if (file_exists($usersFile)) {
-    $users = json_decode(file_get_contents($usersFile), true) ?? [];
-}
-
-// Check for duplicates
-foreach ($users as $user) {
-    if ($user['username'] === $username) {
+try {
+    $db = Database::getInstance();
+    
+    $existing = $db->fetchOne(
+        "SELECT id FROM users WHERE username = ? OR email = ? LIMIT 1",
+        [$username, $email]
+    );
+    
+    if ($existing) {
         http_response_code(400);
-        echo json_encode(['error' => 'Username already exists']);
+        echo json_encode(['error' => 'Username or email already exists']);
         exit();
     }
-    if ($user['email'] === $email) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Email already registered']);
-        exit();
-    }
+    
+    $userId = uniqid('user_');
+    $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+    $created = date('Y-m-d H:i:s');
+    
+    $newUser = [
+        'id' => $userId,
+        'name' => $name,
+        'username' => $username,
+        'email' => $email,
+        'password' => $hashedPassword,
+        'role' => 'user',
+        'created' => $created,
+        'bio' => '',
+        'isVerified' => false
+    ];
+    
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'User created, pending email verification',
+        'user' => $newUser
+    ]);
+    
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Server error']);
+    error_log("Register error: " . $e->getMessage());
 }
-
-// Create new user with secure password hash
-$newUser = [
-    'id' => uniqid('user_'),
-    'name' => $name,
-    'username' => $username,
-    'email' => $email,
-    'password' => password_hash($password, PASSWORD_BCRYPT),
-    'role' => 'user',
-    'created' => date('Y-m-d H:i:s'),
-    'bio' => '',
-    'isVerified' => false
-];
-
-// Return user data for OTP verification (don't save yet)
-echo json_encode([
-    'status' => 'success',
-    'message' => 'User created, pending email verification',
-    'user' => $newUser
-]);
 ?>

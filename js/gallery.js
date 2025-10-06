@@ -593,62 +593,6 @@ function addPostMenuListeners() {
         });
     });
     
-    // Old menu button listeners (for backwards compatibility)
-    document.querySelectorAll('.menu-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const postId = this.dataset.postId;
-            const dropdown = document.getElementById(`menu-${postId}`);
-            
-            // Close all other dropdowns
-            document.querySelectorAll('.menu-dropdown').forEach(menu => {
-                if (menu.id !== `menu-${postId}`) {
-                    menu.classList.remove('show');
-                }
-            });
-            
-            // Toggle current dropdown
-            dropdown.classList.toggle('show');
-        });
-    });
-    
-    // Menu item listeners
-    document.querySelectorAll('.menu-item').forEach(item => {
-        item.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const postId = this.dataset.postId;
-            const action = this.classList[1]; // Get the action class
-            
-            // Close dropdown
-            document.getElementById(`menu-${postId}`).classList.remove('show');
-            
-            // Handle action
-            switch (action) {
-                case 'share-whatsapp':
-                    sharePost(postId, 'whatsapp');
-                    break;
-                case 'share-instagram':
-                    sharePost(postId, 'instagram');
-                    break;
-                case 'share-copy':
-                    sharePost(postId, 'copy');
-                    break;
-                case 'share-native':
-                    sharePost(postId, 'share');
-                    break;
-                case 'download-post':
-                    downloadPost(postId);
-                    break;
-                case 'view-comments':
-                    openPostModal(postId);
-                    break;
-            }
-        });
-    });
     
     // Close menus when clicking outside
     document.addEventListener('click', function(e) {

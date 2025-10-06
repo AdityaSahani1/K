@@ -548,22 +548,7 @@ main {
     }
 }
 
-.close {
-    position: absolute;
-    top: var(--spacing-lg);
-    right: var(--spacing-lg);
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: color var(--transition-fast);
-}
-
-.close:hover {
-    color: var(--accent-danger);
-}
-
-/* Modern Modal Close Button */
+/* Modal Close Button */
 .modal-close-btn {
     position: absolute;
     top: var(--spacing-lg);
