@@ -100,28 +100,21 @@ async function loadAnalytics() {
     if (!viewsEl) return; // Modal not open yet, skip analytics update
     
     try {
-        // Use consistent data loading
+        // Load data from API
         const posts = await loadData('posts.json');
-        const users = await loadData('users.json');
-        const likes = await loadData('likes.json');
-        const comments = await loadData('comments.json');
-        const saves = await loadData('saves.json');
         
-        // Calculate totals
+        // Calculate totals from posts data (database already has these counts)
         const totalViews = posts.reduce((sum, post) => sum + (post.views || 0), 0);
         const totalLikes = posts.reduce((sum, post) => sum + (post.likes || 0), 0);
-        const totalComments = comments.length;
-        const totalSaves = saves.length;
+        const totalComments = posts.reduce((sum, post) => sum + (post.comments || 0), 0);
         
         // Update analytics display
         const likesEl = document.getElementById('total-likes');
         const commentsEl = document.getElementById('total-comments');
-        const savesEl = document.getElementById('total-saves');
         
         if (viewsEl) viewsEl.textContent = totalViews;
         if (likesEl) likesEl.textContent = totalLikes;
         if (commentsEl) commentsEl.textContent = totalComments;
-        if (savesEl) savesEl.textContent = totalSaves;
         
     } catch (error) {
         console.error('Error loading analytics:', error);
@@ -325,22 +318,17 @@ async function deletePost(postId) {
     }
     
     try {
-        let posts = await loadData('posts.json');
-        posts = posts.filter(post => post.id !== postId);
-        await saveData('posts.json', posts);
+        const response = await fetch('/api/posts.php', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: postId })
+        });
         
-        // Also remove related likes, comments, saves
-        let likes = await loadData('likes.json');
-        likes = likes.filter(like => like.postId !== postId);
-        await saveData('likes.json', likes);
-        
-        let comments = await loadData('comments.json');
-        comments = comments.filter(comment => comment.postId !== postId);
-        await saveData('comments.json', comments);
-        
-        let saves = await loadData('saves.json');
-        saves = saves.filter(save => save.postId !== postId);
-        await saveData('saves.json', saves);
+        if (!response.ok) {
+            throw new Error('Failed to delete post');
+        }
         
         showNotification('Post deleted successfully', 'success');
         loadPostsTable();
@@ -374,8 +362,6 @@ async function handlePostForm(e) {
     }
     
     try {
-        let posts = await loadData('posts.json');
-        
         const postData = {
             title,
             category,
@@ -383,34 +369,32 @@ async function handlePostForm(e) {
             description,
             tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
             downloadUrl: downloadUrl || null,
-            featured,
+            featured: featured ? 1 : 0,
             author: currentUser.username
         };
         
+        let method = 'POST';
+        
         if (mode === 'add') {
-            // Add new post
-            postData.id = generateId();
-            postData.created = new Date().toISOString();
-            postData.likes = 0;
-            postData.comments = 0;
-            postData.views = 0;
-            
-            posts.push(postData);
-            showNotification('Post created successfully!', 'success');
-            
+            postData.id = 'post_' + Date.now();
         } else if (mode === 'edit') {
-            // Edit existing post
-            const postIndex = posts.findIndex(p => p.id === postId);
-            if (postIndex !== -1) {
-                posts[postIndex] = { ...posts[postIndex], ...postData };
-                showNotification('Post updated successfully!', 'success');
-            } else {
-                throw new Error('Post not found');
-            }
+            postData.id = postId;
+            method = 'PUT';
         }
         
-        // Save data consistently
-        await saveData('posts.json', posts);
+        const response = await fetch('/api/posts.php', {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(postData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to save post');
+        }
+        
+        showNotification(mode === 'add' ? 'Post created successfully!' : 'Post updated successfully!', 'success');
         
         hideModal('post-form-modal');
         loadPostsTable();
@@ -512,29 +496,32 @@ async function handleEditUserForm(e) {
     }
     
     try {
-        let users = await loadData('users.json');
-        const userIndex = users.findIndex(u => u.id === userId);
+        const userData = {
+            id: userId,
+            name,
+            username,
+            email,
+            bio,
+            profilePicture,
+            role,
+            isVerified
+        };
         
-        if (userIndex === -1) {
-            showNotification('User not found', 'error');
-            return;
-        }
-        
-        // Update user data
-        users[userIndex].name = name;
-        users[userIndex].username = username;
-        users[userIndex].email = email;
-        users[userIndex].bio = bio;
-        users[userIndex].profilePicture = profilePicture;
-        users[userIndex].role = role;
-        users[userIndex].isVerified = isVerified;
-        
-        // Update password if provided
         if (newPassword) {
-            users[userIndex].password = await hashPasswordSecure(newPassword);
+            userData.password = newPassword;
         }
         
-        await saveData('users.json', users);
+        const response = await fetch('/api/get-users.php', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to update user');
+        }
         
         showNotification('User updated successfully!', 'success');
         hideModal('edit-user-modal');
@@ -628,28 +615,25 @@ async function deleteUser(userId) {
     }
     
     try {
-        let users = await loadData('users.json');
-        const userToDelete = users.find(u => u.id === userId);
+        const response = await fetch('/api/get-users.php', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: userId })
+        });
         
-        if (!userToDelete) {
-            showNotification('User not found', 'error');
-            return;
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to delete user');
         }
-        
-        if (userToDelete.role === 'admin') {
-            showNotification('Cannot delete admin users', 'error');
-            return;
-        }
-        
-        users = users.filter(user => user.id !== userId);
-        await saveData('users.json', users);
         
         showNotification('User deleted successfully', 'success');
         loadUsersTable();
         
     } catch (error) {
         console.error('Error deleting user:', error);
-        showNotification('Error deleting user', 'error');
+        showNotification(error.message || 'Error deleting user', 'error');
     }
 }
 

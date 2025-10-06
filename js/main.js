@@ -273,19 +273,24 @@ function generateId() {
 // Data Management
 async function loadData(filename) {
     try {
-        // Always load from server JSON files first (server is the source of truth)
-        // Use secure API endpoint for users.json to prevent exposure of sensitive data
-        if (filename === 'users.json') {
-            const response = await fetch('/api/get-users');
-            if (!response.ok) {
-                throw new Error(`Failed to load users`);
-            }
-            const jsonData = await response.json();
-            return jsonData;
+        let endpoint = '';
+        
+        // Map JSON files to API endpoints
+        switch(filename) {
+            case 'posts.json':
+                endpoint = '/api/posts.php';
+                break;
+            case 'users.json':
+                endpoint = '/api/get-users.php';
+                break;
+            default:
+                // For other files (likes, saves, comments, etc.), return empty array
+                // These are now handled by the database and fetched via post-actions API
+                console.warn(`${filename} is no longer supported. Data is now stored in database.`);
+                return [];
         }
         
-        // Load other data from JSON files
-        const response = await fetch(`data/${filename}`);
+        const response = await fetch(endpoint);
         if (!response.ok) {
             throw new Error(`Failed to load ${filename}`);
         }

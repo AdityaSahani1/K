@@ -58,35 +58,40 @@ function handleLike($conn, $input) {
         return;
     }
     
-    // Check if already liked
+    // Check if already liked (PDO)
     $stmt = $conn->prepare("SELECT id FROM likes WHERE postId = ? AND userId = ? LIMIT 1");
-    $stmt->bind_param("ss", $postId, $userId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $exists = $result->fetch_assoc();
-    $stmt->close();
+    $stmt->execute([$postId, $userId]);
+    $exists = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if ($exists) {
         // Unlike
         $stmt = $conn->prepare("DELETE FROM likes WHERE postId = ? AND userId = ?");
-        $stmt->bind_param("ss", $postId, $userId);
-        $stmt->execute();
-        $stmt->close();
+        $stmt->execute([$postId, $userId]);
         
-        $conn->query("UPDATE posts SET likes = likes - 1 WHERE id = '$postId'");
+        $stmt = $conn->prepare("UPDATE posts SET likes = likes - 1 WHERE id = ?");
+        $stmt->execute([$postId]);
         
-        echo json_encode(['status' => 'success', 'action' => 'unliked']);
+        // Get updated count
+        $stmt = $conn->prepare("SELECT likes FROM posts WHERE id = ?");
+        $stmt->execute([$postId]);
+        $post = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        echo json_encode(['status' => 'success', 'action' => 'unliked', 'likes' => (int)$post['likes']]);
     } else {
         // Like
         $created = date('Y-m-d H:i:s');
         $stmt = $conn->prepare("INSERT INTO likes (postId, userId, created) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $postId, $userId, $created);
-        $stmt->execute();
-        $stmt->close();
+        $stmt->execute([$postId, $userId, $created]);
         
-        $conn->query("UPDATE posts SET likes = likes + 1 WHERE id = '$postId'");
+        $stmt = $conn->prepare("UPDATE posts SET likes = likes + 1 WHERE id = ?");
+        $stmt->execute([$postId]);
         
-        echo json_encode(['status' => 'success', 'action' => 'liked']);
+        // Get updated count
+        $stmt = $conn->prepare("SELECT likes FROM posts WHERE id = ?");
+        $stmt->execute([$postId]);
+        $post = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        echo json_encode(['status' => 'success', 'action' => 'liked', 'likes' => (int)$post['likes']]);
     }
 }
 
@@ -100,29 +105,22 @@ function handleSave($conn, $input) {
         return;
     }
     
-    // Check if already saved
+    // Check if already saved (PDO)
     $stmt = $conn->prepare("SELECT id FROM saves WHERE postId = ? AND userId = ? LIMIT 1");
-    $stmt->bind_param("ss", $postId, $userId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $exists = $result->fetch_assoc();
-    $stmt->close();
+    $stmt->execute([$postId, $userId]);
+    $exists = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if ($exists) {
         // Unsave
         $stmt = $conn->prepare("DELETE FROM saves WHERE postId = ? AND userId = ?");
-        $stmt->bind_param("ss", $postId, $userId);
-        $stmt->execute();
-        $stmt->close();
+        $stmt->execute([$postId, $userId]);
         
         echo json_encode(['status' => 'success', 'action' => 'unsaved']);
     } else {
         // Save
         $created = date('Y-m-d H:i:s');
         $stmt = $conn->prepare("INSERT INTO saves (postId, userId, created) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $postId, $userId, $created);
-        $stmt->execute();
-        $stmt->close();
+        $stmt->execute([$postId, $userId, $created]);
         
         echo json_encode(['status' => 'success', 'action' => 'saved']);
     }
@@ -141,11 +139,10 @@ function handleView($conn, $input) {
     
     $created = date('Y-m-d H:i:s');
     $stmt = $conn->prepare("INSERT INTO views (postId, userId, ipAddress, created) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssss", $postId, $userId, $ipAddress, $created);
-    $stmt->execute();
-    $stmt->close();
+    $stmt->execute([$postId, $userId, $ipAddress, $created]);
     
-    $conn->query("UPDATE posts SET views = views + 1 WHERE id = '$postId'");
+    $stmt = $conn->prepare("UPDATE posts SET views = views + 1 WHERE id = ?");
+    $stmt->execute([$postId]);
     
     echo json_encode(['status' => 'success']);
 }
@@ -165,12 +162,16 @@ function handleComment($conn, $input) {
     $created = date('Y-m-d H:i:s');
     
     $stmt = $conn->prepare("INSERT INTO comments (id, postId, userId, text, created) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssss", $id, $postId, $userId, $text, $created);
-    $stmt->execute();
-    $stmt->close();
+    $stmt->execute([$id, $postId, $userId, $text, $created]);
     
-    $conn->query("UPDATE posts SET comments = comments + 1 WHERE id = '$postId'");
+    $stmt = $conn->prepare("UPDATE posts SET comments = comments + 1 WHERE id = ?");
+    $stmt->execute([$postId]);
     
-    echo json_encode(['status' => 'success', 'commentId' => $id]);
+    // Get updated count
+    $stmt = $conn->prepare("SELECT comments FROM posts WHERE id = ?");
+    $stmt->execute([$postId]);
+    $post = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    echo json_encode(['status' => 'success', 'commentId' => $id, 'comments' => (int)$post['comments']]);
 }
 ?>
