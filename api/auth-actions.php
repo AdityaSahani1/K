@@ -61,8 +61,24 @@ function loadUsers() {
 }
 
 function saveUsers($users) {
-    $usersFile = __DIR__ . '/../data/users.json';
-    file_put_contents($usersFile, json_encode($users, JSON_PRETTY_PRINT));
+    $dataDir = __DIR__ . '/../data';
+    $usersFile = $dataDir . '/users.json';
+    
+    if (!file_exists($dataDir)) {
+        if (!mkdir($dataDir, 0755, true)) {
+            error_log("Failed to create data directory: $dataDir");
+            return false;
+        }
+    }
+    
+    $result = file_put_contents($usersFile, json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+    
+    if ($result === false) {
+        error_log("Failed to save users file: $usersFile");
+        return false;
+    }
+    
+    return true;
 }
 
 function sendOTPForVerification($data) {
@@ -119,7 +135,11 @@ function sendOTPForVerification($data) {
         $users[] = $tempUser;
     }
     
-    saveUsers($users);
+    if (!saveUsers($users)) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to save user data. Please check file permissions.']);
+        return;
+    }
     
     // Send email
     $emailHandler = new EmailHandler();
@@ -129,7 +149,7 @@ function sendOTPForVerification($data) {
         echo json_encode(['status' => 'success', 'message' => 'OTP sent successfully']);
     } else {
         http_response_code(500);
-        echo json_encode(['error' => 'Failed to send OTP email']);
+        echo json_encode(['error' => 'Failed to send OTP email. Please check SMTP configuration.']);
     }
 }
 
@@ -166,7 +186,7 @@ function verifyOTP($data) {
         unset($users[$userIndex]['otpToken']);
         unset($users[$userIndex]['otpExpires']);
         unset($users[$userIndex]['otpCreated']);
-        saveUsers($users);
+        saveUsers($users); // Best effort - OTP cleanup failure is non-critical
         
         http_response_code(400);
         echo json_encode(['error' => 'OTP has expired']);
@@ -193,7 +213,11 @@ function verifyOTP($data) {
         $users[$userIndex]['isVerified'] = true;
     }
     
-    saveUsers($users);
+    if (!saveUsers($users)) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to save verification. Please check file permissions.']);
+        return;
+    }
     
     echo json_encode([
         'status' => 'success', 
@@ -262,7 +286,11 @@ function handleForgotPassword($data) {
     $users[$userIndex]['passwordResetToken'] = $resetToken;
     $users[$userIndex]['passwordResetExpires'] = time() + 3600; // 1 hour
     
-    saveUsers($users);
+    if (!saveUsers($users)) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to save reset token. Please check file permissions.']);
+        return;
+    }
     
     // Send password reset email
     $emailHandler = new EmailHandler();
@@ -272,7 +300,7 @@ function handleForgotPassword($data) {
         echo json_encode(['status' => 'success', 'message' => 'Password reset link sent to your email']);
     } else {
         http_response_code(500);
-        echo json_encode(['error' => 'Failed to send password reset email']);
+        echo json_encode(['error' => 'Failed to send password reset email. Please check SMTP configuration.']);
     }
 }
 
@@ -309,7 +337,7 @@ function handlePasswordReset($data) {
         // Clear expired token
         $users[$userIndex]['passwordResetToken'] = null;
         $users[$userIndex]['passwordResetExpires'] = null;
-        saveUsers($users);
+        saveUsers($users); // Best effort - token cleanup failure is non-critical
         
         http_response_code(400);
         echo json_encode(['error' => 'Reset token has expired']);
@@ -321,7 +349,11 @@ function handlePasswordReset($data) {
     $users[$userIndex]['passwordResetToken'] = null;
     $users[$userIndex]['passwordResetExpires'] = null;
     
-    saveUsers($users);
+    if (!saveUsers($users)) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to save new password. Please check file permissions.']);
+        return;
+    }
     
     echo json_encode(['status' => 'success', 'message' => 'Password reset successfully']);
 }
@@ -386,7 +418,11 @@ function handleChangePassword($data) {
     // Update password with new secure hash
     $users[$userIndex]['password'] = password_hash($newPassword, PASSWORD_BCRYPT);
     
-    saveUsers($users);
+    if (!saveUsers($users)) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to save new password. Please check file permissions.']);
+        return;
+    }
     
     echo json_encode(['status' => 'success', 'message' => 'Password changed successfully']);
 }

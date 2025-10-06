@@ -1,14 +1,20 @@
+# Apache configuration for SnapSera
 RewriteEngine On
 
-# Handle API routes
-RewriteRule ^api/save-data/?$ api/save-data.php [QSA,L]
+# Security: Block direct access to data directory
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
 
-# Serve static files
+# Security: Protect JSON data files from direct access
+RewriteRule ^data/.*\.json$ - [F,L]
+
+# Serve existing files (PHP, HTML, CSS, JS, images) directly
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
 
-# Default to index.html for all other requests
-RewriteRule ^ index.html [L]
+# Default directory index
+DirectoryIndex index.php index.html
 
 # Enable CORS
 <IfModule mod_headers.c>
@@ -18,8 +24,15 @@ RewriteRule ^ index.html [L]
 </IfModule>
 
 # Disable caching for dynamic content
-<FilesMatch "\.(html|js|css|json)$">
+<FilesMatch "\.(html|php|js|css)$">
     Header set Cache-Control "no-cache, no-store, must-revalidate"
     Header set Pragma "no-cache"
     Header set Expires "0"
 </FilesMatch>
+
+# Enable error logging (helpful for debugging)
+php_flag display_errors Off
+php_flag log_errors On
+
+# Disable directory browsing
+Options -Indexes

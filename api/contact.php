@@ -72,15 +72,32 @@ if ($emailSent) {
         'status' => 'new'
     ];
     
-    $contactsFile = __DIR__ . '/../data/contacts.json';
-    $contacts = [];
+    $dataDir = __DIR__ . '/../data';
+    $contactsFile = $dataDir . '/contacts.json';
     
+    if (!file_exists($dataDir)) {
+        if (!mkdir($dataDir, 0755, true)) {
+            error_log("Failed to create data directory: $dataDir");
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to save contact message. Please contact administrator.']);
+            return;
+        }
+    }
+    
+    $contacts = [];
     if (file_exists($contactsFile)) {
         $contacts = json_decode(file_get_contents($contactsFile), true) ?? [];
     }
     
     $contacts[] = $contactMessage;
-    file_put_contents($contactsFile, json_encode($contacts, JSON_PRETTY_PRINT));
+    $result = file_put_contents($contactsFile, json_encode($contacts, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+    
+    if ($result === false) {
+        error_log("Failed to save contact message to file: $contactsFile");
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to save contact message. Please check file permissions.']);
+        return;
+    }
     
     echo json_encode([
         'status' => 'success', 
@@ -88,6 +105,6 @@ if ($emailSent) {
     ]);
 } else {
     http_response_code(500);
-    echo json_encode(['error' => 'Failed to send message. Please try again later.']);
+    echo json_encode(['error' => 'Failed to send message. Please check SMTP configuration.']);
 }
 ?>
