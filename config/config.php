@@ -5,7 +5,6 @@
 return [
 
     'DB_TYPE' => 'mysql',
-
     
 
     'MYSQL_HOST' => 'sql106.infinityfree.com',
