@@ -47,6 +47,17 @@ try {
         exit();
     }
     
+    if (!$user['isVerified']) {
+        http_response_code(403);
+        echo json_encode([
+            'error' => 'Email not verified',
+            'needsVerification' => true,
+            'email' => $user['email'],
+            'userId' => $user['id']
+        ]);
+        exit();
+    }
+    
     $sessionToken = bin2hex(random_bytes(32));
     $lastLogin = date('Y-m-d H:i:s');
     

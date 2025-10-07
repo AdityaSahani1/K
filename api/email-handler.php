@@ -1,6 +1,18 @@
 <?php
-// Email Handler using PHPMailer (via Composer)
-require_once __DIR__ . '/../vendor/autoload.php';
+// Email Handler using PHPMailer (Composer or manual installation)
+
+// Try Composer autoload first (Replit), then manual includes (InfinityFree)
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    require_once __DIR__ . '/../vendor/autoload.php';
+} elseif (file_exists(__DIR__ . '/../phpmailer/src/PHPMailer.php')) {
+    // Manual PHPMailer installation (for InfinityFree or other hosts without Composer)
+    require_once __DIR__ . '/../phpmailer/src/PHPMailer.php';
+    require_once __DIR__ . '/../phpmailer/src/SMTP.php';
+    require_once __DIR__ . '/../phpmailer/src/Exception.php';
+} else {
+    die('PHPMailer not found. Please install via Composer or download manually from GitHub.');
+}
+
 require_once __DIR__ . '/../config/env-loader.php';
 
 use PHPMailer\PHPMailer\PHPMailer;

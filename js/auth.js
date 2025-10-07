@@ -193,6 +193,13 @@ async function handleLogin(e) {
             
             // Clear form
             document.getElementById('login-form-element').reset();
+        } else if (result.needsVerification) {
+            showNotification('Please verify your email before logging in', 'warning');
+            pendingUserData = {
+                email: result.email,
+                userId: result.userId
+            };
+            switchToOTPForm();
         } else {
             showNotification(result.error || 'Invalid username or password', 'error');
         }
@@ -222,8 +229,23 @@ async function handleRegister(e) {
         return;
     }
 
-    if (password.length < 6) {
-        showNotification('Password must be at least 6 characters long', 'error');
+    if (password.length < 8) {
+        showNotification('Password must be at least 8 characters long', 'error');
+        return;
+    }
+    
+    if (!/[A-Z]/.test(password)) {
+        showNotification('Password must contain at least one uppercase letter', 'error');
+        return;
+    }
+    
+    if (!/[a-z]/.test(password)) {
+        showNotification('Password must contain at least one lowercase letter', 'error');
+        return;
+    }
+    
+    if (!/[0-9]/.test(password)) {
+        showNotification('Password must contain at least one number', 'error');
         return;
     }
 
@@ -280,7 +302,18 @@ async function handleRegister(e) {
             showNotification('Please check your email for the OTP code', 'success');
             switchToOTPForm();
         } else {
-            showNotification(otpData.error || 'Failed to send OTP', 'error');
+            showNotification(otpData.error || 'Failed to send OTP. Registration cancelled.', 'error');
+            
+            await fetch(`/api/get-users.php`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: registerData.user.id
+                })
+            });
+            pendingUserData = null;
         }
         
     } catch (error) {

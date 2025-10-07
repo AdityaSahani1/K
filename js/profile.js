@@ -186,11 +186,27 @@ async function loadLikedPosts() {
     try {
         const userData = await getUserData(currentUser.id, 'all');
         const likes = userData.likes || [];
-        const posts = await loadData('posts.json');
         
-        // Get posts that the user has liked
+        if (likes.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="far fa-heart"></i>
+                    <h3>No Liked Posts</h3>
+                    <p>Posts you like will appear here</p>
+                    <a href="gallery.php" class="empty-state-action">
+                        <i class="fas fa-images"></i> Explore Gallery
+                    </a>
+                </div>
+            `;
+            return;
+        }
+        
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        const posts = await response.json();
+        
         const likedPosts = posts.filter(post => 
-            userLikes.some(like => like.postId === post.id)
+            likes.some(like => like.postId === post.id)
         );
         
         if (likedPosts.length === 0) {
@@ -228,11 +244,27 @@ async function loadSavedPosts() {
     try {
         const userData = await getUserData(currentUser.id, 'all');
         const saves = userData.saves || [];
-        const posts = await loadData('posts.json');
         
-        // Get posts that the user has saved
+        if (saves.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="far fa-bookmark"></i>
+                    <h3>No Saved Posts</h3>
+                    <p>Posts you save will appear here</p>
+                    <a href="gallery.php" class="empty-state-action">
+                        <i class="fas fa-images"></i> Explore Gallery
+                    </a>
+                </div>
+            `;
+            return;
+        }
+        
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        const posts = await response.json();
+        
         const savedPosts = posts.filter(post => 
-            userSaves.some(save => save.postId === post.id)
+            saves.some(save => save.postId === post.id)
         );
         
         if (savedPosts.length === 0) {
@@ -270,9 +302,8 @@ async function loadUserComments() {
     try {
         const userData = await getUserData(currentUser.id, 'all');
         const comments = userData.comments || [];
-        const posts = await loadData('posts.json');
         
-        if (userComments.length === 0) {
+        if (comments.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
                     <i class="far fa-comment"></i>
@@ -286,10 +317,13 @@ async function loadUserComments() {
             return;
         }
         
-        // Sort comments by date (newest first)
-        userComments.sort((a, b) => new Date(b.created) - new Date(a.created));
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        const posts = await response.json();
         
-        container.innerHTML = userComments.map(comment => {
+        comments.sort((a, b) => new Date(b.created) - new Date(a.created));
+        
+        container.innerHTML = comments.map(comment => {
             const post = posts.find(p => p.id === comment.postId);
             const postTitle = post ? post.title : 'Unknown Post';
             const isReply = comment.replyTo ? true : false;
@@ -304,7 +338,7 @@ async function loadUserComments() {
                         <span class="comment-date">${formatDate(comment.created)}</span>
                     </div>
                     ${replyTag}
-                    <div class="comment-content">${comment.content}</div>
+                    <div class="comment-content">${comment.text}</div>
                 </div>
             `;
         }).join('');
@@ -531,8 +565,23 @@ async function handleChangePassword(e) {
         return;
     }
     
-    if (newPassword.length < 6) {
-        showNotification('New password must be at least 6 characters long', 'error');
+    if (newPassword.length < 8) {
+        showNotification('New password must be at least 8 characters long', 'error');
+        return;
+    }
+    
+    if (!/[A-Z]/.test(newPassword)) {
+        showNotification('Password must contain at least one uppercase letter', 'error');
+        return;
+    }
+    
+    if (!/[a-z]/.test(newPassword)) {
+        showNotification('Password must contain at least one lowercase letter', 'error');
+        return;
+    }
+    
+    if (!/[0-9]/.test(newPassword)) {
+        showNotification('Password must contain at least one number', 'error');
         return;
     }
     

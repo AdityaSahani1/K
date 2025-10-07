@@ -24,6 +24,19 @@ try {
     $db = Database::getInstance();
     $conn = $db->getConnection();
     
+    $userId = $input['userId'] ?? null;
+    if ($userId && in_array($action, ['like', 'save', 'comment', 'comment_like', 'comment_reply'])) {
+        $stmt = $conn->prepare("SELECT id FROM users WHERE id = ? LIMIT 1");
+        $stmt->execute([$userId]);
+        $userExists = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$userExists) {
+            http_response_code(401);
+            echo json_encode(['error' => 'User session invalid. Please login again.']);
+            exit();
+        }
+    }
+    
     switch ($action) {
         case 'like':
             handleLike($conn, $input);
@@ -141,6 +154,17 @@ function handleView($conn, $input) {
         http_response_code(400);
         echo json_encode(['error' => 'Post ID is required']);
         return;
+    }
+    
+    if ($userId) {
+        $stmt = $conn->prepare("SELECT id FROM views WHERE postId = ? AND userId = ? LIMIT 1");
+        $stmt->execute([$postId, $userId]);
+        $existingView = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($existingView) {
+            echo json_encode(['status' => 'success', 'message' => 'Already viewed']);
+            return;
+        }
     }
     
     $created = date('Y-m-d H:i:s');

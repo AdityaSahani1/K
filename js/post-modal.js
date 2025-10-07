@@ -259,8 +259,15 @@ async function renderComments(comments) {
         return `
             <div class="comment" data-comment-id="${comment.id}">
                 <div class="comment-header">
-                    <span class="comment-author">${comment.name || comment.username || 'Anonymous'}</span>
-                    <span class="comment-date">${formatDate(comment.created)}</span>
+                    <div class="comment-meta">
+                        <span class="comment-author">${comment.name || comment.username || 'Anonymous'}</span>
+                        <span class="comment-date">${formatDate(comment.created)}</span>
+                    </div>
+                    ${currentUser ? `
+                        <button class="comment-action-btn comment-like-btn ${isLiked ? 'liked' : ''}" onclick="toggleCommentLike('${comment.id}', this)">
+                            <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> ${(comment.likes || likeCount) > 0 ? (comment.likes || likeCount) : ''}
+                        </button>
+                    ` : ''}
                 </div>
                 <div class="comment-content">
                     ${comment.replyToUsername ? `<span class="reply-to">@${comment.replyToUsername}</span> ` : ''}
@@ -268,9 +275,6 @@ async function renderComments(comments) {
                 </div>
                 <div class="comment-actions">
                     ${currentUser ? `
-                        <button class="comment-action-btn comment-like-btn ${isLiked ? 'liked' : ''}" onclick="toggleCommentLike('${comment.id}', this)">
-                            <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> ${(comment.likes || likeCount) > 0 ? (comment.likes || likeCount) : ''}
-                        </button>
                         <button class="comment-action-btn comment-reply-btn" onclick="showReplyInput('${comment.id}', '${comment.username || comment.name || 'user'}')">
                             <i class="fas fa-reply"></i> Reply
                         </button>
@@ -288,18 +292,18 @@ async function renderComments(comments) {
                         ${replies.map(reply => `
                             <div class="comment reply" data-comment-id="${reply.id}">
                                 <div class="comment-header">
-                                    <span class="comment-author">${reply.name || reply.username || 'Anonymous'}</span>
-                                    <span class="comment-date">${formatDate(reply.created)}</span>
-                                </div>
-                                <div class="comment-content">
-                                    <span class="reply-to">@${reply.replyToUsername}</span> ${reply.text || reply.content || ''}
-                                </div>
-                                <div class="comment-actions">
+                                    <div class="comment-meta">
+                                        <span class="comment-author">${reply.name || reply.username || 'Anonymous'}</span>
+                                        <span class="comment-date">${formatDate(reply.created)}</span>
+                                    </div>
                                     ${currentUser ? `
                                         <button class="comment-action-btn comment-like-btn ${commentLikes.some(like => like.commentId === reply.id && like.userId === currentUser.id) ? 'liked' : ''}" onclick="toggleCommentLike('${reply.id}', this)">
                                             <i class="${commentLikes.some(like => like.commentId === reply.id && like.userId === currentUser.id) ? 'fas' : 'far'} fa-heart"></i> ${(reply.likes || 0) > 0 ? reply.likes : ''}
                                         </button>
                                     ` : ''}
+                                </div>
+                                <div class="comment-content">
+                                    <span class="reply-to">@${reply.replyToUsername}</span> ${reply.text || reply.content || ''}
                                 </div>
                             </div>
                         `).join('')}

@@ -35,9 +35,27 @@ if (strlen($username) < 3) {
     exit();
 }
 
-if (strlen($password) < 6) {
+if (strlen($password) < 8) {
     http_response_code(400);
-    echo json_encode(['error' => 'Password must be at least 6 characters long']);
+    echo json_encode(['error' => 'Password must be at least 8 characters long']);
+    exit();
+}
+
+if (!preg_match('/[A-Z]/', $password)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Password must contain at least one uppercase letter']);
+    exit();
+}
+
+if (!preg_match('/[a-z]/', $password)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Password must contain at least one lowercase letter']);
+    exit();
+}
+
+if (!preg_match('/[0-9]/', $password)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Password must contain at least one number']);
     exit();
 }
 

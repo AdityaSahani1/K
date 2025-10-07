@@ -71,7 +71,7 @@ function getUserSaves($conn, $userId) {
 }
 
 function getUserComments($conn, $userId) {
-    $stmt = $conn->prepare("SELECT id, postId, text, created, likes FROM comments WHERE userId = ? ORDER BY created DESC");
+    $stmt = $conn->prepare("SELECT id, postId, text, created, likes, replyTo, replyToUsername FROM comments WHERE userId = ? ORDER BY created DESC");
     $stmt->execute([$userId]);
     $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -87,7 +87,7 @@ function getUserAllData($conn, $userId) {
     $stmt->execute([$userId]);
     $saves = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    $stmt = $conn->prepare("SELECT id, postId, text, created, likes FROM comments WHERE userId = ? ORDER BY created DESC");
+    $stmt = $conn->prepare("SELECT id, postId, text, created, likes, replyTo, replyToUsername FROM comments WHERE userId = ? ORDER BY created DESC");
     $stmt->execute([$userId]);
     $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
