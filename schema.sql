@@ -2,7 +2,19 @@
 
 
 
+
+
+
+
 -- MySQL Database for InfinityFree Hosting
+
+
+
+
+
+
+
+
 
 
 
@@ -14,7 +26,15 @@
 
 
 
+
+
+
+
 CREATE TABLE IF NOT EXISTS users (
+
+
+
+
 
 
 
@@ -22,7 +42,15 @@ CREATE TABLE IF NOT EXISTS users (
 
 
 
+
+
+
+
     name VARCHAR(255) NOT NULL,
+
+
+
+
 
 
 
@@ -30,7 +58,15 @@ CREATE TABLE IF NOT EXISTS users (
 
 
 
+
+
+
+
     email VARCHAR(255) UNIQUE NOT NULL,
+
+
+
+
 
 
 
@@ -38,7 +74,15 @@ CREATE TABLE IF NOT EXISTS users (
 
 
 
+
+
+
+
     role ENUM('user', 'admin') DEFAULT 'user',
+
+
+
+
 
 
 
@@ -46,7 +90,15 @@ CREATE TABLE IF NOT EXISTS users (
 
 
 
+
+
+
+
     bio TEXT,
+
+
+
+
 
 
 
@@ -54,7 +106,15 @@ CREATE TABLE IF NOT EXISTS users (
 
 
 
+
+
+
+
     isVerified BOOLEAN DEFAULT FALSE,
+
+
+
+
 
 
 
@@ -62,7 +122,15 @@ CREATE TABLE IF NOT EXISTS users (
 
 
 
+
+
+
+
     otpExpires DATETIME,
+
+
+
+
 
 
 
@@ -70,7 +138,15 @@ CREATE TABLE IF NOT EXISTS users (
 
 
 
+
+
+
+
     passwordResetToken VARCHAR(100),
+
+
+
+
 
 
 
@@ -78,7 +154,15 @@ CREATE TABLE IF NOT EXISTS users (
 
 
 
+
+
+
+
     lastLogin DATETIME,
+
+
+
+
 
 
 
@@ -86,11 +170,27 @@ CREATE TABLE IF NOT EXISTS users (
 
 
 
+
+
+
+
     INDEX idx_email (email)
 
 
 
+
+
+
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+
+
+
+
+
 
 
 
@@ -102,7 +202,15 @@ CREATE TABLE IF NOT EXISTS users (
 
 
 
+
+
+
+
 CREATE TABLE IF NOT EXISTS posts (
+
+
+
+
 
 
 
@@ -110,7 +218,15 @@ CREATE TABLE IF NOT EXISTS posts (
 
 
 
+
+
+
+
     title VARCHAR(255) NOT NULL,
+
+
+
+
 
 
 
@@ -118,7 +234,15 @@ CREATE TABLE IF NOT EXISTS posts (
 
 
 
+
+
+
+
     imageUrl VARCHAR(500) NOT NULL,
+
+
+
+
 
 
 
@@ -126,7 +250,15 @@ CREATE TABLE IF NOT EXISTS posts (
 
 
 
+
+
+
+
     tags JSON,
+
+
+
+
 
 
 
@@ -134,7 +266,15 @@ CREATE TABLE IF NOT EXISTS posts (
 
 
 
+
+
+
+
     created DATETIME NOT NULL,
+
+
+
+
 
 
 
@@ -142,7 +282,15 @@ CREATE TABLE IF NOT EXISTS posts (
 
 
 
+
+
+
+
     comments INT DEFAULT 0,
+
+
+
+
 
 
 
@@ -150,7 +298,15 @@ CREATE TABLE IF NOT EXISTS posts (
 
 
 
+
+
+
+
     featured BOOLEAN DEFAULT FALSE,
+
+
+
+
 
 
 
@@ -158,7 +314,15 @@ CREATE TABLE IF NOT EXISTS posts (
 
 
 
+
+
+
+
     FOREIGN KEY (author) REFERENCES users(id) ON DELETE CASCADE,
+
+
+
+
 
 
 
@@ -166,7 +330,15 @@ CREATE TABLE IF NOT EXISTS posts (
 
 
 
+
+
+
+
     INDEX idx_author (author),
+
+
+
+
 
 
 
@@ -174,7 +346,15 @@ CREATE TABLE IF NOT EXISTS posts (
 
 
 
+
+
+
+
     INDEX idx_featured (featured)
+
+
+
+
 
 
 
@@ -186,7 +366,19 @@ CREATE TABLE IF NOT EXISTS posts (
 
 
 
+
+
+
+
+
+
+
+
 -- Comments Table
+
+
+
+
 
 
 
@@ -194,7 +386,15 @@ CREATE TABLE IF NOT EXISTS comments (
 
 
 
+
+
+
+
     id VARCHAR(50) PRIMARY KEY,
+
+
+
+
 
 
 
@@ -202,7 +402,15 @@ CREATE TABLE IF NOT EXISTS comments (
 
 
 
+
+
+
+
     userId VARCHAR(50) NOT NULL,
+
+
+
+
 
 
 
@@ -210,7 +418,15 @@ CREATE TABLE IF NOT EXISTS comments (
 
 
 
+
+
+
+
     created DATETIME NOT NULL,
+
+
+
+
 
 
 
@@ -226,7 +442,15 @@ CREATE TABLE IF NOT EXISTS comments (
 
 
 
+
+
+
+
     FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE,
+
+
+
+
 
 
 
@@ -234,7 +458,15 @@ CREATE TABLE IF NOT EXISTS comments (
 
 
 
+
+
+
+
     INDEX idx_postId (postId),
+
+
+
+
 
 
 
@@ -242,11 +474,27 @@ CREATE TABLE IF NOT EXISTS comments (
 
 
 
+
+
+
+
     INDEX idx_created (created)
 
 
 
+
+
+
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+
+
+
+
+
 
 
 
@@ -258,7 +506,15 @@ CREATE TABLE IF NOT EXISTS comments (
 
 
 
+
+
+
+
 CREATE TABLE IF NOT EXISTS likes (
+
+
+
+
 
 
 
@@ -266,7 +522,15 @@ CREATE TABLE IF NOT EXISTS likes (
 
 
 
+
+
+
+
     postId VARCHAR(50) NOT NULL,
+
+
+
+
 
 
 
@@ -274,7 +538,15 @@ CREATE TABLE IF NOT EXISTS likes (
 
 
 
+
+
+
+
     created DATETIME NOT NULL,
+
+
+
+
 
 
 
@@ -282,7 +554,15 @@ CREATE TABLE IF NOT EXISTS likes (
 
 
 
+
+
+
+
     FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE,
+
+
+
+
 
 
 
@@ -290,7 +570,15 @@ CREATE TABLE IF NOT EXISTS likes (
 
 
 
+
+
+
+
     INDEX idx_postId (postId),
+
+
+
+
 
 
 
@@ -298,7 +586,19 @@ CREATE TABLE IF NOT EXISTS likes (
 
 
 
+
+
+
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+
+
+
+
+
 
 
 
@@ -310,7 +610,15 @@ CREATE TABLE IF NOT EXISTS likes (
 
 
 
+
+
+
+
 CREATE TABLE IF NOT EXISTS comment_likes (
+
+
+
+
 
 
 
@@ -318,7 +626,15 @@ CREATE TABLE IF NOT EXISTS comment_likes (
 
 
 
+
+
+
+
     commentId VARCHAR(50) NOT NULL,
+
+
+
+
 
 
 
@@ -326,7 +642,15 @@ CREATE TABLE IF NOT EXISTS comment_likes (
 
 
 
+
+
+
+
     created DATETIME NOT NULL,
+
+
+
+
 
 
 
@@ -334,7 +658,15 @@ CREATE TABLE IF NOT EXISTS comment_likes (
 
 
 
+
+
+
+
     FOREIGN KEY (commentId) REFERENCES comments(id) ON DELETE CASCADE,
+
+
+
+
 
 
 
@@ -342,7 +674,15 @@ CREATE TABLE IF NOT EXISTS comment_likes (
 
 
 
+
+
+
+
     INDEX idx_commentId (commentId),
+
+
+
+
 
 
 
@@ -350,7 +690,19 @@ CREATE TABLE IF NOT EXISTS comment_likes (
 
 
 
+
+
+
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+
+
+
+
+
 
 
 
@@ -362,7 +714,15 @@ CREATE TABLE IF NOT EXISTS comment_likes (
 
 
 
+
+
+
+
 CREATE TABLE IF NOT EXISTS saves (
+
+
+
+
 
 
 
@@ -370,7 +730,15 @@ CREATE TABLE IF NOT EXISTS saves (
 
 
 
+
+
+
+
     postId VARCHAR(50) NOT NULL,
+
+
+
+
 
 
 
@@ -378,7 +746,15 @@ CREATE TABLE IF NOT EXISTS saves (
 
 
 
+
+
+
+
     created DATETIME NOT NULL,
+
+
+
+
 
 
 
@@ -386,7 +762,15 @@ CREATE TABLE IF NOT EXISTS saves (
 
 
 
+
+
+
+
     FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE,
+
+
+
+
 
 
 
@@ -394,7 +778,15 @@ CREATE TABLE IF NOT EXISTS saves (
 
 
 
+
+
+
+
     INDEX idx_postId (postId),
+
+
+
+
 
 
 
@@ -402,7 +794,19 @@ CREATE TABLE IF NOT EXISTS saves (
 
 
 
+
+
+
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+
+
+
+
+
 
 
 
@@ -414,7 +818,15 @@ CREATE TABLE IF NOT EXISTS saves (
 
 
 
+
+
+
+
 CREATE TABLE IF NOT EXISTS views (
+
+
+
+
 
 
 
@@ -422,7 +834,15 @@ CREATE TABLE IF NOT EXISTS views (
 
 
 
+
+
+
+
     postId VARCHAR(50) NOT NULL,
+
+
+
+
 
 
 
@@ -430,7 +850,15 @@ CREATE TABLE IF NOT EXISTS views (
 
 
 
+
+
+
+
     ipAddress VARCHAR(45),
+
+
+
+
 
 
 
@@ -438,7 +866,15 @@ CREATE TABLE IF NOT EXISTS views (
 
 
 
+
+
+
+
     FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE,
+
+
+
+
 
 
 
@@ -446,7 +882,15 @@ CREATE TABLE IF NOT EXISTS views (
 
 
 
+
+
+
+
     INDEX idx_userId (userId),
+
+
+
+
 
 
 
@@ -454,7 +898,19 @@ CREATE TABLE IF NOT EXISTS views (
 
 
 
+
+
+
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+
+
+
+
+
 
 
 
@@ -466,7 +922,15 @@ CREATE TABLE IF NOT EXISTS views (
 
 
 
+
+
+
+
 CREATE TABLE IF NOT EXISTS notifications (
+
+
+
+
 
 
 
@@ -474,7 +938,15 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 
 
+
+
+
+
     userId VARCHAR(50) NOT NULL,
+
+
+
+
 
 
 
@@ -482,7 +954,15 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 
 
+
+
+
+
     message TEXT NOT NULL,
+
+
+
+
 
 
 
@@ -490,7 +970,15 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 
 
+
+
+
+
     relatedType VARCHAR(50),
+
+
+
+
 
 
 
@@ -498,7 +986,15 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 
 
+
+
+
+
     created DATETIME NOT NULL,
+
+
+
+
 
 
 
@@ -506,7 +1002,15 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 
 
+
+
+
+
     INDEX idx_userId (userId),
+
+
+
+
 
 
 
@@ -514,11 +1018,27 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 
 
+
+
+
+
     INDEX idx_created (created)
 
 
 
+
+
+
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+
+
+
+
+
 
 
 
@@ -530,7 +1050,15 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 
 
+
+
+
+
 CREATE TABLE IF NOT EXISTS contacts (
+
+
+
+
 
 
 
@@ -538,7 +1066,15 @@ CREATE TABLE IF NOT EXISTS contacts (
 
 
 
+
+
+
+
     name VARCHAR(255) NOT NULL,
+
+
+
+
 
 
 
@@ -546,7 +1082,15 @@ CREATE TABLE IF NOT EXISTS contacts (
 
 
 
+
+
+
+
     subject VARCHAR(500) NOT NULL,
+
+
+
+
 
 
 
@@ -554,7 +1098,15 @@ CREATE TABLE IF NOT EXISTS contacts (
 
 
 
+
+
+
+
     created DATETIME NOT NULL,
+
+
+
+
 
 
 
@@ -566,11 +1118,23 @@ CREATE TABLE IF NOT EXISTS contacts (
 
 
 
+
+
+
+
     INDEX idx_status (status),
 
 
 
+
+
+
+
     INDEX idx_created (created)
+
+
+
+
 
 
 
@@ -582,7 +1146,19 @@ CREATE TABLE IF NOT EXISTS contacts (
 
 
 
+
+
+
+
+
+
+
+
 -- Insert default admin user
+
+
+
+
 
 
 
@@ -590,7 +1166,15 @@ CREATE TABLE IF NOT EXISTS contacts (
 
 
 
+
+
+
+
 INSERT INTO users (id, name, username, email, password, role, created, isVerified) VALUES
+
+
+
+
 
 
 
@@ -602,7 +1186,19 @@ INSERT INTO users (id, name, username, email, password, role, created, isVerifie
 
 
 
+
+
+
+
+
+
+
+
 -- Insert sample posts
+
+
+
+
 
 
 
@@ -610,7 +1206,15 @@ INSERT INTO posts (id, title, description, imageUrl, category, tags, author, cre
 
 
 
+
+
+
+
 ('post_68e3e993cd52f', 'Mountain Sunrise', 'Beautiful sunrise over mountain peaks', 'https://picsum.photos/800/600?random=0', 'art', '["landscape","sunrise","mountains"]', 'user_68e3e993baeb3', '2025-10-06 16:08:51', TRUE),
+
+
+
+
 
 
 
@@ -618,7 +1222,15 @@ INSERT INTO posts (id, title, description, imageUrl, category, tags, author, cre
 
 
 
+
+
+
+
 ('post_68e3e993d8eee', 'Ocean Waves', 'Peaceful ocean waves at sunset', 'https://picsum.photos/800/600?random=2', 'nature', '["ocean","sunset","waves"]', 'user_68e3e993baeb3', '2025-10-04 16:08:51', FALSE),
+
+
+
+
 
 
 
@@ -626,7 +1238,15 @@ INSERT INTO posts (id, title, description, imageUrl, category, tags, author, cre
 
 
 
+
+
+
+
 ('post_68e3e993e2393', 'Street Photography', 'Candid moment in the city', 'https://picsum.photos/800/600?random=4', 'urban', '["street","people","city"]', 'user_68e3e993baeb3', '2025-10-02 16:08:51', FALSE);
+
+
+
+
 
 
 
