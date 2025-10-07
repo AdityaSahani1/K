@@ -117,7 +117,10 @@ async function loadUserStats() {
         const likes = userData.likes || [];
         const saves = userData.saves || [];
         const comments = userData.comments || [];
-        const posts = await loadData('posts.json');
+        
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        const posts = await response.json();
         
         // Count user's interactions
         const userPosts = posts.filter(post => post.author === currentUser.username);
@@ -131,9 +134,9 @@ async function loadUserStats() {
             document.getElementById('posts-count').textContent = userPosts.length;
         }
         
-        document.getElementById('likes-count').textContent = userLikes.length;
-        document.getElementById('comments-count').textContent = userComments.length;
-        document.getElementById('saves-count').textContent = userSaves.length;
+        document.getElementById('likes-count').textContent = likes.length;
+        document.getElementById('comments-count').textContent = comments.length;
+        document.getElementById('saves-count').textContent = saves.length;
         
     } catch (error) {
         console.error('Error loading user stats:', error);

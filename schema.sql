@@ -218,6 +218,14 @@ CREATE TABLE IF NOT EXISTS comments (
 
 
 
+    replyTo VARCHAR(50),
+
+
+
+    replyToUsername VARCHAR(100),
+
+
+
     FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE,
 
 
@@ -547,6 +555,10 @@ CREATE TABLE IF NOT EXISTS contacts (
 
 
     created DATETIME NOT NULL,
+
+
+
+    userEmail VARCHAR(255),
 
 
 

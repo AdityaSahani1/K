@@ -19,7 +19,22 @@ function initPostModal() {
 // Open post modal with post details
 async function openPostModal(postId) {
     try {
-        const posts = await loadData('posts.json');
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        
+        const posts = await response.json();
+        
+        // Parse tags if they're JSON strings
+        posts.forEach(post => {
+            if (typeof post.tags === 'string') {
+                try {
+                    post.tags = JSON.parse(post.tags);
+                } catch (e) {
+                    post.tags = [];
+                }
+            }
+        });
+        
         const post = posts.find(p => p.id === postId);
         
         if (!post) {
@@ -29,6 +44,12 @@ async function openPostModal(postId) {
         
         const postDetail = document.getElementById('post-detail');
         if (!postDetail) return;
+        
+        // Store post ID in modal for later use
+        const postModal = document.getElementById('post-modal');
+        if (postModal) {
+            postModal.dataset.currentPostId = postId;
+        }
         
         // Track view when opening post modal
         await trackPostView(postId);
@@ -226,7 +247,9 @@ async function loadPostComments(postId) {
 async function renderComments(comments) {
     const commentLikes = [];
     
+    console.log('All comments:', comments);
     const parentComments = comments.filter(comment => !comment.replyTo);
+    console.log('Parent comments:', parentComments);
     
     return parentComments.map(comment => {
         const isLiked = currentUser && commentLikes.some(like => like.commentId === comment.id && like.userId === currentUser.id);
@@ -236,19 +259,19 @@ async function renderComments(comments) {
         return `
             <div class="comment" data-comment-id="${comment.id}">
                 <div class="comment-header">
-                    <span class="comment-author">${comment.author}</span>
+                    <span class="comment-author">${comment.name || comment.username || 'Anonymous'}</span>
                     <span class="comment-date">${formatDate(comment.created)}</span>
                 </div>
                 <div class="comment-content">
                     ${comment.replyToUsername ? `<span class="reply-to">@${comment.replyToUsername}</span> ` : ''}
-                    ${comment.content}
+                    ${comment.text || comment.content || ''}
                 </div>
                 <div class="comment-actions">
                     ${currentUser ? `
                         <button class="comment-action-btn comment-like-btn ${isLiked ? 'liked' : ''}" onclick="toggleCommentLike('${comment.id}', this)">
-                            <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> ${likeCount > 0 ? likeCount : ''}
+                            <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> ${(comment.likes || likeCount) > 0 ? (comment.likes || likeCount) : ''}
                         </button>
-                        <button class="comment-action-btn comment-reply-btn" onclick="showReplyInput('${comment.id}', '${comment.author}')">
+                        <button class="comment-action-btn comment-reply-btn" onclick="showReplyInput('${comment.id}', '${comment.username || comment.name || 'user'}')">
                             <i class="fas fa-reply"></i> Reply
                         </button>
                     ` : ''}
@@ -257,7 +280,7 @@ async function renderComments(comments) {
                     <textarea class="reply-textarea" placeholder="Write a reply..." id="reply-text-${comment.id}"></textarea>
                     <div class="reply-actions">
                         <button class="btn-secondary" onclick="hideReplyInput('${comment.id}')">Cancel</button>
-                        <button class="btn-primary" onclick="submitReply('${comment.id}', '${comment.author}')">Reply</button>
+                        <button class="btn-primary" onclick="submitReply('${comment.id}', '${comment.username || comment.name || 'user'}')">Reply</button>
                     </div>
                 </div>
                 ${replies.length > 0 ? `
@@ -265,16 +288,16 @@ async function renderComments(comments) {
                         ${replies.map(reply => `
                             <div class="comment reply" data-comment-id="${reply.id}">
                                 <div class="comment-header">
-                                    <span class="comment-author">${reply.author}</span>
+                                    <span class="comment-author">${reply.name || reply.username || 'Anonymous'}</span>
                                     <span class="comment-date">${formatDate(reply.created)}</span>
                                 </div>
                                 <div class="comment-content">
-                                    <span class="reply-to">@${reply.replyToUsername}</span> ${reply.content}
+                                    <span class="reply-to">@${reply.replyToUsername}</span> ${reply.text || reply.content || ''}
                                 </div>
                                 <div class="comment-actions">
                                     ${currentUser ? `
                                         <button class="comment-action-btn comment-like-btn ${commentLikes.some(like => like.commentId === reply.id && like.userId === currentUser.id) ? 'liked' : ''}" onclick="toggleCommentLike('${reply.id}', this)">
-                                            <i class="${commentLikes.some(like => like.commentId === reply.id && like.userId === currentUser.id) ? 'fas' : 'far'} fa-heart"></i> ${commentLikes.filter(like => like.commentId === reply.id).length > 0 ? commentLikes.filter(like => like.commentId === reply.id).length : ''}
+                                            <i class="${commentLikes.some(like => like.commentId === reply.id && like.userId === currentUser.id) ? 'fas' : 'far'} fa-heart"></i> ${(reply.likes || 0) > 0 ? reply.likes : ''}
                                         </button>
                                     ` : ''}
                                 </div>
@@ -295,15 +318,26 @@ async function toggleCommentLike(commentId, button) {
     }
     
     try {
-        console.log('Comment like toggled for:', commentId);
-        const isLiked = button.classList.contains('liked');
+        const response = await fetch('/api/post-actions.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'comment_like',
+                commentId: commentId,
+                userId: currentUser.id
+            })
+        });
         
-        if (isLiked) {
-            button.classList.remove('liked');
-            button.innerHTML = '<i class="far fa-heart"></i>';
-        } else {
+        if (!response.ok) throw new Error('Failed to toggle comment like');
+        
+        const data = await response.json();
+        
+        if (data.action === 'liked') {
             button.classList.add('liked');
-            button.innerHTML = '<i class="fas fa-heart"></i>';
+            button.innerHTML = `<i class="fas fa-heart"></i> ${data.likes > 0 ? data.likes : ''}`;
+        } else {
+            button.classList.remove('liked');
+            button.innerHTML = `<i class="far fa-heart"></i> ${data.likes > 0 ? data.likes : ''}`;
         }
     } catch (error) {
         console.error('Error toggling comment like:', error);
@@ -344,9 +378,42 @@ async function submitReply(commentId, replyToUsername) {
     }
     
     try {
-        console.log('Reply functionality temporarily disabled - needs database implementation');
-        showNotification('Reply feature is being updated', 'info');
-        hideReplyInput(commentId);
+        // Get the current post ID from the modal
+        const postModal = document.getElementById('post-modal');
+        const postId = postModal.dataset.currentPostId;
+        
+        if (!postId) {
+            showNotification('Error: Post ID not found', 'error');
+            return;
+        }
+        
+        const response = await fetch('/api/post-actions.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'comment_reply',
+                postId: postId,
+                userId: currentUser.id,
+                text: replyText,
+                replyTo: commentId,
+                replyToUsername: replyToUsername
+            })
+        });
+        
+        if (!response.ok) throw new Error('Failed to post reply');
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            showNotification('Reply posted successfully', 'success');
+            hideReplyInput(commentId);
+            // Reload comments to show the new reply
+            const comments = await loadPostComments(postId);
+            const commentsList = document.getElementById('comments-list');
+            if (commentsList) {
+                commentsList.innerHTML = await renderComments(comments);
+            }
+        }
     } catch (error) {
         console.error('Error posting reply:', error);
         showNotification('Error posting reply', 'error');

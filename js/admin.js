@@ -33,7 +33,10 @@ async function loadPostsTable() {
     if (!tableBody) return;
     
     try {
-        const posts = await loadData('posts.json');
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        
+        const posts = await response.json();
         
         if (posts.length === 0) {
             tableBody.innerHTML = `
@@ -49,6 +52,17 @@ async function loadPostsTable() {
         
         // Sort posts by creation date (newest first)
         posts.sort((a, b) => new Date(b.created) - new Date(a.created));
+        
+        // Parse tags if they're JSON strings
+        posts.forEach(post => {
+            if (typeof post.tags === 'string') {
+                try {
+                    post.tags = JSON.parse(post.tags);
+                } catch (e) {
+                    post.tags = [];
+                }
+            }
+        });
         
         tableBody.innerHTML = posts.map(post => `
             <tr data-post-id="${post.id}">
@@ -101,7 +115,10 @@ async function loadAnalytics() {
     
     try {
         // Load data from API
-        const posts = await loadData('posts.json');
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        
+        const posts = await response.json();
         
         // Calculate totals from posts data (database already has these counts)
         const totalViews = posts.reduce((sum, post) => sum + (post.views || 0), 0);
@@ -281,12 +298,25 @@ function showAddPostModal() {
 
 async function editPost(postId) {
     try {
-        const posts = await loadData('posts.json');
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        
+        const posts = await response.json();
         const post = posts.find(p => p.id === postId);
         
         if (!post) {
             showNotification('Post not found', 'error');
             return;
+        }
+        
+        // Parse tags if they're JSON strings
+        let tags = post.tags;
+        if (typeof tags === 'string') {
+            try {
+                tags = JSON.parse(tags);
+            } catch (e) {
+                tags = [];
+            }
         }
         
         // Populate form with post data
@@ -295,7 +325,7 @@ async function editPost(postId) {
         document.getElementById('post-category').value = post.category;
         document.getElementById('post-image-url').value = post.imageUrl;
         document.getElementById('post-description').value = post.description || '';
-        document.getElementById('post-tags').value = post.tags.join(', ');
+        document.getElementById('post-tags').value = Array.isArray(tags) ? tags.join(', ') : '';
         document.getElementById('post-download-url').value = post.downloadUrl || '';
         document.getElementById('post-featured').checked = post.featured || false;
         
@@ -415,7 +445,10 @@ async function loadUsersTable() {
     if (!tableBody) return;
     
     try {
-        const users = await loadData('users.json');
+        const response = await fetch('/api/get-users.php');
+        if (!response.ok) throw new Error('Failed to load users');
+        
+        const users = await response.json();
         allUsers = users; // Store for filtering/sorting
         
         if (users.length === 0) {

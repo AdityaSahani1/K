@@ -45,6 +45,8 @@ CREATE TABLE IF NOT EXISTS comments (
     text TEXT NOT NULL,
     created TEXT DEFAULT (datetime('now')),
     likes INTEGER DEFAULT 0,
+    replyTo TEXT,
+    replyToUsername TEXT,
     FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE,
     FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -112,6 +114,7 @@ CREATE TABLE IF NOT EXISTS contacts (
     subject TEXT NOT NULL,
     message TEXT NOT NULL,
     created TEXT DEFAULT (datetime('now')),
+    userEmail TEXT,
     status TEXT DEFAULT 'unread'
 );
 

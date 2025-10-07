@@ -31,6 +31,7 @@ try {
     
     $stmt = $conn->prepare("
         SELECT c.id, c.postId, c.userId, c.text, c.created, c.likes,
+               c.replyTo, c.replyToUsername,
                u.username, u.name, u.profilePicture
         FROM comments c
         JOIN users u ON c.userId = u.id

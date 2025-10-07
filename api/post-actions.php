@@ -37,6 +37,12 @@ try {
         case 'comment':
             handleComment($conn, $input);
             break;
+        case 'comment_like':
+            handleCommentLike($conn, $input);
+            break;
+        case 'comment_reply':
+            handleCommentReply($conn, $input);
+            break;
         default:
             http_response_code(400);
             echo json_encode(['error' => 'Invalid action']);
@@ -163,6 +169,83 @@ function handleComment($conn, $input) {
     
     $stmt = $conn->prepare("INSERT INTO comments (id, postId, userId, text, created) VALUES (?, ?, ?, ?, ?)");
     $stmt->execute([$id, $postId, $userId, $text, $created]);
+    
+    $stmt = $conn->prepare("UPDATE posts SET comments = comments + 1 WHERE id = ?");
+    $stmt->execute([$postId]);
+    
+    // Get updated count
+    $stmt = $conn->prepare("SELECT comments FROM posts WHERE id = ?");
+    $stmt->execute([$postId]);
+    $post = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    echo json_encode(['status' => 'success', 'commentId' => $id, 'comments' => (int)$post['comments']]);
+}
+
+function handleCommentLike($conn, $input) {
+    $commentId = $input['commentId'] ?? '';
+    $userId = $input['userId'] ?? '';
+    
+    if (empty($commentId) || empty($userId)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Comment ID and User ID are required']);
+        return;
+    }
+    
+    // Check if already liked
+    $stmt = $conn->prepare("SELECT id FROM comment_likes WHERE commentId = ? AND userId = ? LIMIT 1");
+    $stmt->execute([$commentId, $userId]);
+    $exists = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($exists) {
+        // Unlike
+        $stmt = $conn->prepare("DELETE FROM comment_likes WHERE commentId = ? AND userId = ?");
+        $stmt->execute([$commentId, $userId]);
+        
+        $stmt = $conn->prepare("UPDATE comments SET likes = GREATEST(0, likes - 1) WHERE id = ?");
+        $stmt->execute([$commentId]);
+        
+        // Get updated count
+        $stmt = $conn->prepare("SELECT likes FROM comments WHERE id = ?");
+        $stmt->execute([$commentId]);
+        $comment = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        echo json_encode(['status' => 'success', 'action' => 'unliked', 'likes' => (int)$comment['likes']]);
+    } else {
+        // Like
+        $created = date('Y-m-d H:i:s');
+        $stmt = $conn->prepare("INSERT INTO comment_likes (commentId, userId, created) VALUES (?, ?, ?)");
+        $stmt->execute([$commentId, $userId, $created]);
+        
+        $stmt = $conn->prepare("UPDATE comments SET likes = likes + 1 WHERE id = ?");
+        $stmt->execute([$commentId]);
+        
+        // Get updated count
+        $stmt = $conn->prepare("SELECT likes FROM comments WHERE id = ?");
+        $stmt->execute([$commentId]);
+        $comment = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        echo json_encode(['status' => 'success', 'action' => 'liked', 'likes' => (int)$comment['likes']]);
+    }
+}
+
+function handleCommentReply($conn, $input) {
+    $postId = $input['postId'] ?? '';
+    $userId = $input['userId'] ?? '';
+    $text = $input['text'] ?? '';
+    $replyTo = $input['replyTo'] ?? '';
+    $replyToUsername = $input['replyToUsername'] ?? '';
+    
+    if (empty($postId) || empty($userId) || empty($text) || empty($replyTo)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Post ID, User ID, text, and replyTo are required']);
+        return;
+    }
+    
+    $id = uniqid('comment_');
+    $created = date('Y-m-d H:i:s');
+    
+    $stmt = $conn->prepare("INSERT INTO comments (id, postId, userId, text, created, replyTo, replyToUsername) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$id, $postId, $userId, $text, $created, $replyTo, $replyToUsername]);
     
     $stmt = $conn->prepare("UPDATE posts SET comments = comments + 1 WHERE id = ?");
     $stmt->execute([$postId]);

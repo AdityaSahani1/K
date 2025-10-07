@@ -168,7 +168,7 @@ class EmailHandler {
         }
     }
     
-    public function sendContactEmail($name, $email, $subject, $message) {
+    public function sendContactEmail($name, $email, $subject, $message, $userEmail = null) {
         $emailsSent = [];
         $errors = [];
         
@@ -181,6 +181,8 @@ class EmailHandler {
             
             $this->mail->Subject = 'Contact: ' . $subject;
             
+            $userEmailInfo = $userEmail ? "<p><strong>Logged-in User Email:</strong> {$userEmail}</p>" : "";
+            
             $adminBody = "
             <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
                 <div style='background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 20px; border-radius: 8px 8px 0 0;'>
@@ -188,6 +190,7 @@ class EmailHandler {
                 </div>
                 <div style='background: white; padding: 20px; border: 1px solid #e5e7eb; border-radius: 0 0 8px 8px;'>
                     <p><strong>From:</strong> {$name} ({$email})</p>
+                    {$userEmailInfo}
                     <p><strong>Subject:</strong> {$subject}</p>
                     <div style='background: #f9fafb; padding: 15px; border-radius: 6px; margin-top: 15px;'>
                         <p style='color: #4b5563; margin: 0;'>" . nl2br(htmlspecialchars($message)) . "</p>

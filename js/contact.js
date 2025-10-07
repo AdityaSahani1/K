@@ -74,17 +74,24 @@ async function handleContactSubmission(e) {
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
     
     try {
+        const requestData = {
+            name: name,
+            email: email,
+            subject: subject,
+            message: message
+        };
+        
+        // Include logged-in user's email if available
+        if (currentUser && currentUser.email) {
+            requestData.userEmail = currentUser.email;
+        }
+        
         const response = await fetch('/api/contact.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                name: name,
-                email: email,
-                subject: subject,
-                message: message
-            })
+            body: JSON.stringify(requestData)
         });
         
         const data = await response.json();
