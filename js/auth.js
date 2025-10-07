@@ -377,16 +377,6 @@ async function handleOTPVerification(e) {
         const data = await response.json();
 
         if (response.ok && data.verified) {
-            // OTP verified, now create the user account
-            let users = await loadData('users.json');
-
-            // Add the verified user
-            pendingUserData.isVerified = true;
-            users.push(pendingUserData);
-            
-            // Save to server
-            await saveData('users.json', users);
-
             showNotification('Registration successful! You can now login.', 'success');
             
             // Clear form data

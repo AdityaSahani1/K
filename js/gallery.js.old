@@ -885,28 +885,29 @@ async function loadUserInteractions() {
     if (!currentUser) return;
     
     try {
-        const likes = await loadData('likes.json');
+        const userData = await getUserData(currentUser.id, 'all');
         const saves = await loadData('saves.json');
+        const saves = userData.saves || [];
         
         // Update like buttons
         likes.forEach(like => {
-            if (like.userId === currentUser.id) {
+            
                 const likeBtn = document.querySelector(`[data-post-id="${like.postId}"].like-btn`);
                 if (likeBtn) {
                     likeBtn.innerHTML = '<i class="fas fa-heart"></i>';
                     likeBtn.classList.add('liked');
-                }
+                
             }
         });
         
         // Update save buttons
         saves.forEach(save => {
-            if (save.userId === currentUser.id) {
+            
                 const saveBtn = document.querySelector(`[data-post-id="${save.postId}"].save-btn`);
                 if (saveBtn) {
                     saveBtn.innerHTML = '<i class="fas fa-bookmark"></i>';
                     saveBtn.classList.add('saved');
-                }
+                
             }
         });
     } catch (error) {
@@ -985,29 +986,30 @@ async function toggleLike(postId, button) {
 
 async function toggleSave(postId, button) {
     try {
-        const response = await fetch('/api/post-actions.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'save',
+        let saves = await loadData('saves.json');
+        const existingSave = saves.find(save => save.postId === postId && save.userId === currentUser.id);
+        
+        if (existingSave) {
+            // Remove save
+            saves = saves.filter(save => !(save.postId === postId && save.userId === currentUser.id));
+            button.innerHTML = '<i class="far fa-bookmark"></i>';
+            button.classList.remove('saved');
+            showNotification('Post removed from saved', 'success');
+        } else {
+            // Add save
+            saves.push({
+                id: generateId(),
                 postId: postId,
-                userId: currentUser.id
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.status === 'success') {
-            if (data.action === 'saved') {
-                button.innerHTML = '<i class="fas fa-bookmark"></i>';
-                button.classList.add('saved');
-                showNotification('Post saved!', 'success');
-            } else {
-                button.innerHTML = '<i class="far fa-bookmark"></i>';
-                button.classList.remove('saved');
-                showNotification('Post removed from saved', 'success');
-            }
+                userId: currentUser.id,
+                created: new Date().toISOString()
+            });
+            button.innerHTML = '<i class="fas fa-bookmark"></i>';
+            button.classList.add('saved');
+            showNotification('Post saved!', 'success');
         }
+        
+        await saveData('saves.json', saves);
+        
     } catch (error) {
         console.error('Error toggling save:', error);
         showNotification('Error updating save', 'error');

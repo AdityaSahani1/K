@@ -68,7 +68,21 @@ async function handleResetPasswordRequest() {
 
 async function loadUserProfile() {
     try {
-        // Update profile information from current user data
+        // Load user data from server to get the latest info including bio
+        const users = await loadData('users.json');
+        const serverUser = users.find(u => u.id === currentUser.id);
+        
+        if (serverUser) {
+            // Update currentUser with server data
+            currentUser.bio = serverUser.bio || '';
+            currentUser.profilePicture = serverUser.profilePicture || '';
+            currentUser.name = serverUser.name || currentUser.name;
+            
+            // Update localStorage session with fresh data
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        }
+        
+        // Update profile information
         document.getElementById('profile-username').textContent = currentUser.name || currentUser.username;
         document.getElementById('profile-email').textContent = currentUser.email;
         
@@ -113,13 +127,16 @@ function updateProfilePicture() {
 
 async function loadUserStats() {
     try {
-        const userData = await getUserData(currentUser.id, 'all');
-        const likes = userData.likes || [];
-        const saves = userData.saves || [];
-        const comments = userData.comments || [];
+        // Use consistent data loading
+        const likes = await loadData('likes.json');
+        const saves = await loadData('saves.json');
+        const comments = await loadData('comments.json');
         const posts = await loadData('posts.json');
         
         // Count user's interactions
+        const userLikes = likes.filter(like => like.userId === currentUser.id);
+        const userSaves = saves.filter(save => save.userId === currentUser.id);
+        const userComments = comments.filter(comment => comment.author === currentUser.username);
         const userPosts = posts.filter(post => post.author === currentUser.username);
         
         // Update stats display
@@ -181,11 +198,12 @@ async function loadLikedPosts() {
     if (!container) return;
     
     try {
-        const userData = await getUserData(currentUser.id, 'all');
-        const likes = userData.likes || [];
+        // Use consistent data loading
+        const likes = await loadData('likes.json');
         const posts = await loadData('posts.json');
         
         // Get posts that the user has liked
+        const userLikes = likes.filter(like => like.userId === currentUser.id);
         const likedPosts = posts.filter(post => 
             userLikes.some(like => like.postId === post.id)
         );
@@ -223,11 +241,12 @@ async function loadSavedPosts() {
     if (!container) return;
     
     try {
-        const userData = await getUserData(currentUser.id, 'all');
-        const saves = userData.saves || [];
+        // Use consistent data loading
+        const saves = await loadData('saves.json');
         const posts = await loadData('posts.json');
         
         // Get posts that the user has saved
+        const userSaves = saves.filter(save => save.userId === currentUser.id);
         const savedPosts = posts.filter(post => 
             userSaves.some(save => save.postId === post.id)
         );
@@ -265,9 +284,12 @@ async function loadUserComments() {
     if (!container) return;
     
     try {
-        const userData = await getUserData(currentUser.id, 'all');
-        const comments = userData.comments || [];
+        // Use consistent data loading
+        const comments = await loadData('comments.json');
         const posts = await loadData('posts.json');
+        
+        // Get all comments and replies by the current user
+        const userComments = comments.filter(comment => comment.author === currentUser.username);
         
         if (userComments.length === 0) {
             container.innerHTML = `
@@ -421,25 +443,20 @@ async function handleEditProfile(e) {
     }
     
     try {
-        const response = await fetch('/api/auth-actions.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'update_profile',
-                userId: currentUser.id,
-                name: name,
-                username: username,
-                email: email,
-                profilePicture: profilePicture,
-                bio: bio
-            })
-        });
+        // Update users data from server
+        let users = await loadData('users.json');
+        const userIndex = users.findIndex(user => user.id === currentUser.id);
         
-        const data = await response.json();
-        
-        if (response.ok) {
+        if (userIndex !== -1) {
+            users[userIndex].name = name;
+            users[userIndex].username = username;
+            users[userIndex].email = email;
+            users[userIndex].profilePicture = profilePicture;
+            users[userIndex].bio = bio;
+            
+            // Save to server
+            await saveData('users.json', users);
+            
             // Update current user object in memory
             currentUser.name = name;
             currentUser.username = username;
@@ -449,14 +466,13 @@ async function handleEditProfile(e) {
             
             // Update in localStorage for session
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            
-            // Update UI
-            loadUserProfile();
-            hideModal('edit-profile-modal');
-            showNotification('Profile updated successfully!', 'success');
-        } else {
-            showNotification(data.error || 'Error updating profile', 'error');
         }
+        
+        // Update UI
+        loadUserProfile();
+        hideModal('edit-profile-modal');
+        showNotification('Profile updated successfully!', 'success');
+        
     } catch (error) {
         console.error('Error updating profile:', error);
         showNotification('Error updating profile', 'error');

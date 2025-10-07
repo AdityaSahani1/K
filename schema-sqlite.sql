@@ -125,3 +125,16 @@ CREATE INDEX IF NOT EXISTS idx_likes_userId ON likes(userId);
 CREATE INDEX IF NOT EXISTS idx_saves_userId ON saves(userId);
 CREATE INDEX IF NOT EXISTS idx_views_postId ON views(postId);
 CREATE INDEX IF NOT EXISTS idx_notifications_userId ON notifications(userId);
+
+-- Insert default admin user
+-- Password is 'admin123' (bcrypt hashed)
+INSERT INTO users (id, name, username, email, password, role, created, isVerified) VALUES
+('user_68e3e993baeb3', 'SnapSera Admin', 'snapsera', 'snapsera.team@gmail.com', '$2y$10$UIU/aPr84wQuoVJDa79OquN8VCmOtNRTTJTrYlOOUbc28sLqx9Jcm', 'admin', '2025-10-06 16:08:51', 1);
+
+-- Insert sample posts
+INSERT INTO posts (id, title, description, imageUrl, category, tags, author, created, featured) VALUES
+('post_68e3e993cd52f', 'Mountain Sunrise', 'Beautiful sunrise over mountain peaks', 'https://picsum.photos/800/600?random=0', 'art', '["landscape","sunrise","mountains"]', 'user_68e3e993baeb3', '2025-10-06 16:08:51', 1),
+('post_68e3e993d246c', 'City Lights', 'Urban nightscape with city lights', 'https://picsum.photos/800/600?random=1', 'urban', '["city","night","architecture"]', 'user_68e3e993baeb3', '2025-10-05 16:08:51', 0),
+('post_68e3e993d8eee', 'Ocean Waves', 'Peaceful ocean waves at sunset', 'https://picsum.photos/800/600?random=2', 'nature', '["ocean","sunset","waves"]', 'user_68e3e993baeb3', '2025-10-04 16:08:51', 0),
+('post_68e3e993ddfbd', 'Forest Path', 'Mystical path through the forest', 'https://picsum.photos/800/600?random=3', 'nature', '["forest","path","trees"]', 'user_68e3e993baeb3', '2025-10-03 16:08:51', 0),
+('post_68e3e993e2393', 'Street Photography', 'Candid moment in the city', 'https://picsum.photos/800/600?random=4', 'urban', '["street","people","city"]', 'user_68e3e993baeb3', '2025-10-02 16:08:51', 0);

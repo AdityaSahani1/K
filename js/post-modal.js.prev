@@ -37,16 +37,11 @@ async function openPostModal(postId) {
         const comments = await loadPostComments(postId);
         
         // Load user interactions to show correct like/save states
-        let isLiked = false;
-        let isSaved = false;
+        const likes = currentUser ? await loadData('likes.json') : [];
+        const saves = currentUser ? await loadData('saves.json') : [];
         
-        if (currentUser) {
-            const userData = await getUserData(currentUser.id, 'all');
-            const likes = userData.likes || [];
-            const saves = userData.saves || [];
-            isLiked = likes.some(like => like.postId === postId);
-            isSaved = saves.some(save => save.postId === postId);
-        }
+        const isLiked = currentUser && likes.some(like => like.postId === postId && like.userId === currentUser.id);
+        const isSaved = currentUser && saves.some(save => save.postId === postId && save.userId === currentUser.id);
         
         postDetail.innerHTML = `
             <button class="post-modal-close" onclick="hideModal('post-modal')" title="Close">
@@ -193,20 +188,35 @@ function addPostModalInteractionListeners() {
 // Track post view
 async function trackPostView(postId) {
     try {
+        // Don't track views for anonymous users
         if (!currentUser) return;
         
-        await fetch('/api/post-actions.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'view',
-                postId: postId,
-                userId: currentUser.id
-            })
-        });
+        let views = await loadData('views.json');
+        let posts = await loadData('posts.json');
         
-        // Update local post view count
-        updateModalViewCount(postId);
+        // Check if this user has already viewed this post
+        const existingView = views.find(view => view.postId === postId && view.userId === currentUser.id);
+        
+        if (!existingView) {
+            // Add new view record
+            views.push({
+                id: generateId(),
+                postId: postId,
+                userId: currentUser.id,
+                created: new Date().toISOString()
+            });
+            
+            // Increment view count in post
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                post.views = (post.views || 0) + 1;
+            }
+            
+            await saveData('views.json', views);
+            await saveData('posts.json', posts);
+            
+            updateModalViewCount(postId);
+        }
     } catch (error) {
         console.error('Error tracking post view:', error);
     }
@@ -215,7 +225,9 @@ async function trackPostView(postId) {
 // Load comments for a post
 async function loadPostComments(postId) {
     try {
-        return await getPostComments(postId);
+        const comments = await loadData('comments.json');
+        return comments.filter(comment => comment.postId === postId)
+                      .sort((a, b) => new Date(a.created) - new Date(b.created));
     } catch (error) {
         console.error('Error loading comments:', error);
         return [];
@@ -224,7 +236,7 @@ async function loadPostComments(postId) {
 
 // Render comments with likes and replies
 async function renderComments(comments) {
-    const commentLikes = [];
+    const commentLikes = currentUser ? await loadData('comment-likes.json') : [];
     
     const parentComments = comments.filter(comment => !comment.replyTo);
     
@@ -295,16 +307,30 @@ async function toggleCommentLike(commentId, button) {
     }
     
     try {
-        console.log('Comment like toggled for:', commentId);
-        const isLiked = button.classList.contains('liked');
+        let commentLikes = await loadData('comment-likes.json');
+        const existingLike = commentLikes.find(like => like.commentId === commentId && like.userId === currentUser.id);
         
-        if (isLiked) {
+        if (existingLike) {
+            commentLikes = commentLikes.filter(like => !(like.commentId === commentId && like.userId === currentUser.id));
             button.classList.remove('liked');
             button.innerHTML = '<i class="far fa-heart"></i>';
         } else {
+            commentLikes.push({
+                id: generateId(),
+                commentId: commentId,
+                userId: currentUser.id,
+                created: new Date().toISOString()
+            });
             button.classList.add('liked');
-            button.innerHTML = '<i class="fas fa-heart"></i>';
+            button.innerHTML = '<i class="fas fa-heart"></i> 1';
         }
+        
+        const likeCount = commentLikes.filter(like => like.commentId === commentId).length;
+        if (likeCount > 0) {
+            button.innerHTML = `<i class="${existingLike ? 'far' : 'fas'} fa-heart"></i> ${likeCount}`;
+        }
+        
+        await saveData('comment-likes.json', commentLikes);
     } catch (error) {
         console.error('Error toggling comment like:', error);
         showNotification('Error updating like', 'error');
@@ -344,9 +370,50 @@ async function submitReply(commentId, replyToUsername) {
     }
     
     try {
-        console.log('Reply functionality temporarily disabled - needs database implementation');
-        showNotification('Reply feature is being updated', 'info');
+        let comments = await loadData('comments.json');
+        const originalComment = comments.find(c => c.id === commentId);
+        
+        if (!originalComment) {
+            showNotification('Original comment not found', 'error');
+            return;
+        }
+        
+        const newReply = {
+            id: generateId(),
+            postId: originalComment.postId,
+            author: currentUser.username,
+            content: replyText,
+            replyTo: commentId,
+            replyToUsername: replyToUsername,
+            created: new Date().toISOString()
+        };
+        
+        comments.push(newReply);
+        
+        // Update post comment count
+        let posts = await loadData('posts.json');
+        const post = posts.find(p => p.id === originalComment.postId);
+        if (post) {
+            post.comments = (post.comments || 0) + 1;
+        }
+        
+        await saveData('comments.json', comments);
+        await saveData('posts.json', posts);
+        
+        // Create notification for the original commenter
+        if (replyToUsername !== currentUser.username) {
+            await createNotification(replyToUsername, commentId, originalComment.postId);
+        }
+        
+        showNotification('Reply posted!', 'success');
         hideReplyInput(commentId);
+        
+        // Refresh comments display
+        const postId = originalComment.postId;
+        const updatedComments = await loadPostComments(postId);
+        document.getElementById('comments-list').innerHTML = await renderComments(updatedComments);
+        updateModalCommentCount(postId);
+        
     } catch (error) {
         console.error('Error posting reply:', error);
         showNotification('Error posting reply', 'error');
@@ -356,7 +423,20 @@ async function submitReply(commentId, replyToUsername) {
 // Create notification
 async function createNotification(username, commentId, postId) {
     try {
-        console.log('Notification created for:', username);
+        let notifications = await loadData('notifications.json');
+        
+        notifications.push({
+            id: generateId(),
+            username: username,
+            type: 'reply',
+            commentId: commentId,
+            postId: postId,
+            from: currentUser.username,
+            read: false,
+            created: new Date().toISOString()
+        });
+        
+        await saveData('notifications.json', notifications);
     } catch (error) {
         console.error('Error creating notification:', error);
     }
@@ -378,30 +458,38 @@ async function submitPostComment(postId) {
     }
     
     try {
-        const response = await fetch('/api/post-actions.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'comment',
-                postId: postId,
-                userId: currentUser.id,
-                text: content
-            })
-        });
+        let comments = await loadData('comments.json');
+        let posts = await loadData('posts.json');
         
-        const data = await response.json();
+        const newComment = {
+            id: generateId(),
+            postId: postId,
+            author: currentUser.username,
+            content: content,
+            created: new Date().toISOString()
+        };
         
-        if (data.status === 'success') {
-            commentInput.value = '';
-            showNotification('Comment posted!', 'success');
-            
-            // Refresh comments display
-            const updatedComments = await getPostComments(postId);
-            document.getElementById('comments-list').innerHTML = await renderComments(updatedComments);
-            updateModalCommentCount(postId);
-        } else {
-            showNotification(data.error || 'Error posting comment', 'error');
+        comments.push(newComment);
+        
+        // Update post comment count
+        const post = posts.find(p => p.id === postId);
+        if (post) {
+            post.comments = (post.comments || 0) + 1;
         }
+        
+        await saveData('comments.json', comments);
+        await saveData('posts.json', posts);
+        
+        // Clear input
+        commentInput.value = '';
+        
+        showNotification('Comment posted!', 'success');
+        
+        // Refresh comments display to show the new comment with all features
+        const updatedComments = await loadPostComments(postId);
+        document.getElementById('comments-list').innerHTML = await renderComments(updatedComments);
+        updateModalCommentCount(postId);
+        
     } catch (error) {
         console.error('Error posting comment:', error);
         showNotification('Error posting comment', 'error');
@@ -411,31 +499,48 @@ async function submitPostComment(postId) {
 // Toggle like on post (from modal)
 async function togglePostLike(postId, button) {
     try {
-        const response = await fetch('/api/post-actions.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'like',
-                postId: postId,
-                userId: currentUser.id
-            })
-        });
+        let likes = await loadData('likes.json');
+        let posts = await loadData('posts.json');
         
-        const data = await response.json();
+        const existingLike = likes.find(like => like.postId === postId && like.userId === currentUser.id);
         
-        if (data.status === 'success') {
-            if (data.action === 'liked') {
-                button.innerHTML = '<i class="fas fa-heart"></i> Like';
-                button.classList.add('liked');
-            } else {
-                button.innerHTML = '<i class="far fa-heart"></i> Like';
-                button.classList.remove('liked');
-            }
+        if (existingLike) {
+            // Remove like
+            likes = likes.filter(like => !(like.postId === postId && like.userId === currentUser.id));
+            button.innerHTML = '<i class="far fa-heart"></i> Like';
+            button.classList.remove('liked');
             
-            // Update like count in modal
-            updateModalLikeCount(postId);
-            showNotification(data.action === 'liked' ? 'Post liked!' : 'Post unliked', 'success');
+            // Decrease like count in posts data
+            const post = posts.find(p => p.id === postId);
+            if (post && post.likes > 0) {
+                post.likes = (post.likes || 0) - 1;
+            }
+        } else {
+            // Add like
+            likes.push({
+                id: generateId(),
+                postId: postId,
+                userId: currentUser.id,
+                created: new Date().toISOString()
+            });
+            button.innerHTML = '<i class="fas fa-heart"></i> Like';
+            button.classList.add('liked');
+            
+            // Increase like count in posts data
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                post.likes = (post.likes || 0) + 1;
+            }
         }
+        
+        await saveData('likes.json', likes);
+        await saveData('posts.json', posts);
+        
+        // Update like count in modal
+        updateModalLikeCount(postId);
+        
+        showNotification(existingLike ? 'Post unliked' : 'Post liked!', 'success');
+        
     } catch (error) {
         console.error('Error toggling like:', error);
         showNotification('Error updating like', 'error');
@@ -445,29 +550,30 @@ async function togglePostLike(postId, button) {
 // Toggle save on post (from modal)
 async function togglePostSave(postId, button) {
     try {
-        const response = await fetch('/api/post-actions.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'save',
+        let saves = await loadData('saves.json');
+        const existingSave = saves.find(save => save.postId === postId && save.userId === currentUser.id);
+        
+        if (existingSave) {
+            // Remove save
+            saves = saves.filter(save => !(save.postId === postId && save.userId === currentUser.id));
+            button.innerHTML = '<i class="far fa-bookmark"></i> Save';
+            button.classList.remove('saved');
+            showNotification('Post removed from saved', 'success');
+        } else {
+            // Add save
+            saves.push({
+                id: generateId(),
                 postId: postId,
-                userId: currentUser.id
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.status === 'success') {
-            if (data.action === 'saved') {
-                button.innerHTML = '<i class="fas fa-bookmark"></i> Save';
-                button.classList.add('saved');
-                showNotification('Post saved!', 'success');
-            } else {
-                button.innerHTML = '<i class="far fa-bookmark"></i> Save';
-                button.classList.remove('saved');
-                showNotification('Post removed from saved', 'success');
-            }
+                userId: currentUser.id,
+                created: new Date().toISOString()
+            });
+            button.innerHTML = '<i class="fas fa-bookmark"></i> Save';
+            button.classList.add('saved');
+            showNotification('Post saved!', 'success');
         }
+        
+        await saveData('saves.json', saves);
+        
     } catch (error) {
         console.error('Error toggling save:', error);
         showNotification('Error updating save', 'error');

@@ -154,48 +154,34 @@ function addPostInteractionListeners() {
 
 async function toggleLike(postId, button) {
     try {
-        let likes = await loadData('likes.json');
-        let posts = await loadData('posts.json');
-        
-        const existingLike = likes.find(like => like.postId === postId && like.userId === currentUser.id);
-        
-        if (existingLike) {
-            // Remove like
-            likes = likes.filter(like => !(like.postId === postId && like.userId === currentUser.id));
-            button.innerHTML = '<i class="far fa-heart"></i>';
-            button.classList.remove('liked');
-            
-            // Decrease like count in posts data
-            const post = posts.find(p => p.id === postId);
-            if (post && post.likes > 0) {
-                post.likes = (post.likes || 0) - 1;
-            }
-        } else {
-            // Add like
-            likes.push({
-                id: generateId(),
+        const response = await fetch('/api/post-actions.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'like',
                 postId: postId,
-                userId: currentUser.id,
-                created: new Date().toISOString()
-            });
-            button.innerHTML = '<i class="fas fa-heart"></i>';
-            button.classList.add('liked');
-            
-            // Increase like count in posts data
-            const post = posts.find(p => p.id === postId);
-            if (post) {
-                post.likes = (post.likes || 0) + 1;
+                userId: currentUser.id
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            if (data.action === 'liked') {
+                button.innerHTML = '<i class="fas fa-heart"></i>';
+                button.classList.add('liked');
+                showNotification('Post liked!', 'success');
+            } else {
+                button.innerHTML = '<i class="far fa-heart"></i>';
+                button.classList.remove('liked');
+                showNotification('Post unliked', 'success');
             }
+            
+            // Update post like count in UI
+            updatePostLikeCount(postId);
+        } else {
+            showNotification('Error updating like', 'error');
         }
-        
-        await saveData('likes.json', likes);
-        await saveData('posts.json', posts);
-        
-        // Update post like count in UI
-        updatePostLikeCount(postId);
-        
-        showNotification(existingLike ? 'Post unliked' : 'Post liked!', 'success');
-        
     } catch (error) {
         console.error('Error toggling like:', error);
         showNotification('Error updating like', 'error');
@@ -204,30 +190,31 @@ async function toggleLike(postId, button) {
 
 async function toggleSave(postId, button) {
     try {
-        let saves = await loadData('saves.json');
-        const existingSave = saves.find(save => save.postId === postId && save.userId === currentUser.id);
-        
-        if (existingSave) {
-            // Remove save
-            saves = saves.filter(save => !(save.postId === postId && save.userId === currentUser.id));
-            button.innerHTML = '<i class="far fa-bookmark"></i>';
-            button.classList.remove('saved');
-            showNotification('Post removed from saved', 'success');
-        } else {
-            // Add save
-            saves.push({
-                id: generateId(),
+        const response = await fetch('/api/post-actions.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'save',
                 postId: postId,
-                userId: currentUser.id,
-                created: new Date().toISOString()
-            });
-            button.innerHTML = '<i class="fas fa-bookmark"></i>';
-            button.classList.add('saved');
-            showNotification('Post saved!', 'success');
+                userId: currentUser.id
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            if (data.action === 'saved') {
+                button.innerHTML = '<i class="fas fa-bookmark"></i>';
+                button.classList.add('saved');
+                showNotification('Post saved!', 'success');
+            } else {
+                button.innerHTML = '<i class="far fa-bookmark"></i>';
+                button.classList.remove('saved');
+                showNotification('Post removed from saved', 'success');
+            }
+        } else {
+            showNotification('Error updating save', 'error');
         }
-        
-        await saveData('saves.json', saves);
-        
     } catch (error) {
         console.error('Error toggling save:', error);
         showNotification('Error updating save', 'error');
@@ -264,28 +251,25 @@ async function loadUserInteractions() {
     if (!currentUser) return;
     
     try {
-        const likes = await loadData('likes.json');
-        const saves = await loadData('saves.json');
+        const userData = await getUserData(currentUser.id, 'all');
+        const likes = userData.likes || [];
+        const saves = userData.saves || [];
         
         // Update like buttons
         likes.forEach(like => {
-            if (like.userId === currentUser.id) {
-                const likeBtn = document.querySelector(`[data-post-id="${like.postId}"].like-btn`);
-                if (likeBtn) {
-                    likeBtn.innerHTML = '<i class="fas fa-heart"></i>';
-                    likeBtn.classList.add('liked');
-                }
+            const likeBtn = document.querySelector(`[data-post-id="${like.postId}"].like-btn`);
+            if (likeBtn) {
+                likeBtn.innerHTML = '<i class="fas fa-heart"></i>';
+                likeBtn.classList.add('liked');
             }
         });
         
         // Update save buttons
         saves.forEach(save => {
-            if (save.userId === currentUser.id) {
-                const saveBtn = document.querySelector(`[data-post-id="${save.postId}"].save-btn`);
-                if (saveBtn) {
-                    saveBtn.innerHTML = '<i class="fas fa-bookmark"></i>';
-                    saveBtn.classList.add('saved');
-                }
+            const saveBtn = document.querySelector(`[data-post-id="${save.postId}"].save-btn`);
+            if (saveBtn) {
+                saveBtn.innerHTML = '<i class="fas fa-bookmark"></i>';
+                saveBtn.classList.add('saved');
             }
         });
     } catch (error) {

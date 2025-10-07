@@ -985,29 +985,30 @@ async function toggleLike(postId, button) {
 
 async function toggleSave(postId, button) {
     try {
-        const response = await fetch('/api/post-actions.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'save',
+        let saves = await loadData('saves.json');
+        const existingSave = saves.find(save => save.postId === postId && save.userId === currentUser.id);
+        
+        if (existingSave) {
+            // Remove save
+            saves = saves.filter(save => !(save.postId === postId && save.userId === currentUser.id));
+            button.innerHTML = '<i class="far fa-bookmark"></i>';
+            button.classList.remove('saved');
+            showNotification('Post removed from saved', 'success');
+        } else {
+            // Add save
+            saves.push({
+                id: generateId(),
                 postId: postId,
-                userId: currentUser.id
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.status === 'success') {
-            if (data.action === 'saved') {
-                button.innerHTML = '<i class="fas fa-bookmark"></i>';
-                button.classList.add('saved');
-                showNotification('Post saved!', 'success');
-            } else {
-                button.innerHTML = '<i class="far fa-bookmark"></i>';
-                button.classList.remove('saved');
-                showNotification('Post removed from saved', 'success');
-            }
+                userId: currentUser.id,
+                created: new Date().toISOString()
+            });
+            button.innerHTML = '<i class="fas fa-bookmark"></i>';
+            button.classList.add('saved');
+            showNotification('Post saved!', 'success');
         }
+        
+        await saveData('saves.json', saves);
+        
     } catch (error) {
         console.error('Error toggling save:', error);
         showNotification('Error updating save', 'error');

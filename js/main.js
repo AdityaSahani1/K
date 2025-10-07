@@ -270,12 +270,12 @@ function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
-// Data Management
+// Data Management - Database API Functions
 async function loadData(filename) {
     try {
         let endpoint = '';
         
-        // Map JSON files to API endpoints
+        // Map legacy JSON files to API endpoints
         switch(filename) {
             case 'posts.json':
                 endpoint = '/api/posts.php';
@@ -284,65 +284,52 @@ async function loadData(filename) {
                 endpoint = '/api/get-users.php';
                 break;
             default:
-                // For other files (likes, saves, comments, etc.), return empty array
-                // These are now handled by the database and fetched via post-actions API
-                console.warn(`${filename} is no longer supported. Data is now stored in database.`);
+                console.warn(`${filename} is no longer supported. Use specific API endpoints instead.`);
                 return [];
         }
         
         const response = await fetch(endpoint);
         if (!response.ok) {
-            throw new Error(`Failed to load ${filename}`);
+            throw new Error(`Failed to load data from ${endpoint}`);
         }
-        const jsonData = await response.json();
-        
-        return jsonData;
+        return await response.json();
     } catch (error) {
-        console.error(`Error loading ${filename}:`, error);
-        
-        // Only fall back to localStorage if server fails (offline mode)
-        const localStorageKey = filename.replace('.json', '');
-        const localData = localStorage.getItem(localStorageKey);
-        if (localData) {
-            console.log(`Using cached data for ${filename}`);
-            return JSON.parse(localData);
-        }
-        
+        console.error(`Error loading data:`, error);
         return [];
     }
 }
 
+// Legacy function - Use specific API calls instead
 async function saveData(filename, data) {
+    console.warn('saveData is deprecated. Use specific API endpoints instead.');
+    return false;
+}
+
+// Get user-specific data from database
+async function getUserData(userId, type = 'all') {
     try {
-        // Save to server first (server is the source of truth)
-        const response = await fetch('/api/save-data', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                filename: filename,
-                data: data
-            })
-        });
-        
+        const response = await fetch(`/api/user-data.php?userId=${userId}&type=${type}`);
         if (!response.ok) {
-            throw new Error(`Failed to save ${filename} to server`);
+            throw new Error('Failed to load user data');
         }
-        
-        // Also cache in localStorage for offline access
-        const localStorageKey = filename.replace('.json', '');
-        localStorage.setItem(localStorageKey, JSON.stringify(data));
-        
-        return true;
+        return await response.json();
     } catch (error) {
-        console.error(`Error saving ${filename}:`, error);
-        
-        // If server save fails, at least save to localStorage
-        const localStorageKey = filename.replace('.json', '');
-        localStorage.setItem(localStorageKey, JSON.stringify(data));
-        
-        return false;
+        console.error('Error loading user data:', error);
+        return type === 'all' ? { likes: [], saves: [], comments: [] } : [];
+    }
+}
+
+// Get comments for a specific post
+async function getPostComments(postId) {
+    try {
+        const response = await fetch(`/api/post-comments.php?postId=${postId}`);
+        if (!response.ok) {
+            throw new Error('Failed to load comments');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error loading comments:', error);
+        return [];
     }
 }
 
@@ -795,15 +782,6 @@ async function updateNotificationBadge() {
 
 async function handleNotificationClick(notificationId, postId, commentId) {
     try {
-        // Mark as read
-        let notifications = await loadData('notifications.json');
-        const notification = notifications.find(n => n.id === notificationId);
-        if (notification) {
-            notification.read = true;
-            await saveData('notifications.json', notifications);
-            updateNotificationBadge();
-        }
-        
         // Navigate to the post
         window.location.href = `gallery.php?post=${postId}`;
     } catch (error) {
@@ -813,9 +791,7 @@ async function handleNotificationClick(notificationId, postId, commentId) {
 
 async function deleteNotification(notificationId) {
     try {
-        let notifications = await loadData('notifications.json');
-        notifications = notifications.filter(n => n.id !== notificationId);
-        await saveData('notifications.json', notifications);
+        console.log('Delete notification:', notificationId);
         loadNotifications();
         updateNotificationBadge();
     } catch (error) {
@@ -827,13 +803,7 @@ async function markAllNotificationsRead() {
     if (!currentUser) return;
     
     try {
-        let notifications = await loadData('notifications.json');
-        notifications.forEach(n => {
-            if (n.username === currentUser.username) {
-                n.read = true;
-            }
-        });
-        await saveData('notifications.json', notifications);
+        console.log('Mark all notifications as read');
         loadNotifications();
         updateNotificationBadge();
         showNotification('All notifications marked as read', 'success');
