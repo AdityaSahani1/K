@@ -11,24 +11,50 @@ class EmailHandler {
     private $mail;
     private $fromEmail;
     private $fromName;
+    private $config;
     
     public function __construct() {
-        $this->fromEmail = getenv('SMTP_FROM_EMAIL') ?: 'snapsera.team@gmail.com';
-        $this->fromName = getenv('SMTP_FROM_NAME') ?: 'SnapSera';
+        $this->loadConfig();
+        
+        $this->fromEmail = $this->getConfigValue('SMTP_FROM_EMAIL', 'snapsera.team@gmail.com');
+        $this->fromName = $this->getConfigValue('SMTP_FROM_NAME', 'SnapSera');
         
         $this->mail = new PHPMailer(true);
         $this->setupSMTP();
     }
     
+    private function loadConfig() {
+        $configFile = __DIR__ . '/../config/config.php';
+        if (file_exists($configFile)) {
+            $this->config = require $configFile;
+        } else {
+            $this->config = [];
+        }
+    }
+    
+    private function getConfigValue($key, $default = null) {
+        // Priority: config.php > environment variables > default
+        if (isset($this->config[$key])) {
+            return $this->config[$key];
+        }
+        
+        $envValue = getenv($key);
+        if ($envValue !== false && $envValue !== '') {
+            return $envValue;
+        }
+        
+        return $default;
+    }
+    
     private function setupSMTP() {
-        // Server settings - use environment variables with fallbacks
+        // Server settings - use config.php, then environment variables, then fallbacks
         $this->mail->isSMTP();
-        $this->mail->Host       = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
+        $this->mail->Host       = $this->getConfigValue('SMTP_HOST', 'smtp.gmail.com');
         $this->mail->SMTPAuth   = true;
-        $this->mail->Username   = getenv('SMTP_USERNAME') ?: $this->fromEmail;
-        $this->mail->Password   = getenv('SMTP_PASSWORD') ?: getenv('GMAIL_APP_PASSWORD');
-        $this->mail->SMTPSecure = (getenv('SMTP_ENCRYPTION') === 'tls') ? PHPMailer::ENCRYPTION_STARTTLS : PHPMailer::ENCRYPTION_SMTPS;
-        $this->mail->Port       = getenv('SMTP_PORT') ?: 587;
+        $this->mail->Username   = $this->getConfigValue('SMTP_USERNAME', $this->fromEmail);
+        $this->mail->Password   = $this->getConfigValue('SMTP_PASSWORD', $this->getConfigValue('GMAIL_APP_PASSWORD', ''));
+        $this->mail->SMTPSecure = ($this->getConfigValue('SMTP_ENCRYPTION', 'tls') === 'tls') ? PHPMailer::ENCRYPTION_STARTTLS : PHPMailer::ENCRYPTION_SMTPS;
+        $this->mail->Port       = (int)$this->getConfigValue('SMTP_PORT', 587);
         
         $this->mail->setFrom($this->fromEmail, $this->fromName);
         $this->mail->isHTML(true);

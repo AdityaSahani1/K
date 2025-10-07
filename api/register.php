@@ -65,22 +65,21 @@ try {
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
     $created = date('Y-m-d H:i:s');
     
-    $newUser = [
-        'id' => $userId,
-        'name' => $name,
-        'username' => $username,
-        'email' => $email,
-        'password' => $hashedPassword,
-        'role' => 'user',
-        'created' => $created,
-        'bio' => '',
-        'isVerified' => false
-    ];
+    $db->execute(
+        "INSERT INTO users (id, name, username, email, password, role, created, isVerified) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        [$userId, $name, $username, $email, $hashedPassword, 'user', $created, 0]
+    );
     
     echo json_encode([
         'status' => 'success',
-        'message' => 'User created, pending email verification',
-        'user' => $newUser
+        'message' => 'User created successfully',
+        'user' => [
+            'id' => $userId,
+            'name' => $name,
+            'username' => $username,
+            'email' => $email,
+            'role' => 'user'
+        ]
     ]);
     
 } catch (Exception $e) {

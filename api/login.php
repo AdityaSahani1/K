@@ -48,10 +48,11 @@ try {
     }
     
     $sessionToken = bin2hex(random_bytes(32));
+    $lastLogin = date('Y-m-d H:i:s');
     
     $db->execute(
-        "UPDATE users SET lastLogin = datetime('now') WHERE id = ?",
-        [$user['id']]
+        "UPDATE users SET lastLogin = ? WHERE id = ?",
+        [$lastLogin, $user['id']]
     );
     
     echo json_encode([

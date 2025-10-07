@@ -49,12 +49,29 @@ try {
 }
 
 function getAllPosts($db) {
-    $posts = $db->fetchAll("SELECT * FROM posts ORDER BY created DESC");
+    $conn = $db->getConnection();
+    $stmt = $conn->prepare("
+        SELECT p.*, u.username, u.name as authorName, u.profilePicture as authorProfile
+        FROM posts p
+        LEFT JOIN users u ON p.author = u.username OR p.author = u.id
+        ORDER BY p.created DESC
+    ");
+    $stmt->execute();
+    $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode(array_map('formatPost', $posts));
 }
 
 function getPost($id, $db) {
-    $post = $db->fetchOne("SELECT * FROM posts WHERE id = ? LIMIT 1", [$id]);
+    $conn = $db->getConnection();
+    $stmt = $conn->prepare("
+        SELECT p.*, u.username, u.name as authorName, u.profilePicture as authorProfile
+        FROM posts p
+        LEFT JOIN users u ON p.author = u.username OR p.author = u.id
+        WHERE p.id = ?
+        LIMIT 1
+    ");
+    $stmt->execute([$id]);
+    $post = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if ($post) {
         echo json_encode(formatPost($post));
@@ -139,7 +156,9 @@ function formatPost($row) {
         'imageUrl' => $row['imageUrl'],
         'category' => $row['category'],
         'tags' => json_decode($row['tags'] ?? '[]', true),
-        'author' => $row['author'],
+        'author' => $row['username'] ?? $row['author'],
+        'authorName' => $row['authorName'] ?? $row['username'] ?? $row['author'],
+        'authorProfile' => $row['authorProfile'] ?? '',
         'created' => $row['created'],
         'likes' => (int)$row['likes'],
         'comments' => (int)$row['comments'],

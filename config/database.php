@@ -4,10 +4,12 @@ class Database {
     private static $instance = null;
     private $conn;
     private $dbtype;
+    private $config;
     
     private function __construct() {
-        // Database type: 'mysql' for InfinityFree, 'sqlite' for Replit testing
-        $this->dbtype = getenv('DB_TYPE') ?: 'mysql';
+        $this->loadConfig();
+        
+        $this->dbtype = $this->getConfigValue('DB_TYPE', 'sqlite');
         
         try {
             if ($this->dbtype === 'sqlite') {
@@ -21,14 +23,37 @@ class Database {
         }
     }
     
-    private function connectMySQL() {
-        $host = 'sql106.infinityfree.com';
-        $username = 'if0_40098287';
-        $password = 'lIHeuEjslJ0';
-        $database = 'if0_40098287_snapsera';
-        $port = 3306;
+    private function loadConfig() {
+        $configFile = __DIR__ . '/config.php';
+        if (file_exists($configFile)) {
+            $this->config = require $configFile;
+        } else {
+            $this->config = [];
+        }
         
-        // Use PDO for MySQL too for consistency
+        require_once __DIR__ . '/env-loader.php';
+    }
+    
+    private function getConfigValue($key, $default = null) {
+        if (isset($this->config[$key])) {
+            return $this->config[$key];
+        }
+        
+        $envValue = getenv($key);
+        if ($envValue !== false) {
+            return $envValue;
+        }
+        
+        return $default;
+    }
+    
+    private function connectMySQL() {
+        $host = $this->getConfigValue('MYSQL_HOST', 'localhost');
+        $username = $this->getConfigValue('MYSQL_USERNAME', 'root');
+        $password = $this->getConfigValue('MYSQL_PASSWORD', '');
+        $database = $this->getConfigValue('MYSQL_DATABASE', 'snapsera');
+        $port = $this->getConfigValue('MYSQL_PORT', 3306);
+        
         $dsn = "mysql:host=$host;port=$port;dbname=$database;charset=utf8mb4";
         $this->conn = new PDO($dsn, $username, $password, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
