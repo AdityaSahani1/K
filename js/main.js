@@ -322,7 +322,10 @@ async function getUserData(userId, type = 'all') {
 // Get comments for a specific post
 async function getPostComments(postId) {
     try {
-        const response = await fetch(`/api/post-comments.php?postId=${postId}`);
+        const url = currentUser 
+            ? `/api/post-comments.php?postId=${postId}&userId=${currentUser.id}`
+            : `/api/post-comments.php?postId=${postId}`;
+        const response = await fetch(url);
         if (!response.ok) {
             throw new Error('Failed to load comments');
         }

@@ -245,27 +245,30 @@ async function loadPostComments(postId) {
 
 // Render comments with likes and replies
 async function renderComments(comments) {
-    const commentLikes = [];
-    
     console.log('All comments:', comments);
     const parentComments = comments.filter(comment => !comment.replyTo);
     console.log('Parent comments:', parentComments);
     
     return parentComments.map(comment => {
-        const isLiked = currentUser && commentLikes.some(like => like.commentId === comment.id && like.userId === currentUser.id);
-        const likeCount = commentLikes.filter(like => like.commentId === comment.id).length;
+        const isLiked = comment.isLiked || false;
         const replies = comments.filter(c => c.replyTo === comment.id);
         
         return `
             <div class="comment" data-comment-id="${comment.id}">
                 <div class="comment-header">
                     <div class="comment-meta">
-                        <span class="comment-author">${comment.name || comment.username || 'Anonymous'}</span>
+                        <div class="comment-avatar">
+                            ${comment.profilePicture ? 
+                                `<img src="${comment.profilePicture}" alt="${comment.username || 'User'}">` : 
+                                `<i class="fas fa-user"></i>`
+                            }
+                        </div>
+                        <span class="comment-author">${comment.username || 'anonymous'}</span>
                         <span class="comment-date">${formatDate(comment.created)}</span>
                     </div>
                     ${currentUser ? `
                         <button class="comment-action-btn comment-like-btn ${isLiked ? 'liked' : ''}" onclick="toggleCommentLike('${comment.id}', this)">
-                            <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> ${(comment.likes || likeCount) > 0 ? (comment.likes || likeCount) : ''}
+                            <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> ${comment.likes > 0 ? comment.likes : ''}
                         </button>
                     ` : ''}
                 </div>
@@ -275,16 +278,21 @@ async function renderComments(comments) {
                 </div>
                 <div class="comment-actions">
                     ${currentUser ? `
-                        <button class="comment-action-btn comment-reply-btn" onclick="showReplyInput('${comment.id}', '${comment.username || comment.name || 'user'}')">
+                        <button class="comment-action-btn comment-reply-btn" onclick="showReplyInput('${comment.id}', '${comment.username || 'user'}')">
                             <i class="fas fa-reply"></i> Reply
                         </button>
+                        ${(currentUser.id === comment.userId || currentUser.role === 'admin') ? `
+                            <button class="comment-action-btn comment-delete-btn" onclick="deleteComment('${comment.id}', this)">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        ` : ''}
                     ` : ''}
                 </div>
                 <div class="reply-input-container" id="reply-input-${comment.id}" style="display: none;">
                     <textarea class="reply-textarea" placeholder="Write a reply..." id="reply-text-${comment.id}"></textarea>
                     <div class="reply-actions">
                         <button class="btn-secondary" onclick="hideReplyInput('${comment.id}')">Cancel</button>
-                        <button class="btn-primary" onclick="submitReply('${comment.id}', '${comment.username || comment.name || 'user'}')">Reply</button>
+                        <button class="btn-primary" onclick="submitReply('${comment.id}', '${comment.username || 'user'}')">Reply</button>
                     </div>
                 </div>
                 ${replies.length > 0 ? `
@@ -293,17 +301,30 @@ async function renderComments(comments) {
                             <div class="comment reply" data-comment-id="${reply.id}">
                                 <div class="comment-header">
                                     <div class="comment-meta">
-                                        <span class="comment-author">${reply.name || reply.username || 'Anonymous'}</span>
+                                        <div class="comment-avatar">
+                                            ${reply.profilePicture ? 
+                                                `<img src="${reply.profilePicture}" alt="${reply.username || 'User'}">` : 
+                                                `<i class="fas fa-user"></i>`
+                                            }
+                                        </div>
+                                        <span class="comment-author">${reply.username || 'anonymous'}</span>
                                         <span class="comment-date">${formatDate(reply.created)}</span>
                                     </div>
                                     ${currentUser ? `
-                                        <button class="comment-action-btn comment-like-btn ${commentLikes.some(like => like.commentId === reply.id && like.userId === currentUser.id) ? 'liked' : ''}" onclick="toggleCommentLike('${reply.id}', this)">
-                                            <i class="${commentLikes.some(like => like.commentId === reply.id && like.userId === currentUser.id) ? 'fas' : 'far'} fa-heart"></i> ${(reply.likes || 0) > 0 ? reply.likes : ''}
+                                        <button class="comment-action-btn comment-like-btn ${reply.isLiked ? 'liked' : ''}" onclick="toggleCommentLike('${reply.id}', this)">
+                                            <i class="${reply.isLiked ? 'fas' : 'far'} fa-heart"></i> ${reply.likes > 0 ? reply.likes : ''}
                                         </button>
                                     ` : ''}
                                 </div>
                                 <div class="comment-content">
                                     <span class="reply-to">@${reply.replyToUsername}</span> ${reply.text || reply.content || ''}
+                                </div>
+                                <div class="comment-actions">
+                                    ${currentUser && (currentUser.id === reply.userId || currentUser.role === 'admin') ? `
+                                        <button class="comment-action-btn comment-delete-btn" onclick="deleteComment('${reply.id}', this)">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    ` : ''}
                                 </div>
                             </div>
                         `).join('')}
@@ -336,12 +357,16 @@ async function toggleCommentLike(commentId, button) {
         
         const data = await response.json();
         
-        if (data.action === 'liked') {
-            button.classList.add('liked');
-            button.innerHTML = `<i class="fas fa-heart"></i> ${data.likes > 0 ? data.likes : ''}`;
+        if (data.status === 'success') {
+            if (data.action === 'liked') {
+                button.classList.add('liked');
+                button.innerHTML = `<i class="fas fa-heart"></i> ${data.likes > 0 ? data.likes : ''}`;
+            } else {
+                button.classList.remove('liked');
+                button.innerHTML = `<i class="far fa-heart"></i> ${data.likes > 0 ? data.likes : ''}`;
+            }
         } else {
-            button.classList.remove('liked');
-            button.innerHTML = `<i class="far fa-heart"></i> ${data.likes > 0 ? data.likes : ''}`;
+            showNotification(data.error || 'Error updating like', 'error');
         }
     } catch (error) {
         console.error('Error toggling comment like:', error);
@@ -476,6 +501,52 @@ async function submitPostComment(postId) {
     } catch (error) {
         console.error('Error posting comment:', error);
         showNotification('Error posting comment', 'error');
+    }
+}
+
+// Delete comment
+async function deleteComment(commentId, button) {
+    if (!currentUser) {
+        showAuthModal();
+        return;
+    }
+    
+    if (!confirm('Are you sure you want to delete this comment?')) {
+        return;
+    }
+    
+    const postId = document.getElementById('post-modal').dataset.postId;
+    
+    try {
+        const response = await fetch('/api/post-actions.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'delete_comment',
+                commentId: commentId,
+                userId: currentUser.id
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            showNotification('Comment deleted', 'success');
+            
+            // Remove comment from UI
+            const commentElement = button.closest('.comment');
+            if (commentElement) {
+                commentElement.remove();
+            }
+            
+            // Update comment count
+            updateModalCommentCount(postId);
+        } else {
+            showNotification(data.error || 'Error deleting comment', 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting comment:', error);
+        showNotification('Error deleting comment', 'error');
     }
 }
 

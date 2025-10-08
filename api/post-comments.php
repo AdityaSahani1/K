@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 $postId = $_GET['postId'] ?? '';
+$userId = $_GET['userId'] ?? null;
 
 if (empty($postId)) {
     http_response_code(400);
@@ -40,6 +41,15 @@ try {
     ");
     $stmt->execute([$postId]);
     $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Add isLiked flag for each comment if userId is provided
+    if ($userId) {
+        foreach ($comments as &$comment) {
+            $stmt = $conn->prepare("SELECT id FROM comment_likes WHERE commentId = ? AND userId = ? LIMIT 1");
+            $stmt->execute([$comment['id'], $userId]);
+            $comment['isLiked'] = $stmt->fetch(PDO::FETCH_ASSOC) ? true : false;
+        }
+    }
     
     echo json_encode($comments);
 } catch (Exception $e) {

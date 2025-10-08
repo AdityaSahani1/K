@@ -1194,59 +1194,15 @@ INSERT INTO users (id, name, username, email, password, role, created, isVerifie
 
 
 
--- Insert sample posts
-
-
-
-
-
-
-
-INSERT INTO posts (id, title, description, imageUrl, category, tags, author, created, featured) VALUES
-
-
-
-
-
-
-
-('post_68e3e993cd52f', 'Mountain Sunrise', 'Beautiful sunrise over mountain peaks', 'https://picsum.photos/800/600?random=0', 'art', '["landscape","sunrise","mountains"]', 'user_68e3e993baeb3', '2025-10-06 16:08:51', TRUE),
-
-
-
-
-
-
-
-('post_68e3e993d246c', 'City Lights', 'Urban nightscape with city lights', 'https://picsum.photos/800/600?random=1', 'urban', '["city","night","architecture"]', 'user_68e3e993baeb3', '2025-10-05 16:08:51', FALSE),
-
-
-
-
-
-
-
-('post_68e3e993d8eee', 'Ocean Waves', 'Peaceful ocean waves at sunset', 'https://picsum.photos/800/600?random=2', 'nature', '["ocean","sunset","waves"]', 'user_68e3e993baeb3', '2025-10-04 16:08:51', FALSE),
-
-
-
-
-
-
-
-('post_68e3e993ddfbd', 'Forest Path', 'Mystical path through the forest', 'https://picsum.photos/800/600?random=3', 'nature', '["forest","path","trees"]', 'user_68e3e993baeb3', '2025-10-03 16:08:51', FALSE),
-
-
-
-
-
-
-
-('post_68e3e993e2393', 'Street Photography', 'Candid moment in the city', 'https://picsum.photos/800/600?random=4', 'urban', '["street","people","city"]', 'user_68e3e993baeb3', '2025-10-02 16:08:51', FALSE);
-
-
-
-
-
-
-
+-- Insert 10 sample posts with zero stats
+INSERT INTO posts (id, title, description, imageUrl, category, tags, author, created, likes, comments, views, featured) VALUES
+('post_68e3e993cd52f', 'Mountain Sunrise', 'Beautiful sunrise over mountain peaks', 'https://picsum.photos/800/600?random=0', 'art', '["landscape","sunrise","mountains"]', 'user_68e3e993baeb3', '2025-10-06 16:08:51', 0, 0, 0, TRUE),
+('post_68e3e993d246c', 'City Lights', 'Urban nightscape with city lights', 'https://picsum.photos/800/600?random=1', 'photography', '["city","night","architecture"]', 'user_68e3e993baeb3', '2025-10-05 16:08:51', 0, 0, 0, FALSE),
+('post_68e3e993d8eee', 'Ocean Waves', 'Peaceful ocean waves at sunset', 'https://picsum.photos/800/600?random=2', 'nature', '["ocean","sunset","waves"]', 'user_68e3e993baeb3', '2025-10-04 16:08:51', 0, 0, 0, FALSE),
+('post_68e3e993ddfbd', 'Forest Path', 'Mystical path through the forest', 'https://picsum.photos/800/600?random=3', 'nature', '["forest","path","trees"]', 'user_68e3e993baeb3', '2025-10-03 16:08:51', 0, 0, 0, FALSE),
+('post_68e3e993e2393', 'Street Photography', 'Candid moment in the city', 'https://picsum.photos/800/600?random=4', 'photography', '["street","people","city"]', 'user_68e3e993baeb3', '2025-10-02 16:08:51', 0, 0, 0, FALSE),
+('post_68e3e993e7890', 'Abstract Art', 'Colorful abstract composition', 'https://picsum.photos/800/600?random=5', 'art', '["abstract","colors","modern"]', 'user_68e3e993baeb3', '2025-10-01 16:08:51', 0, 0, 0, FALSE),
+('post_68e3e993ec123', 'Desert Landscape', 'Golden sand dunes at dusk', 'https://picsum.photos/800/600?random=6', 'nature', '["desert","landscape","dunes"]', 'user_68e3e993baeb3', '2025-09-30 16:08:51', 0, 0, 0, FALSE),
+('post_68e3e993f0456', 'Urban Design', 'Modern architectural masterpiece', 'https://picsum.photos/800/600?random=7', 'design', '["architecture","modern","building"]', 'user_68e3e993baeb3', '2025-09-29 16:08:51', 0, 0, 0, FALSE),
+('post_68e3e993f4789', 'Digital Illustration', 'Vibrant digital artwork', 'https://picsum.photos/800/600?random=8', 'digital', '["illustration","digital","art"]', 'user_68e3e993baeb3', '2025-09-28 16:08:51', 0, 0, 0, FALSE),
+('post_68e3e993f8abc', 'Nature Macro', 'Close-up of morning dew on leaves', 'https://picsum.photos/800/600?random=9', 'photography', '["macro","nature","closeup"]', 'user_68e3e993baeb3', '2025-09-27 16:08:51', 0, 0, 0, FALSE);

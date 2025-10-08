@@ -1,18 +1,7 @@
 <?php
-// Email Handler using PHPMailer (Composer or manual installation)
-
-// Try Composer autoload first (Replit), then manual includes (InfinityFree)
-if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
-    require_once __DIR__ . '/../vendor/autoload.php';
-} elseif (file_exists(__DIR__ . '/../phpmailer/src/PHPMailer.php')) {
-    // Manual PHPMailer installation (for InfinityFree or other hosts without Composer)
-    require_once __DIR__ . '/../phpmailer/src/PHPMailer.php';
-    require_once __DIR__ . '/../phpmailer/src/SMTP.php';
-    require_once __DIR__ . '/../phpmailer/src/Exception.php';
-} else {
-    die('PHPMailer not found. Please install via Composer or download manually from GitHub.');
-}
-
+require_once __DIR__ . '/../vendor/phpmailer/phpmailer/src/PHPMailer.php';
+require_once __DIR__ . '/../vendor/phpmailer/phpmailer/src/SMTP.php';
+require_once __DIR__ . '/../vendor/phpmailer/phpmailer/src/Exception.php';
 require_once __DIR__ . '/../config/env-loader.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -45,7 +34,6 @@ class EmailHandler {
     }
     
     private function getConfigValue($key, $default = null) {
-        // Priority: config.php > environment variables > default
         if (isset($this->config[$key])) {
             return $this->config[$key];
         }
@@ -59,7 +47,6 @@ class EmailHandler {
     }
     
     private function setupSMTP() {
-        // Server settings - use config.php, then environment variables, then fallbacks
         $this->mail->isSMTP();
         $this->mail->Host       = $this->getConfigValue('SMTP_HOST', 'smtp.gmail.com');
         $this->mail->SMTPAuth   = true;
@@ -184,7 +171,6 @@ class EmailHandler {
         $emailsSent = [];
         $errors = [];
         
-        // Send to admin
         try {
             $this->mail->clearAddresses();
             $this->mail->clearReplyTos();
@@ -219,7 +205,6 @@ class EmailHandler {
             error_log("Admin email failed: " . $this->mail->ErrorInfo);
         }
         
-        // Send confirmation to sender
         try {
             $this->mail->clearAddresses();
             $this->mail->clearReplyTos();
@@ -250,7 +235,6 @@ class EmailHandler {
             error_log("Sender email failed: " . $this->mail->ErrorInfo);
         }
         
-        // Return true only if at least the admin email was sent
         if (in_array('admin', $emailsSent)) {
             return true;
         }

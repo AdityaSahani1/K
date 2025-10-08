@@ -25,8 +25,8 @@ try {
     $conn = $db->getConnection();
     
     $userId = $input['userId'] ?? null;
-    if ($userId && in_array($action, ['like', 'save', 'comment', 'comment_like', 'comment_reply'])) {
-        $stmt = $conn->prepare("SELECT id FROM users WHERE id = ? LIMIT 1");
+    if ($userId && in_array($action, ['like', 'save', 'comment', 'comment_like', 'comment_reply', 'delete_comment'])) {
+        $stmt = $conn->prepare("SELECT id, role FROM users WHERE id = ? LIMIT 1");
         $stmt->execute([$userId]);
         $userExists = $stmt->fetch(PDO::FETCH_ASSOC);
         
@@ -55,6 +55,9 @@ try {
             break;
         case 'comment_reply':
             handleCommentReply($conn, $input);
+            break;
+        case 'delete_comment':
+            handleCommentDelete($conn, $input);
             break;
         default:
             http_response_code(400);
@@ -225,7 +228,7 @@ function handleCommentLike($conn, $input) {
         $stmt = $conn->prepare("DELETE FROM comment_likes WHERE commentId = ? AND userId = ?");
         $stmt->execute([$commentId, $userId]);
         
-        $stmt = $conn->prepare("UPDATE comments SET likes = GREATEST(0, likes - 1) WHERE id = ?");
+        $stmt = $conn->prepare("UPDATE comments SET likes = CASE WHEN likes > 0 THEN likes - 1 ELSE 0 END WHERE id = ?");
         $stmt->execute([$commentId]);
         
         // Get updated count
@@ -280,5 +283,53 @@ function handleCommentReply($conn, $input) {
     $post = $stmt->fetch(PDO::FETCH_ASSOC);
     
     echo json_encode(['status' => 'success', 'commentId' => $id, 'comments' => (int)$post['comments']]);
+}
+
+function handleCommentDelete($conn, $input) {
+    $commentId = $input['commentId'] ?? '';
+    $userId = $input['userId'] ?? '';
+    
+    if (empty($commentId) || empty($userId)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Comment ID and User ID are required']);
+        return;
+    }
+    
+    // Get comment and check ownership
+    $stmt = $conn->prepare("SELECT c.postId, c.userId, u.role FROM comments c JOIN users u ON u.id = ? WHERE c.id = ? LIMIT 1");
+    $stmt->execute([$userId, $commentId]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$result) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Comment not found']);
+        return;
+    }
+    
+    $postId = $result['postId'];
+    $commentOwnerId = $result['userId'];
+    $userRole = $result['role'];
+    
+    // Check if user is comment owner OR admin
+    if ($userId !== $commentOwnerId && $userRole !== 'admin') {
+        http_response_code(403);
+        echo json_encode(['error' => 'You do not have permission to delete this comment']);
+        return;
+    }
+    
+    // Delete the comment
+    $stmt = $conn->prepare("DELETE FROM comments WHERE id = ?");
+    $stmt->execute([$commentId]);
+    
+    // Update post comment count
+    $stmt = $conn->prepare("UPDATE posts SET comments = comments - 1 WHERE id = ?");
+    $stmt->execute([$postId]);
+    
+    // Get updated count
+    $stmt = $conn->prepare("SELECT comments FROM posts WHERE id = ?");
+    $stmt->execute([$postId]);
+    $post = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    echo json_encode(['status' => 'success', 'comments' => (int)$post['comments']]);
 }
 ?>

@@ -59,49 +59,39 @@ function sendOTPForVerification($data) {
         
         $otp = sprintf('%06d', mt_rand(0, 999999));
         $db = Database::getInstance();
-        $conn = $db->getConnection();
         
-        // Check if user exists
-        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $user = $result->fetch_assoc();
-        $stmt->close();
+        $user = $db->fetchOne("SELECT id FROM users WHERE email = ? LIMIT 1", [$email]);
         
         $otpExpires = date('Y-m-d H:i:s', time() + 600);
         $otpCreated = date('Y-m-d H:i:s');
         
         if ($user) {
-            // Update existing user
-            $stmt = $conn->prepare("UPDATE users SET otpToken = ?, otpExpires = ?, otpCreated = ? WHERE email = ?");
-            $stmt->bind_param("ssss", $otp, $otpExpires, $otpCreated, $email);
-            $stmt->execute();
-            $stmt->close();
+            $db->execute(
+                "UPDATE users SET otpToken = ?, otpExpires = ?, otpCreated = ? WHERE email = ?",
+                [$otp, $otpExpires, $otpCreated, $email]
+            );
         } else {
-            // New registration - insert user with OTP
             $userData = $data['userData'] ?? null;
             if ($userData) {
-                $stmt = $conn->prepare("INSERT INTO users (id, name, username, email, password, role, created, bio, isVerified, otpToken, otpExpires, otpCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)");
-                $stmt->bind_param("sssssssssss",
-                    $userData['id'],
-                    $userData['name'],
-                    $userData['username'],
-                    $userData['email'],
-                    $userData['password'],
-                    $userData['role'],
-                    $userData['created'],
-                    $userData['bio'],
-                    $otp,
-                    $otpExpires,
-                    $otpCreated
+                $db->execute(
+                    "INSERT INTO users (id, name, username, email, password, role, created, bio, isVerified, otpToken, otpExpires, otpCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)",
+                    [
+                        $userData['id'],
+                        $userData['name'],
+                        $userData['username'],
+                        $userData['email'],
+                        $userData['password'],
+                        $userData['role'],
+                        $userData['created'],
+                        $userData['bio'],
+                        $otp,
+                        $otpExpires,
+                        $otpCreated
+                    ]
                 );
-                $stmt->execute();
-                $stmt->close();
             }
         }
         
-        // Send email
         $emailHandler = new EmailHandler();
         $emailSent = $emailHandler->sendOTPEmail($email, $name, $otp);
         
@@ -130,14 +120,7 @@ function verifyOTP($data) {
         }
         
         $db = Database::getInstance();
-        $conn = $db->getConnection();
-        
-        $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? LIMIT 1");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $user = $result->fetch_assoc();
-        $stmt->close();
+        $user = $db->fetchOne("SELECT * FROM users WHERE email = ? LIMIT 1", [$email]);
         
         if (!$user || !$user['otpToken']) {
             http_response_code(400);
@@ -157,11 +140,10 @@ function verifyOTP($data) {
             return;
         }
         
-        // OTP verified - clear OTP and set verified
-        $stmt = $conn->prepare("UPDATE users SET otpToken = NULL, otpExpires = NULL, otpCreated = NULL, isVerified = 1 WHERE email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $stmt->close();
+        $db->execute(
+            "UPDATE users SET otpToken = NULL, otpExpires = NULL, otpCreated = NULL, isVerified = 1 WHERE email = ?",
+            [$email]
+        );
         
         echo json_encode([
             'status' => 'success',
@@ -187,15 +169,7 @@ function resendOTP($data) {
         }
         
         $db = Database::getInstance();
-        $conn = $db->getConnection();
-        
-        // Check rate limiting
-        $stmt = $conn->prepare("SELECT otpCreated FROM users WHERE email = ? LIMIT 1");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $user = $result->fetch_assoc();
-        $stmt->close();
+        $user = $db->fetchOne("SELECT otpCreated FROM users WHERE email = ? LIMIT 1", [$email]);
         
         if ($user && $user['otpCreated']) {
             $otpAge = time() - strtotime($user['otpCreated']);
@@ -225,14 +199,7 @@ function handleForgotPassword($data) {
         }
         
         $db = Database::getInstance();
-        $conn = $db->getConnection();
-        
-        $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? LIMIT 1");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $user = $result->fetch_assoc();
-        $stmt->close();
+        $user = $db->fetchOne("SELECT * FROM users WHERE email = ? LIMIT 1", [$email]);
         
         if (!$user) {
             http_response_code(404);
@@ -243,10 +210,10 @@ function handleForgotPassword($data) {
         $resetToken = bin2hex(random_bytes(32));
         $resetExpires = date('Y-m-d H:i:s', time() + 3600);
         
-        $stmt = $conn->prepare("UPDATE users SET passwordResetToken = ?, passwordResetExpires = ? WHERE email = ?");
-        $stmt->bind_param("sss", $resetToken, $resetExpires, $email);
-        $stmt->execute();
-        $stmt->close();
+        $db->execute(
+            "UPDATE users SET passwordResetToken = ?, passwordResetExpires = ? WHERE email = ?",
+            [$resetToken, $resetExpires, $email]
+        );
         
         $emailHandler = new EmailHandler();
         $emailSent = $emailHandler->sendPasswordResetEmail($email, $user['name'] ?? $user['username'], $resetToken);
@@ -276,14 +243,7 @@ function handlePasswordReset($data) {
         }
         
         $db = Database::getInstance();
-        $conn = $db->getConnection();
-        
-        $stmt = $conn->prepare("SELECT * FROM users WHERE passwordResetToken = ? LIMIT 1");
-        $stmt->bind_param("s", $token);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $user = $result->fetch_assoc();
-        $stmt->close();
+        $user = $db->fetchOne("SELECT * FROM users WHERE passwordResetToken = ? LIMIT 1", [$token]);
         
         if (!$user) {
             http_response_code(400);
@@ -298,10 +258,10 @@ function handlePasswordReset($data) {
         }
         
         $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
-        $stmt = $conn->prepare("UPDATE users SET password = ?, passwordResetToken = NULL, passwordResetExpires = NULL WHERE passwordResetToken = ?");
-        $stmt->bind_param("ss", $hashedPassword, $token);
-        $stmt->execute();
-        $stmt->close();
+        $db->execute(
+            "UPDATE users SET password = ?, passwordResetToken = NULL, passwordResetExpires = NULL WHERE passwordResetToken = ?",
+            [$hashedPassword, $token]
+        );
         
         echo json_encode(['status' => 'success', 'message' => 'Password reset successfully']);
     } catch (Exception $e) {
@@ -330,14 +290,7 @@ function handleChangePassword($data) {
         }
         
         $db = Database::getInstance();
-        $conn = $db->getConnection();
-        
-        $stmt = $conn->prepare("SELECT password FROM users WHERE id = ? LIMIT 1");
-        $stmt->bind_param("s", $userId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $user = $result->fetch_assoc();
-        $stmt->close();
+        $user = $db->fetchOne("SELECT password FROM users WHERE id = ? LIMIT 1", [$userId]);
         
         if (!$user) {
             http_response_code(404);
@@ -352,10 +305,7 @@ function handleChangePassword($data) {
         }
         
         $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
-        $stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
-        $stmt->bind_param("ss", $hashedPassword, $userId);
-        $stmt->execute();
-        $stmt->close();
+        $db->execute("UPDATE users SET password = ? WHERE id = ?", [$hashedPassword, $userId]);
         
         echo json_encode(['status' => 'success', 'message' => 'Password changed successfully']);
     } catch (Exception $e) {
