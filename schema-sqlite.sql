@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS users (
     otpExpires TEXT,
     otpCreated TEXT,
     passwordResetToken TEXT,
-    passwordResetExpires TEXT
+    passwordResetExpires TEXT,
+    canPost INTEGER DEFAULT 0
 );
 
 -- Posts table

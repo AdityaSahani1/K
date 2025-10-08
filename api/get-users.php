@@ -39,7 +39,7 @@ try {
 
 function getUsers($db) {
     $users = $db->fetchAll(
-        "SELECT id, name, username, email, role, created, bio, isVerified, profilePicture FROM users ORDER BY created DESC"
+        "SELECT id, name, username, email, role, created, bio, isVerified, profilePicture, canPost FROM users ORDER BY created DESC"
     );
     
     $result = array_map(function($row) {
@@ -52,7 +52,8 @@ function getUsers($db) {
             'created' => $row['created'],
             'bio' => $row['bio'] ?? '',
             'isVerified' => (bool)$row['isVerified'],
-            'profilePicture' => $row['profilePicture'] ?? ''
+            'profilePicture' => $row['profilePicture'] ?? '',
+            'canPost' => (bool)($row['canPost'] ?? 0)
         ];
     }, $users);
     
@@ -70,7 +71,7 @@ function updateUser($db) {
     $profilePicture = $input['profilePicture'] ?? '';
     $role = $input['role'] ?? 'user';
     $isVerified = isset($input['isVerified']) ? ($input['isVerified'] ? 1 : 0) : 0;
-    $password = $input['password'] ?? '';
+    $canPost = isset($input['canPost']) ? ($input['canPost'] ? 1 : 0) : 0;
     
     if (empty($id) || empty($username) || empty($email)) {
         http_response_code(400);
@@ -78,18 +79,10 @@ function updateUser($db) {
         return;
     }
     
-    if (!empty($password)) {
-        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-        $db->execute(
-            "UPDATE users SET name = ?, username = ?, email = ?, bio = ?, profilePicture = ?, role = ?, isVerified = ?, password = ? WHERE id = ?",
-            [$name, $username, $email, $bio, $profilePicture, $role, $isVerified, $hashedPassword, $id]
-        );
-    } else {
-        $db->execute(
-            "UPDATE users SET name = ?, username = ?, email = ?, bio = ?, profilePicture = ?, role = ?, isVerified = ? WHERE id = ?",
-            [$name, $username, $email, $bio, $profilePicture, $role, $isVerified, $id]
-        );
-    }
+    $db->execute(
+        "UPDATE users SET name = ?, username = ?, email = ?, bio = ?, profilePicture = ?, role = ?, isVerified = ?, canPost = ? WHERE id = ?",
+        [$name, $username, $email, $bio, $profilePicture, $role, $isVerified, $canPost, $id]
+    );
     
     echo json_encode([
         'status' => 'success',

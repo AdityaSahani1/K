@@ -481,7 +481,10 @@ async function loadUsersTable() {
 
 async function editUser(userId) {
     try {
-        const users = await loadData('users.json');
+        const response = await fetch('/api/get-users.php');
+        if (!response.ok) throw new Error('Failed to load users');
+        
+        const users = await response.json();
         const user = users.find(u => u.id === userId);
         
         if (!user) {
@@ -497,7 +500,8 @@ async function editUser(userId) {
         document.getElementById('edit-user-profile-pic').value = user.profilePicture || '';
         document.getElementById('edit-user-role').value = user.role || 'user';
         document.getElementById('edit-user-verified').checked = user.isVerified || false;
-        document.getElementById('edit-user-password').value = '';
+        document.getElementById('edit-user-canpost').checked = user.canPost || false;
+        document.getElementById('reset-email-address').value = user.email || '';
         
         // Store user ID for form submission
         document.getElementById('edit-user-form').dataset.userId = userId;
@@ -521,7 +525,7 @@ async function handleEditUserForm(e) {
     const profilePicture = document.getElementById('edit-user-profile-pic').value.trim();
     const role = document.getElementById('edit-user-role').value;
     const isVerified = document.getElementById('edit-user-verified').checked;
-    const newPassword = document.getElementById('edit-user-password').value.trim();
+    const canPost = document.getElementById('edit-user-canpost').checked;
     
     if (!name || !username || !email) {
         showNotification('Name, username and email are required', 'error');
@@ -537,12 +541,9 @@ async function handleEditUserForm(e) {
             bio,
             profilePicture,
             role,
-            isVerified
+            isVerified,
+            canPost
         };
-        
-        if (newPassword) {
-            userData.password = newPassword;
-        }
         
         const response = await fetch('/api/get-users.php', {
             method: 'PUT',
@@ -563,6 +564,47 @@ async function handleEditUserForm(e) {
     } catch (error) {
         console.error('Error updating user:', error);
         showNotification('Error updating user', 'error');
+    }
+}
+
+async function sendPasswordResetEmail() {
+    const email = document.getElementById('reset-email-address').value.trim();
+    const sendBtn = document.getElementById('send-reset-email-btn');
+    
+    if (!email) {
+        showNotification('Please enter an email address', 'error');
+        return;
+    }
+    
+    const originalHTML = sendBtn.innerHTML;
+    sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    sendBtn.disabled = true;
+    
+    try {
+        const response = await fetch('/api/auth-actions.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'forgot_password',
+                email: email
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showNotification('Password reset email sent successfully!', 'success');
+        } else {
+            showNotification(data.error || 'Failed to send reset email', 'error');
+        }
+    } catch (error) {
+        console.error('Error sending reset email:', error);
+        showNotification('Error sending reset email', 'error');
+    } finally {
+        sendBtn.innerHTML = originalHTML;
+        sendBtn.disabled = false;
     }
 }
 

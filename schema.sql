@@ -166,6 +166,15 @@ CREATE TABLE IF NOT EXISTS users (
 
 
 
+
+    canPost TINYINT(1) DEFAULT 0,
+
+
+
+
+
+
+
     INDEX idx_username (username),
 
 

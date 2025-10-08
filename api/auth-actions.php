@@ -40,6 +40,12 @@ switch ($action) {
     case 'change_password':
         handleChangePassword($input);
         break;
+    case 'update_profile':
+        handleUpdateProfile($input);
+        break;
+    case 'request_post_permission':
+        handleRequestPostPermission($input);
+        break;
     default:
         http_response_code(400);
         echo json_encode(['error' => 'Invalid action']);
@@ -312,6 +318,92 @@ function handleChangePassword($data) {
         http_response_code(500);
         echo json_encode(['error' => 'Server error']);
         error_log("Change password error: " . $e->getMessage());
+    }
+}
+
+function handleUpdateProfile($data) {
+    try {
+        $userId = $data['userId'] ?? '';
+        $name = $data['name'] ?? '';
+        $username = $data['username'] ?? '';
+        $email = $data['email'] ?? '';
+        $bio = $data['bio'] ?? '';
+        $profilePicture = $data['profilePicture'] ?? '';
+        
+        if (empty($userId) || empty($username) || empty($email)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'User ID, username, and email are required']);
+            return;
+        }
+        
+        $db = Database::getInstance();
+        
+        $existingUser = $db->fetchOne(
+            "SELECT id FROM users WHERE (username = ? OR email = ?) AND id != ? LIMIT 1",
+            [$username, $email, $userId]
+        );
+        
+        if ($existingUser) {
+            http_response_code(409);
+            echo json_encode(['error' => 'Username or email already exists']);
+            return;
+        }
+        
+        $db->execute(
+            "UPDATE users SET name = ?, username = ?, email = ?, bio = ?, profilePicture = ? WHERE id = ?",
+            [$name, $username, $email, $bio, $profilePicture, $userId]
+        );
+        
+        echo json_encode(['status' => 'success', 'message' => 'Profile updated successfully']);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Server error']);
+        error_log("Update profile error: " . $e->getMessage());
+    }
+}
+
+function handleRequestPostPermission($data) {
+    try {
+        $userId = $data['userId'] ?? '';
+        $userName = $data['userName'] ?? '';
+        $userEmail = $data['userEmail'] ?? '';
+        
+        if (empty($userId) || empty($userName) || empty($userEmail)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'User information is required']);
+            return;
+        }
+        
+        $db = Database::getInstance();
+        
+        // Get admin email
+        $admin = $db->fetchOne("SELECT email, name FROM users WHERE role = 'admin' LIMIT 1");
+        
+        if (!$admin) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Admin not found']);
+            return;
+        }
+        
+        $emailHandler = new EmailHandler();
+        $emailSent = $emailHandler->sendPostPermissionRequestEmail(
+            $admin['email'],
+            $admin['name'] ?? 'Admin',
+            $userName,
+            $userEmail,
+            $userId
+        );
+        
+        if ($emailSent) {
+            echo json_encode(['status' => 'success', 'message' => 'Request sent to admin successfully']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to send request email']);
+        }
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Server error']);
+        error_log("Request post permission error: " . $e->getMessage());
     }
 }
 ?>

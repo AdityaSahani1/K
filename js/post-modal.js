@@ -104,7 +104,7 @@ async function openPostModal(postId) {
                     <button class="action-btn share-btn" data-post-id="${post.id}">
                         <i class="fas fa-share-alt"></i> Share
                     </button>
-                    ${post.downloadUrl ? `<button class="action-btn download-btn" data-post-id="${post.id}"><i class="fas fa-download"></i> Download</button>` : ''}
+                    ${post.downloadUrl && post.downloadUrl.trim() !== '' ? `<button class="action-btn download-btn" data-post-id="${post.id}"><i class="fas fa-download"></i> Download</button>` : ''}
                 </div>
                 
                 <div class="comments-section">

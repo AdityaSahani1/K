@@ -241,5 +241,66 @@ class EmailHandler {
         
         return false;
     }
+    
+    public function sendPostPermissionRequestEmail($adminEmail, $adminName, $userName, $userEmail, $userId) {
+        try {
+            $this->mail->clearAddresses();
+            $this->mail->addAddress($adminEmail, $adminName);
+            
+            $this->mail->Subject = 'Post Permission Request - SnapSera';
+            
+            $manageUsersLink = "http://" . $_SERVER['HTTP_HOST'] . "/admin.php";
+            
+            $body = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc;'>
+                <div style='background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;'>
+                    <h1 style='color: white; margin: 0; font-size: 28px;'>Post Permission Request</h1>
+                </div>
+                
+                <div style='background: white; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb;'>
+                    <h2 style='color: #1f2937; margin-bottom: 20px;'>Hello {$adminName},</h2>
+                    
+                    <p style='color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 25px;'>
+                        A user has requested permission to create posts on SnapSera:
+                    </p>
+                    
+                    <div style='background: #f9fafb; padding: 20px; border-radius: 8px; margin: 25px 0;'>
+                        <p style='margin: 5px 0;'><strong>Name:</strong> {$userName}</p>
+                        <p style='margin: 5px 0;'><strong>Email:</strong> {$userEmail}</p>
+                        <p style='margin: 5px 0;'><strong>User ID:</strong> {$userId}</p>
+                    </div>
+                    
+                    <p style='color: #4b5563; font-size: 16px; line-height: 1.6; margin: 25px 0;'>
+                        To grant or deny this request, please visit the admin panel:
+                    </p>
+                    
+                    <div style='text-align: center; margin: 30px 0;'>
+                        <a href='{$manageUsersLink}' style='display: inline-block; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; text-decoration: none; font-size: 16px; font-weight: bold; padding: 15px 30px; border-radius: 8px;'>
+                            Manage Users
+                        </a>
+                    </div>
+                    
+                    <p style='color: #6b7280; font-size: 14px; text-align: center; margin: 25px 0;'>
+                        You can enable or disable posting permissions in the user management section.
+                    </p>
+                    
+                    <hr style='border: none; height: 1px; background-color: #e5e7eb; margin: 25px 0;'>
+                    
+                    <p style='color: #6b7280; font-size: 12px; text-align: center; margin: 0;'>
+                        © 2025 SnapSera. All rights reserved.
+                    </p>
+                </div>
+            </div>
+            ";
+            
+            $this->mail->Body = $body;
+            
+            $this->mail->send();
+            return true;
+        } catch (Exception $e) {
+            error_log("Email sending failed: " . $this->mail->ErrorInfo);
+            return false;
+        }
+    }
 }
 ?>

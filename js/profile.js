@@ -16,6 +16,7 @@ function initProfilePage() {
     initEditProfileModal();
     initChangePasswordModal();
     initResetPasswordButton();
+    initPostPermissions();
     loadUserContent();
 }
 
@@ -636,6 +637,358 @@ function hashPassword(password) {
     }
     return hash.toString(36);
 }
+
+// Post permission functionality
+async function initPostPermissions() {
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    const requestBtn = document.getElementById('request-post-btn');
+    const myPostsTab = document.getElementById('myposts-tab-btn');
+    const myPostsPane = document.getElementById('myposts-tab');
+    const addPostBtn = document.getElementById('add-post-btn');
+    
+    // Fetch fresh user data to check canPost permission
+    try {
+        const response = await fetch('/api/get-users.php');
+        if (response.ok) {
+            const users = await response.json();
+            const userData = users.find(u => u.id === currentUser.id);
+            
+            if (userData) {
+                const canPost = userData.canPost || isAdmin;
+                
+                if (canPost) {
+                    // User can post - show My Posts tab
+                    if (myPostsTab) {
+                        myPostsTab.style.display = 'inline-block';
+                    }
+                    if (myPostsPane) {
+                        myPostsPane.style.display = 'block';
+                    }
+                    
+                    // Hide request button
+                    if (requestBtn) {
+                        requestBtn.style.display = 'none';
+                    }
+                    
+                    // Load user's posts
+                    loadMyPosts();
+                } else {
+                    // User cannot post - show request button (but not for admin)
+                    if (requestBtn && !isAdmin) {
+                        requestBtn.style.display = 'inline-block';
+                        requestBtn.addEventListener('click', handleRequestPostPermission);
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error checking post permissions:', error);
+    }
+    
+    // Initialize post form modal
+    if (addPostBtn) {
+        addPostBtn.addEventListener('click', () => showAddPostModal());
+    }
+    
+    const postFormClose = document.getElementById('user-post-form-close');
+    const cancelUserPost = document.getElementById('cancel-user-post');
+    const userPostForm = document.getElementById('user-post-form');
+    
+    if (postFormClose) {
+        postFormClose.addEventListener('click', () => hideModal('user-post-form-modal'));
+    }
+    if (cancelUserPost) {
+        cancelUserPost.addEventListener('click', () => hideModal('user-post-form-modal'));
+    }
+    if (userPostForm) {
+        userPostForm.addEventListener('submit', handleUserPostForm);
+    }
+}
+
+async function handleRequestPostPermission() {
+    const btn = document.getElementById('request-post-btn');
+    const originalText = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    btn.disabled = true;
+    
+    try {
+        const response = await fetch('/api/auth-actions.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'request_post_permission',
+                userId: currentUser.id,
+                userName: currentUser.name || currentUser.username,
+                userEmail: currentUser.email
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showNotification('Request sent to admin successfully!', 'success');
+        } else {
+            showNotification(data.error || 'Failed to send request', 'error');
+        }
+    } catch (error) {
+        console.error('Request permission error:', error);
+        showNotification('Failed to send request', 'error');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+async function loadMyPosts() {
+    const myPostsContainer = document.getElementById('my-posts');
+    if (!myPostsContainer) return;
+    
+    try {
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        
+        const posts = await response.json();
+        const myPosts = posts.filter(post => post.author === currentUser.id);
+        
+        if (myPosts.length === 0) {
+            myPostsContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-images"></i>
+                    <p>You haven't created any posts yet</p>
+                    <button class="btn-primary" onclick="showAddPostModal()">
+                        <i class="fas fa-plus"></i> Create Your First Post
+                    </button>
+                </div>
+            `;
+            return;
+        }
+        
+        myPostsContainer.innerHTML = myPosts.map(post => `
+            <div class="post-card" data-post-id="${post.id}">
+                <img src="${post.imageUrl}" alt="${post.title}" class="post-image" loading="lazy" onclick="openPost('${post.id}')">
+                <div class="post-overlay">
+                    <div class="post-stats">
+                        <span><i class="fas fa-heart"></i> ${post.likes || 0}</span>
+                        <span><i class="fas fa-comment"></i> ${post.comments || 0}</span>
+                    </div>
+                    <div class="post-menu">
+                        <button class="menu-trigger" onclick="togglePostMenu(event, '${post.id}')">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <div class="menu-dropdown" id="menu-${post.id}">
+                            <button onclick="editMyPost('${post.id}')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button onclick="deleteMyPost('${post.id}')" class="delete-option">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-info">
+                    <h3>${post.title}</h3>
+                    <p class="post-category">${post.category}</p>
+                </div>
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading my posts:', error);
+        myPostsContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Error loading posts</p>
+            </div>
+        `;
+    }
+}
+
+function showAddPostModal() {
+    document.getElementById('user-post-form-title').textContent = 'Add New Post';
+    document.getElementById('user-post-form').reset();
+    delete document.getElementById('user-post-form').dataset.postId;
+    showModal('user-post-form-modal');
+}
+
+async function editMyPost(postId) {
+    try {
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load post');
+        
+        const posts = await response.json();
+        const post = posts.find(p => p.id === postId);
+        
+        if (!post) {
+            showNotification('Post not found', 'error');
+            return;
+        }
+        
+        // Check if user owns this post
+        if (post.author !== currentUser.id) {
+            showNotification('You can only edit your own posts', 'error');
+            return;
+        }
+        
+        // Parse tags
+        let tags = [];
+        if (typeof post.tags === 'string') {
+            try {
+                tags = JSON.parse(post.tags);
+            } catch (e) {
+                tags = [];
+            }
+        } else if (Array.isArray(post.tags)) {
+            tags = post.tags;
+        }
+        
+        // Populate form
+        document.getElementById('user-post-form-title').textContent = 'Edit Post';
+        document.getElementById('user-post-title').value = post.title || '';
+        document.getElementById('user-post-category').value = post.category || '';
+        document.getElementById('user-post-image-url').value = post.imageUrl || '';
+        document.getElementById('user-post-description').value = post.description || '';
+        document.getElementById('user-post-tags').value = tags.join(', ');
+        document.getElementById('user-post-download-url').value = post.downloadUrl || '';
+        
+        // Store post ID for update
+        document.getElementById('user-post-form').dataset.postId = postId;
+        
+        showModal('user-post-form-modal');
+        
+    } catch (error) {
+        console.error('Error loading post for editing:', error);
+        showNotification('Error loading post', 'error');
+    }
+}
+
+async function handleUserPostForm(e) {
+    e.preventDefault();
+    
+    const form = e.target;
+    const postId = form.dataset.postId;
+    const isEdit = !!postId;
+    
+    const title = document.getElementById('user-post-title').value.trim();
+    const category = document.getElementById('user-post-category').value;
+    const imageUrl = document.getElementById('user-post-image-url').value.trim();
+    const description = document.getElementById('user-post-description').value.trim();
+    const tagsInput = document.getElementById('user-post-tags').value.trim();
+    const downloadUrl = document.getElementById('user-post-download-url').value.trim();
+    
+    // Parse tags
+    const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+    
+    const postData = {
+        title,
+        category,
+        imageUrl,
+        description,
+        tags: JSON.stringify(tags),
+        downloadUrl: downloadUrl || '',
+        author: currentUser.id,
+        featured: 0
+    };
+    
+    if (isEdit) {
+        postData.id = postId;
+    }
+    
+    try {
+        const method = isEdit ? 'PUT' : 'POST';
+        const response = await fetch('/api/posts.php', {
+            method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(postData)
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to save post');
+        }
+        
+        showNotification(isEdit ? 'Post updated successfully!' : 'Post created successfully!', 'success');
+        hideModal('user-post-form-modal');
+        loadMyPosts();
+        
+    } catch (error) {
+        console.error('Error saving post:', error);
+        showNotification(error.message || 'Error saving post', 'error');
+    }
+}
+
+async function deleteMyPost(postId) {
+    if (!confirm('Are you sure you want to delete this post?')) {
+        return;
+    }
+    
+    try {
+        // Verify ownership first
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load post');
+        
+        const posts = await response.json();
+        const post = posts.find(p => p.id === postId);
+        
+        if (!post) {
+            showNotification('Post not found', 'error');
+            return;
+        }
+        
+        if (post.author !== currentUser.id) {
+            showNotification('You can only delete your own posts', 'error');
+            return;
+        }
+        
+        // Delete the post
+        const deleteResponse = await fetch('/api/posts.php', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: postId })
+        });
+        
+        if (!deleteResponse.ok) {
+            throw new Error('Failed to delete post');
+        }
+        
+        showNotification('Post deleted successfully!', 'success');
+        loadMyPosts();
+        
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        showNotification('Error deleting post', 'error');
+    }
+}
+
+// Toggle post menu dropdown
+function togglePostMenu(event, postId) {
+    event.stopPropagation();
+    const menu = document.getElementById(`menu-${postId}`);
+    
+    // Close all other menus
+    document.querySelectorAll('.menu-dropdown').forEach(m => {
+        if (m.id !== `menu-${postId}`) {
+            m.classList.remove('show');
+        }
+    });
+    
+    menu.classList.toggle('show');
+}
+
+// Close menus when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.post-menu')) {
+        document.querySelectorAll('.menu-dropdown').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    }
+});
 
 // Initialize profile page when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {

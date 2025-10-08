@@ -94,6 +94,8 @@ $showSearch = false;
                             <option value="photography">Photography</option>
                             <option value="design">Design</option>
                             <option value="digital">Digital</option>
+                            <option value="nature">Nature</option>
+                            <option value="urban">Urban</option>
                         </select>
                     </div>
                 </div>
@@ -220,8 +222,20 @@ $showSearch = false;
                     </label>
                 </div>
                 <div class="form-group">
-                    <label for="edit-user-password">New Password (leave empty to keep current)</label>
-                    <input type="password" id="edit-user-password" minlength="6">
+                    <label>
+                        <input type="checkbox" id="edit-user-canpost">
+                        Can Create Posts
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="reset-email-address">Send Password Reset Email</label>
+                    <div style="display: flex; gap: var(--spacing-md); align-items: center;">
+                        <input type="email" id="reset-email-address" placeholder="Enter email address for password reset">
+                        <button type="button" class="btn-secondary" id="send-reset-email-btn" onclick="sendPasswordResetEmail()">
+                            <i class="fas fa-envelope"></i> Send Reset Email
+                        </button>
+                    </div>
+                    <small style="color: var(--text-muted); margin-top: 0.5rem; display: block;">Password reset link will be sent to this email address</small>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn-secondary" id="cancel-edit-user">Cancel</button>

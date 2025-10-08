@@ -35,6 +35,9 @@ $showSearch = false;
                         <button class="reset-password-btn" id="reset-password-btn">
                             <i class="fas fa-envelope-open-text"></i> Reset Password via Email
                         </button>
+                        <button class="request-post-btn" id="request-post-btn" style="display: none;">
+                            <i class="fas fa-paper-plane"></i> Request Posting Permission
+                        </button>
                     </div>
                 </div>
                 <div class="profile-stats">
@@ -63,6 +66,9 @@ $showSearch = false;
     <section class="profile-tabs">
         <div class="container">
             <div class="tabs-nav">
+                <button class="tab-btn" data-tab="myposts" id="myposts-tab-btn" style="display: none;">
+                    <i class="fas fa-images"></i> My Posts
+                </button>
                 <button class="tab-btn active" data-tab="liked">
                     <i class="fas fa-heart"></i> Liked Posts
                 </button>
@@ -75,6 +81,16 @@ $showSearch = false;
             </div>
             
             <div class="tab-content">
+                <div class="tab-pane" id="myposts-tab" style="display: none;">
+                    <div class="my-posts-header">
+                        <button class="btn-primary" id="add-post-btn">
+                            <i class="fas fa-plus"></i> Add Post
+                        </button>
+                    </div>
+                    <div class="posts-grid" id="my-posts">
+                        <!-- My posts will be loaded here -->
+                    </div>
+                </div>
                 <div class="tab-pane active" id="liked-tab">
                     <div class="posts-grid" id="liked-posts">
                         <!-- Liked posts will be loaded here -->
@@ -169,6 +185,63 @@ $showSearch = false;
             <div class="post-detail" id="post-detail">
                 <!-- Post detail content will be loaded here -->
             </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Post Modal (for users with canPost permission) -->
+    <div class="modal" id="user-post-form-modal">
+        <div class="modal-content large">
+            <button class="modal-close-btn" id="user-post-form-close">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 id="user-post-form-title">Add New Post</h2>
+            
+            <form id="user-post-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="user-post-title">Title</label>
+                        <input type="text" id="user-post-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-post-category">Category</label>
+                        <select id="user-post-category" required>
+                            <option value="">Select Category</option>
+                            <option value="art">Art</option>
+                            <option value="photography">Photography</option>
+                            <option value="design">Design</option>
+                            <option value="digital">Digital</option>
+                            <option value="nature">Nature</option>
+                            <option value="urban">Urban</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-post-image-url">Image URL</label>
+                    <input type="url" id="user-post-image-url" placeholder="https://example.com/image.jpg" required>
+                    <small>Enter the URL of the image you want to display</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-post-description">Description</label>
+                    <textarea id="user-post-description" rows="4" placeholder="Describe your post..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-post-tags">Tags</label>
+                    <input type="text" id="user-post-tags" placeholder="art, creative, design (comma separated)">
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-post-download-url">Download URL (Optional)</label>
+                    <input type="url" id="user-post-download-url" placeholder="https://example.com/download.zip">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="cancel-user-post">Cancel</button>
+                    <button type="submit" id="save-user-post">Save Post</button>
+                </div>
+            </form>
         </div>
     </div>
 
