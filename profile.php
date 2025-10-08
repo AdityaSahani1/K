@@ -219,7 +219,10 @@ $showSearch = false;
                 <div class="form-group">
                     <label for="user-post-image-url">Image URL</label>
                     <input type="url" id="user-post-image-url" placeholder="https://example.com/image.jpg" required>
-                    <small>Enter the URL of the image you want to display</small>
+                    <small>
+                        📌 <strong>Recommended platforms:</strong> <a href="https://imgur.com/upload" target="_blank" style="color: var(--accent-primary);">Imgur</a>, <a href="https://imgbb.com/" target="_blank" style="color: var(--accent-primary);">ImgBB</a>, or direct image URLs<br>
+                        ⚠️ Google Drive links may not work reliably. For Drive: Right-click image → Share → Anyone with link → Copy link
+                    </small>
                 </div>
                 
                 <div class="form-group">

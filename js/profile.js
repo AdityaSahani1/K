@@ -515,21 +515,32 @@ async function loadUserContent() {
             const userData = users.find(u => u.id === currentUser.id);
             
             if (userData && (userData.canPost || isAdmin)) {
+                // Wait a bit for the tab to be made visible by initPostPermissions
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
                 // User can post - show My Posts tab first
                 const myPostsTab = document.getElementById('myposts-tab-btn');
                 const likedTab = document.querySelector('.tab-btn[data-tab="liked"]');
                 const myPostsPane = document.getElementById('myposts-tab');
                 const likedPane = document.getElementById('liked-tab');
                 
-                if (myPostsTab && myPostsPane && myPostsTab.style.display !== 'none') {
+                if (myPostsTab && myPostsPane) {
+                    // Make sure tab is visible
+                    myPostsTab.style.display = 'inline-block';
+                    
                     // Set My Posts as active
                     myPostsTab.classList.add('active');
                     myPostsPane.classList.add('active');
+                    myPostsPane.style.display = 'block';
+                    
                     if (likedTab) likedTab.classList.remove('active');
-                    if (likedPane) likedPane.classList.remove('active');
+                    if (likedPane) {
+                        likedPane.classList.remove('active');
+                        likedPane.style.display = 'none';
+                    }
                     
                     // Load My Posts content
-                    loadTabContent('myposts');
+                    await loadTabContent('myposts');
                     return;
                 }
             }
@@ -682,17 +693,24 @@ async function initPostPermissions() {
     const myPostsPane = document.getElementById('myposts-tab');
     const addPostBtn = document.getElementById('add-post-btn');
     
-    // Fetch fresh user data to check canPost permission
-    try {
-        const response = await fetch('/api/get-users.php');
-        if (response.ok) {
-            const users = await response.json();
-            const userData = users.find(u => u.id === currentUser.id);
-            
-            if (userData) {
-                const canPost = userData.canPost || isAdmin;
+    // Admin always has posting permission
+    if (isAdmin) {
+        if (myPostsTab) {
+            myPostsTab.style.display = 'inline-block';
+        }
+        if (requestBtn) {
+            requestBtn.style.display = 'none';
+        }
+        loadMyPosts();
+    } else {
+        // Fetch fresh user data to check canPost permission for non-admin users
+        try {
+            const response = await fetch('/api/get-users.php');
+            if (response.ok) {
+                const users = await response.json();
+                const userData = users.find(u => u.id === currentUser.id);
                 
-                if (canPost) {
+                if (userData && userData.canPost) {
                     // User can post - show My Posts tab button
                     if (myPostsTab) {
                         myPostsTab.style.display = 'inline-block';
@@ -706,16 +724,16 @@ async function initPostPermissions() {
                     // Load user's posts
                     loadMyPosts();
                 } else {
-                    // User cannot post - show request button (but not for admin)
-                    if (requestBtn && !isAdmin) {
+                    // User cannot post - show request button
+                    if (requestBtn) {
                         requestBtn.style.display = 'inline-block';
                         requestBtn.addEventListener('click', handleRequestPostPermission);
                     }
                 }
             }
+        } catch (error) {
+            console.error('Error checking post permissions:', error);
         }
-    } catch (error) {
-        console.error('Error checking post permissions:', error);
     }
     
     // Initialize post form modal
@@ -784,7 +802,19 @@ async function loadMyPosts() {
         if (!response.ok) throw new Error('Failed to load posts');
         
         const posts = await response.json();
-        const myPosts = posts.filter(post => post.author === currentUser.username || post.author === currentUser.id);
+        
+        // Filter posts by matching author (can be username or ID)
+        const myPosts = posts.filter(post => {
+            return post.author === currentUser.username || 
+                   post.author === currentUser.id ||
+                   post.author === currentUser.username.toLowerCase() ||
+                   (post.authorName && post.authorName === currentUser.name);
+        });
+        
+        console.log('Current user:', currentUser.username, currentUser.id);
+        console.log('Total posts:', posts.length);
+        console.log('My posts:', myPosts.length);
+        console.log('My posts container:', myPostsContainer);
         
         if (myPosts.length === 0) {
             myPostsContainer.innerHTML = `

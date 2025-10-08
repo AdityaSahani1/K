@@ -686,6 +686,39 @@
     transform: translateY(-2px);
 }
 
+/* Send Reset Email Button */
+#send-reset-email-btn {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    border: none;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    white-space: nowrap;
+}
+
+#send-reset-email-btn:hover {
+    background: linear-gradient(135deg, #d97706, #b45309);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+    border-color: transparent;
+}
+
+#send-reset-email-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+#send-reset-email-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
 .btn-primary {
     display: inline-flex;
     align-items: center;
