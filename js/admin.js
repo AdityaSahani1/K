@@ -379,7 +379,7 @@ async function handlePostForm(e) {
     // Get form data
     const title = document.getElementById('post-title').value.trim();
     const category = document.getElementById('post-category').value;
-    const imageUrl = document.getElementById('post-image-url').value.trim();
+    let imageUrl = document.getElementById('post-image-url').value.trim();
     const description = document.getElementById('post-description').value.trim();
     const tags = document.getElementById('post-tags').value.trim();
     const downloadUrl = document.getElementById('post-download-url').value.trim();
@@ -390,6 +390,9 @@ async function handlePostForm(e) {
         showNotification('Please fill in all required fields', 'error');
         return;
     }
+    
+    // Convert image URL to direct link if from supported platforms
+    imageUrl = convertToDirectImageUrl(imageUrl);
     
     try {
         const postData = {
@@ -651,7 +654,7 @@ function displayUsers(users) {
     if (users.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="5" style="text-align: center; padding: var(--spacing-2xl);">
+                <td colspan="6" style="text-align: center; padding: var(--spacing-2xl);">
                     <i class="fas fa-users" style="font-size: 2rem; color: var(--text-muted); margin-bottom: var(--spacing-md);"></i>
                     <p>No users found</p>
                 </td>
@@ -660,28 +663,83 @@ function displayUsers(users) {
         return;
     }
     
-    tableBody.innerHTML = users.map(user => `
-        <tr data-user-id="${user.id}">
-            <td>${user.username}</td>
-            <td>${user.email}</td>
-            <td>
-                <span class="role-badge ${user.role || 'user'}">${user.role || 'user'}</span>
-            </td>
-            <td>${user.created ? formatDate(user.created) : 'N/A'}</td>
-            <td>
-                <div class="action-buttons">
-                    <button class="table-action-btn edit" onclick="editUser('${user.id}')" title="Edit User">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    ${user.role !== 'admin' ? `
-                        <button class="table-action-btn delete" onclick="deleteUser('${user.id}')" title="Delete User">
-                            <i class="fas fa-trash"></i>
+    tableBody.innerHTML = users.map(user => {
+        const profilePic = user.profilePicture ? 
+            `<img src="${user.profilePicture}" alt="${user.username}" class="user-profile-pic">` :
+            `<div class="user-profile-pic default"><i class="fas fa-user"></i></div>`;
+        
+        return `
+            <tr data-user-id="${user.id}">
+                <td>${profilePic}</td>
+                <td>${user.username}</td>
+                <td>${user.email}</td>
+                <td>
+                    <span class="role-badge ${user.role || 'user'}">${user.role || 'user'}</span>
+                </td>
+                <td>${user.created ? formatDate(user.created) : 'N/A'}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="table-action-btn edit" onclick="editUser('${user.id}')" title="Edit User">
+                            <i class="fas fa-edit"></i>
                         </button>
-                    ` : ''}
-                </div>
-            </td>
-        </tr>
-    `).join('');
+                        ${user.role !== 'admin' ? `
+                            <button class="table-action-btn delete" onclick="deleteUser('${user.id}')" title="Delete User">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function grantPostPermission(userId) {
+    if (!confirm('Grant this user permission to create posts?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/get-users.php');
+        if (!response.ok) throw new Error('Failed to load user');
+        
+        const users = await response.json();
+        const user = users.find(u => u.id === userId);
+        
+        if (!user) {
+            showNotification('User not found', 'error');
+            return;
+        }
+        
+        const updateResponse = await fetch('/api/get-users.php', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: userId,
+                name: user.name,
+                username: user.username,
+                email: user.email,
+                bio: user.bio || '',
+                profilePicture: user.profilePicture || '',
+                role: user.role,
+                isVerified: user.isVerified,
+                canPost: true
+            })
+        });
+        
+        if (!updateResponse.ok) {
+            throw new Error('Failed to grant permission');
+        }
+        
+        showNotification('Post permission granted successfully!', 'success');
+        loadUsersTable();
+        
+    } catch (error) {
+        console.error('Error granting permission:', error);
+        showNotification('Error granting permission', 'error');
+    }
 }
 
 async function deleteUser(userId) {
@@ -710,6 +768,46 @@ async function deleteUser(userId) {
         console.error('Error deleting user:', error);
         showNotification(error.message || 'Error deleting user', 'error');
     }
+}
+
+// Convert various image hosting URLs to direct image URLs
+function convertToDirectImageUrl(url) {
+    if (!url) return url;
+    
+    // Google Drive conversion
+    // From: https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+    // To: https://drive.google.com/uc?export=view&id=FILE_ID
+    const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
+    if (driveMatch) {
+        return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+    }
+    
+    // Dropbox conversion
+    // From: https://www.dropbox.com/s/xxxxx/image.jpg?dl=0
+    // To: https://www.dropbox.com/s/xxxxx/image.jpg?raw=1
+    if (url.includes('dropbox.com')) {
+        return url.replace('?dl=0', '?raw=1').replace('www.dropbox.com', 'dl.dropboxusercontent.com');
+    }
+    
+    // OneDrive conversion
+    // From: https://1drv.ms/i/s!xxxxx or onedrive.live.com
+    // To: Direct embed URL
+    if (url.includes('1drv.ms') || url.includes('onedrive.live.com')) {
+        // OneDrive requires embed parameter
+        if (url.includes('?')) {
+            return url + '&embed=1';
+        } else {
+            return url + '?embed=1';
+        }
+    }
+    
+    // Google Photos - inform user it's not directly supported
+    if (url.includes('photos.google.com') || url.includes('photos.app.goo.gl')) {
+        showNotification('Google Photos links may not work. Please use Google Drive, Imgur, or ImgBB instead.', 'warning');
+    }
+    
+    // Return original URL if no conversion needed
+    return url;
 }
 
 // Note: initAdminPage is already called at the top of the file via DOMContentLoaded

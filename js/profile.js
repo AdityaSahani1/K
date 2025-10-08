@@ -124,7 +124,7 @@ async function loadUserStats() {
         const posts = await response.json();
         
         // Count user's interactions
-        const userPosts = posts.filter(post => post.author === currentUser.username);
+        const userPosts = posts.filter(post => post.author === currentUser.username || post.author === currentUser.id);
         
         // Update stats display
         // Hide posts count for non-admin users
@@ -168,6 +168,9 @@ function initProfileTabs() {
 
 async function loadTabContent(tabName) {
     switch (tabName) {
+        case 'myposts':
+            await loadMyPosts();
+            break;
         case 'liked':
             await loadLikedPosts();
             break;
@@ -501,8 +504,41 @@ async function handleEditProfile(e) {
     }
 }
 
-function loadUserContent() {
-    // Load initial tab content
+async function loadUserContent() {
+    // Determine which tab to show first
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    
+    try {
+        const response = await fetch('/api/get-users.php');
+        if (response.ok) {
+            const users = await response.json();
+            const userData = users.find(u => u.id === currentUser.id);
+            
+            if (userData && (userData.canPost || isAdmin)) {
+                // User can post - show My Posts tab first
+                const myPostsTab = document.getElementById('myposts-tab-btn');
+                const likedTab = document.querySelector('.tab-btn[data-tab="liked"]');
+                const myPostsPane = document.getElementById('myposts-tab');
+                const likedPane = document.getElementById('liked-tab');
+                
+                if (myPostsTab && myPostsPane && myPostsTab.style.display !== 'none') {
+                    // Set My Posts as active
+                    myPostsTab.classList.add('active');
+                    myPostsPane.classList.add('active');
+                    if (likedTab) likedTab.classList.remove('active');
+                    if (likedPane) likedPane.classList.remove('active');
+                    
+                    // Load My Posts content
+                    loadTabContent('myposts');
+                    return;
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error checking user permissions:', error);
+    }
+    
+    // Default: Load liked posts
     loadTabContent('liked');
 }
 
@@ -657,12 +693,9 @@ async function initPostPermissions() {
                 const canPost = userData.canPost || isAdmin;
                 
                 if (canPost) {
-                    // User can post - show My Posts tab
+                    // User can post - show My Posts tab button
                     if (myPostsTab) {
                         myPostsTab.style.display = 'inline-block';
-                    }
-                    if (myPostsPane) {
-                        myPostsPane.style.display = 'block';
                     }
                     
                     // Hide request button
@@ -751,7 +784,7 @@ async function loadMyPosts() {
         if (!response.ok) throw new Error('Failed to load posts');
         
         const posts = await response.json();
-        const myPosts = posts.filter(post => post.author === currentUser.id);
+        const myPosts = posts.filter(post => post.author === currentUser.username || post.author === currentUser.id);
         
         if (myPosts.length === 0) {
             myPostsContainer.innerHTML = `
@@ -827,7 +860,7 @@ async function editMyPost(postId) {
         }
         
         // Check if user owns this post
-        if (post.author !== currentUser.id) {
+        if (post.author !== currentUser.username && post.author !== currentUser.id) {
             showNotification('You can only edit your own posts', 'error');
             return;
         }
@@ -873,10 +906,13 @@ async function handleUserPostForm(e) {
     
     const title = document.getElementById('user-post-title').value.trim();
     const category = document.getElementById('user-post-category').value;
-    const imageUrl = document.getElementById('user-post-image-url').value.trim();
+    let imageUrl = document.getElementById('user-post-image-url').value.trim();
     const description = document.getElementById('user-post-description').value.trim();
     const tagsInput = document.getElementById('user-post-tags').value.trim();
     const downloadUrl = document.getElementById('user-post-download-url').value.trim();
+    
+    // Convert image URL to direct link if from supported platforms
+    imageUrl = convertToDirectImageUrl(imageUrl);
     
     // Parse tags
     const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
@@ -886,9 +922,9 @@ async function handleUserPostForm(e) {
         category,
         imageUrl,
         description,
-        tags: JSON.stringify(tags),
+        tags,
         downloadUrl: downloadUrl || '',
-        author: currentUser.id,
+        author: currentUser.username,
         featured: 0
     };
     
@@ -939,7 +975,7 @@ async function deleteMyPost(postId) {
             return;
         }
         
-        if (post.author !== currentUser.id) {
+        if (post.author !== currentUser.username && post.author !== currentUser.id) {
             showNotification('You can only delete your own posts', 'error');
             return;
         }
@@ -989,6 +1025,38 @@ document.addEventListener('click', function(event) {
         });
     }
 });
+
+// Convert various image hosting URLs to direct image URLs
+function convertToDirectImageUrl(url) {
+    if (!url) return url;
+    
+    // Google Drive conversion
+    const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
+    if (driveMatch) {
+        return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+    }
+    
+    // Dropbox conversion
+    if (url.includes('dropbox.com')) {
+        return url.replace('?dl=0', '?raw=1').replace('www.dropbox.com', 'dl.dropboxusercontent.com');
+    }
+    
+    // OneDrive conversion
+    if (url.includes('1drv.ms') || url.includes('onedrive.live.com')) {
+        if (url.includes('?')) {
+            return url + '&embed=1';
+        } else {
+            return url + '?embed=1';
+        }
+    }
+    
+    // Google Photos warning
+    if (url.includes('photos.google.com') || url.includes('photos.app.goo.gl')) {
+        showNotification('Google Photos links may not work. Please use Google Drive, Imgur, or ImgBB instead.', 'warning');
+    }
+    
+    return url;
+}
 
 // Initialize profile page when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {

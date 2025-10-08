@@ -165,6 +165,7 @@ $showSearch = false;
                 <table>
                     <thead>
                         <tr>
+                            <th>Profile</th>
                             <th>Username</th>
                             <th>Email</th>
                             <th>Role</th>
