@@ -13,7 +13,7 @@ $showSearch = false;
 <body>
     <?php include 'components/navbar.php'; ?>
 
-    <!-- Admin Header -->
+    <!-- Admin Header --> 
     <section class="admin-header">
         <div class="container">
             <h1>Admin Panel</h1>
