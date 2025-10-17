@@ -133,7 +133,16 @@ $showSearch = false;
                     <input type="email" id="edit-email" required>
                 </div>
                 <div class="form-group">
-                    <label for="edit-profile-pic">Profile Picture URL</label>
+                    <label for="edit-profile-pic-upload">Upload Profile Picture</label>
+                    <input type="file" id="edit-profile-pic-upload" accept="image/*" style="margin-bottom: 10px;">
+                    <div id="profile-pic-preview" style="display: none; margin-bottom: 10px;">
+                        <img id="profile-preview-img" src="" alt="Preview" style="max-width: 150px; max-height: 150px; border-radius: 50%; object-fit: cover;">
+                        <button type="button" id="remove-profile-upload" style="display: block; margin-top: 5px; padding: 5px 10px; background: var(--accent-danger); color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
+                    </div>
+                    <small>📸 Upload an image or enter a URL below</small>
+                </div>
+                <div class="form-group">
+                    <label for="edit-profile-pic">Or Enter Profile Picture URL</label>
                     <input type="url" id="edit-profile-pic" placeholder="https://example.com/image.jpg">
                 </div>
                 <div class="form-group">
@@ -217,11 +226,23 @@ $showSearch = false;
                 </div>
                 
                 <div class="form-group">
-                    <label for="user-post-image-url">Image URL</label>
-                    <input type="url" id="user-post-image-url" placeholder="https://example.com/image.jpg" required>
+                    <label for="user-post-image-upload">Upload Image</label>
+                    <input type="file" id="user-post-image-upload" accept="image/*" style="margin-bottom: 10px;">
+                    <div id="user-post-preview" style="display: none; margin-bottom: 10px;">
+                        <img id="user-post-preview-img" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
+                        <button type="button" id="remove-user-post-upload" style="display: block; margin-top: 5px; padding: 5px 10px; background: var(--accent-danger); color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
+                    </div>
                     <small>
-                        📌 <strong>Recommended platforms:</strong> <a href="https://imgur.com/upload" target="_blank" style="color: var(--accent-primary);">Imgur</a>, <a href="https://imgbb.com/" target="_blank" style="color: var(--accent-primary);">ImgBB</a>, or direct image URLs<br>
-                        ⚠️ Google Drive links may not work reliably. For Drive: Right-click image → Share → Anyone with link → Copy link
+                        📸 <strong>Upload an image</strong> or enter a direct URL below<br>
+                        ⚡ Supported formats: JPG, PNG, GIF, WEBP (max 32 MB)
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-post-image-url">Or Enter Image URL</label>
+                    <input type="url" id="user-post-image-url" placeholder="https://example.com/image.jpg">
+                    <small>
+                        📌 Direct image URLs from Imgur, ImgBB, or other platforms
                     </small>
                 </div>
                 

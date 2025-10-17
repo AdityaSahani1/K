@@ -13,7 +13,7 @@ $showSearch = false;
 <body>
     <?php include 'components/navbar.php'; ?>
 
-    <!-- Admin Header -->
+    <!-- Admin Header --> 
     <section class="admin-header">
         <div class="container">
             <h1>Admin Panel</h1>
@@ -101,11 +101,23 @@ $showSearch = false;
                 </div>
                 
                 <div class="form-group">
-                    <label for="post-image-url">Image URL</label>
-                    <input type="url" id="post-image-url" placeholder="https://example.com/image.jpg" required>
+                    <label for="post-image-upload">Upload Image</label>
+                    <input type="file" id="post-image-upload" accept="image/*" style="margin-bottom: 10px;">
+                    <div id="image-upload-preview" style="display: none; margin-bottom: 10px;">
+                        <img id="preview-img" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
+                        <button type="button" id="remove-upload" style="display: block; margin-top: 5px; padding: 5px 10px; background: var(--accent-danger); color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
+                    </div>
                     <small>
-                        📌 <strong>Recommended platforms:</strong> Imgur, ImgBB, or direct image URLs<br>
-                        ⚠️ Google Drive links may not work reliably. For Drive: Share → Anyone with link → Copy link
+                        📸 <strong>Upload an image</strong> or enter a direct URL below<br>
+                        ⚡ Supported formats: JPG, PNG, GIF, WEBP (max 32 MB)
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="post-image-url">Or Enter Image URL</label>
+                    <input type="url" id="post-image-url" placeholder="https://example.com/image.jpg">
+                    <small>
+                        📌 Direct image URLs from Imgur, ImgBB, or other platforms
                     </small>
                 </div>
                 
@@ -209,7 +221,16 @@ $showSearch = false;
                     <textarea id="edit-user-bio" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="edit-user-profile-pic">Profile Picture URL</label>
+                    <label for="edit-user-profile-pic-upload">Upload Profile Picture</label>
+                    <input type="file" id="edit-user-profile-pic-upload" accept="image/*" style="margin-bottom: 10px;">
+                    <div id="user-pic-preview" style="display: none; margin-bottom: 10px;">
+                        <img id="user-preview-img" src="" alt="Preview" style="max-width: 150px; max-height: 150px; border-radius: 50%; object-fit: cover;">
+                        <button type="button" id="remove-user-upload" style="display: block; margin-top: 5px; padding: 5px 10px; background: var(--accent-danger); color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
+                    </div>
+                    <small>📸 Upload an image or enter a URL below</small>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-profile-pic">Or Enter Profile Picture URL</label>
                     <input type="url" id="edit-user-profile-pic">
                 </div>
                 <div class="form-group">
