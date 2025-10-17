@@ -1097,3 +1097,160 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 100);
 });
+// Image Upload Functionality for Profile
+function initProfileImageUpload() {
+    // Profile picture upload
+    const profilePicUpload = document.getElementById('edit-profile-pic-upload');
+    const profilePicUrl = document.getElementById('edit-profile-pic');
+    const profilePicPreview = document.getElementById('profile-pic-preview');
+    const profilePreviewImg = document.getElementById('profile-preview-img');
+    const removeProfileUpload = document.getElementById('remove-profile-upload');
+    
+    if (profilePicUpload) {
+        profilePicUpload.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                profilePreviewImg.src = e.target.result;
+                profilePicPreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+            
+            // Upload to ImgBB
+            try {
+                const base64 = await fileToBase64(file);
+                const imageUrl = await uploadToImgBB(base64);
+                profilePicUrl.value = imageUrl;
+                showNotification('Profile picture uploaded successfully!', 'success');
+            } catch (error) {
+                console.error('Upload error:', error);
+                showNotification('Failed to upload image: ' + error.message, 'error');
+                profilePicPreview.style.display = 'none';
+            }
+        });
+    }
+    
+    if (removeProfileUpload) {
+        removeProfileUpload.addEventListener('click', function() {
+            profilePicUpload.value = '';
+            profilePicUrl.value = '';
+            profilePicPreview.style.display = 'none';
+        });
+    }
+    
+    // User post image upload
+    const userPostUpload = document.getElementById('user-post-image-upload');
+    const userPostUrl = document.getElementById('user-post-image-url');
+    const userPostPreview = document.getElementById('user-post-preview');
+    const userPostPreviewImg = document.getElementById('user-post-preview-img');
+    const removeUserPostUpload = document.getElementById('remove-user-post-upload');
+    
+    if (userPostUpload) {
+        userPostUpload.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                userPostPreviewImg.src = e.target.result;
+                userPostPreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+            
+            // Upload to ImgBB
+            try {
+                const base64 = await fileToBase64(file);
+                const imageUrl = await uploadToImgBB(base64);
+                userPostUrl.value = imageUrl;
+                userPostUrl.removeAttribute('required');
+                showNotification('Image uploaded successfully!', 'success');
+            } catch (error) {
+                console.error('Upload error:', error);
+                showNotification('Failed to upload image: ' + error.message, 'error');
+                userPostPreview.style.display = 'none';
+            }
+        });
+    }
+    
+    if (removeUserPostUpload) {
+        removeUserPostUpload.addEventListener('click', function() {
+            userPostUpload.value = '';
+            userPostUrl.value = '';
+            userPostPreview.style.display = 'none';
+            userPostUrl.setAttribute('required', '');
+        });
+    }
+}
+
+// Convert file to base64
+async function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            // Get base64 string without the data URL prefix
+            const base64 = reader.result.split(',')[1];
+            resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// Upload image to ImgBB
+async function uploadToImgBB(base64Image) {
+    try {
+        const response = await fetch('/api/upload-image.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                image: base64Image
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Upload failed');
+        }
+        
+        return data.data.display_url;
+    } catch (error) {
+        console.error('ImgBB upload error:', error);
+        throw error;
+    }
+}
+
+// Initialize when modals are opened
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize when edit profile modal is shown
+    const editProfileModal = document.getElementById('edit-profile-modal');
+    if (editProfileModal) {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (editProfileModal.classList.contains('show')) {
+                    initProfileImageUpload();
+                }
+            });
+        });
+        observer.observe(editProfileModal, { attributes: true, attributeFilter: ['class'] });
+    }
+    
+    // Initialize when user post form modal is shown
+    const userPostModal = document.getElementById('user-post-form-modal');
+    if (userPostModal) {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (userPostModal.classList.contains('show')) {
+                    initProfileImageUpload();
+                }
+            });
+        });
+        observer.observe(userPostModal, { attributes: true, attributeFilter: ['class'] });
+    }
+});

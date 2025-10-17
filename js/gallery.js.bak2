@@ -641,28 +641,40 @@ function handlePostMenuAction(action, postId) {
 // Toggle like from menu (when like button not visible)
 async function toggleLikeFromMenu(postId) {
     try {
-        const response = await fetch('/api/post-actions.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'like',
-                postId: postId,
-                userId: currentUser.id
-            })
-        });
+        let likes = await loadData('likes.json');
+        let posts = await loadData('posts.json');
         
-        const data = await response.json();
+        const existingLike = likes.find(like => like.postId === postId && like.userId === currentUser.id);
         
-        if (data.status === 'success') {
-            if (data.action === 'liked') {
-                showNotification('Post liked!', 'success');
-            } else {
-                showNotification('Like removed', 'success');
+        if (existingLike) {
+            likes = likes.filter(like => !(like.postId === postId && like.userId === currentUser.id));
+            
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                post.likes = Math.max(0, (post.likes || 0) - 1);
+                await saveData('posts.json', posts);
             }
-            allPosts = await loadData('posts.json');
-            filteredPosts = [...allPosts];
-            loadGalleryPosts();
+            
+            showNotification('Like removed', 'success');
+        } else {
+            likes.push({
+                id: generateId(),
+                postId: postId,
+                userId: currentUser.id,
+                created: new Date().toISOString()
+            });
+            
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                post.likes = (post.likes || 0) + 1;
+                await saveData('posts.json', posts);
+            }
+            
+            showNotification('Post liked!', 'success');
         }
+        
+        await saveData('likes.json', likes);
+        
     } catch (error) {
         console.error('Error toggling like:', error);
         showNotification('Error updating like', 'error');
@@ -672,25 +684,25 @@ async function toggleLikeFromMenu(postId) {
 // Toggle save from menu (when save button not visible)
 async function toggleSaveFromMenu(postId) {
     try {
-        const response = await fetch('/api/post-actions.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'save',
+        let saves = await loadData('saves.json');
+        
+        const existingSave = saves.find(save => save.postId === postId && save.userId === currentUser.id);
+        
+        if (existingSave) {
+            saves = saves.filter(save => !(save.postId === postId && save.userId === currentUser.id));
+            showNotification('Post removed from saved', 'success');
+        } else {
+            saves.push({
+                id: generateId(),
                 postId: postId,
-                userId: currentUser.id
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.status === 'success') {
-            if (data.action === 'saved') {
-                showNotification('Post saved!', 'success');
-            } else {
-                showNotification('Post removed from saved', 'success');
-            }
+                userId: currentUser.id,
+                created: new Date().toISOString()
+            });
+            showNotification('Post saved!', 'success');
         }
+        
+        await saveData('saves.json', saves);
+        
     } catch (error) {
         console.error('Error toggling save:', error);
         showNotification('Error updating save', 'error');
@@ -911,33 +923,60 @@ setTimeout(() => {
 // Like and Save functionality
 async function toggleLike(postId, button) {
     try {
-        const response = await fetch('/api/post-actions.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'like',
-                postId: postId,
-                userId: currentUser.id
-            })
-        });
+        let likes = await loadData('likes.json');
+        let posts = await loadData('posts.json');
         
-        const data = await response.json();
+        const existingLike = likes.find(like => like.postId === postId && like.userId === currentUser.id);
         
-        if (data.status === 'success') {
-            if (data.action === 'liked') {
-                button.innerHTML = '<i class="fas fa-heart"></i>';
-                button.classList.add('liked');
-                showNotification('Post liked!', 'success');
-            } else {
-                button.innerHTML = '<i class="far fa-heart"></i>';
-                button.classList.remove('liked');
-                showNotification('Post unliked', 'success');
+        if (existingLike) {
+            // Remove like
+            likes = likes.filter(like => !(like.postId === postId && like.userId === currentUser.id));
+            button.innerHTML = '<i class="far fa-heart"></i>';
+            button.classList.remove('liked');
+            
+            // Decrease like count in posts data
+            const post = posts.find(p => p.id === postId);
+            if (post && post.likes > 0) {
+                post.likes = (post.likes || 0) - 1;
             }
-            // Reload posts to update like counts
-            allPosts = await loadData('posts.json');
-            filteredPosts = [...allPosts];
-            updatePostLikeCount(postId);
+            
+            // Update allPosts array as well
+            const allPostIndex = allPosts.findIndex(p => p.id === postId);
+            if (allPostIndex !== -1) {
+                allPosts[allPostIndex].likes = post.likes;
+            }
+        } else {
+            // Add like
+            likes.push({
+                id: generateId(),
+                postId: postId,
+                userId: currentUser.id,
+                created: new Date().toISOString()
+            });
+            button.innerHTML = '<i class="fas fa-heart"></i>';
+            button.classList.add('liked');
+            
+            // Increase like count in posts data
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                post.likes = (post.likes || 0) + 1;
+            }
+            
+            // Update allPosts array as well
+            const allPostIndex = allPosts.findIndex(p => p.id === postId);
+            if (allPostIndex !== -1) {
+                allPosts[allPostIndex].likes = post.likes;
+            }
         }
+        
+        await saveData('likes.json', likes);
+        await saveData('posts.json', posts);
+        
+        // Update post like count in UI
+        updatePostLikeCount(postId);
+        
+        showNotification(existingLike ? 'Post unliked' : 'Post liked!', 'success');
+        
     } catch (error) {
         console.error('Error toggling like:', error);
         showNotification('Error updating like', 'error');
