@@ -16,4 +16,6 @@ return [
     'SMTP_PASSWORD' => 'jeie uepk hhjc yrut',
     'SMTP_FROM_EMAIL' => 'snapsera.team@gmail.com',
     'SMTP_FROM_NAME' => 'SnapSera',
+    
+    'IMGBB_API_KEY' => '5b0c5fa147aae0360e3e798ed5ce37bf',
 ];
