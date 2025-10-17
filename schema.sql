@@ -1,733 +1,50 @@
 -- SnapSera Database Schema
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 -- MySQL Database for InfinityFree Hosting
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 -- Users Table
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 CREATE TABLE IF NOT EXISTS users (
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     id VARCHAR(50) PRIMARY KEY,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     name VARCHAR(255) NOT NULL,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     username VARCHAR(100) UNIQUE NOT NULL,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     email VARCHAR(255) UNIQUE NOT NULL,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     password VARCHAR(255) NOT NULL,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     role ENUM('user', 'admin') DEFAULT 'user',
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     created DATETIME NOT NULL,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     bio TEXT,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     profilePicture VARCHAR(500),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     isVerified BOOLEAN DEFAULT FALSE,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     otpToken VARCHAR(10),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     otpExpires DATETIME,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     otpCreated DATETIME,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     passwordResetToken VARCHAR(100),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     passwordResetExpires DATETIME,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     lastLogin DATETIME,
-
-
-
-
-
-
-
-
-
     canPost TINYINT(1) DEFAULT 0,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     INDEX idx_username (username),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     INDEX idx_email (email)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- Posts Table
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 CREATE TABLE IF NOT EXISTS posts (
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     id VARCHAR(50) PRIMARY KEY,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     title VARCHAR(255) NOT NULL,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     description TEXT,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     imageUrl VARCHAR(500) NOT NULL,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     category VARCHAR(50) NOT NULL,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     tags JSON,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     author VARCHAR(50) NOT NULL,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     created DATETIME NOT NULL,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     likes INT DEFAULT 0,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     comments INT DEFAULT 0,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     views INT DEFAULT 0,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     featured BOOLEAN DEFAULT FALSE,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     downloadUrl VARCHAR(500),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     FOREIGN KEY (author) REFERENCES users(id) ON DELETE CASCADE,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     INDEX idx_category (category),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     INDEX idx_author (author),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     INDEX idx_created (created),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     INDEX idx_featured (featured)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 
 
@@ -983,7 +300,7 @@ CREATE TABLE IF NOT EXISTS comments (
 
 
 
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 
 
@@ -1191,7 +508,7 @@ CREATE TABLE IF NOT EXISTS likes (
 
 
 
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 
 
@@ -1399,7 +716,7 @@ CREATE TABLE IF NOT EXISTS comment_likes (
 
 
 
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 
 
@@ -1607,7 +924,7 @@ CREATE TABLE IF NOT EXISTS saves (
 
 
 
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 
 
@@ -1815,7 +1132,7 @@ CREATE TABLE IF NOT EXISTS views (
 
 
 
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 
 
@@ -2071,7 +1388,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 
 
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 
 
@@ -2287,7 +1604,7 @@ CREATE TABLE IF NOT EXISTS contacts (
 
 
 
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 
 
