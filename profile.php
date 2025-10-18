@@ -133,17 +133,51 @@ $showSearch = false;
                     <input type="email" id="edit-email" required>
                 </div>
                 <div class="form-group">
-                    <label for="edit-profile-pic-upload">Upload Profile Picture</label>
-                    <input type="file" id="edit-profile-pic-upload" accept="image/*" style="margin-bottom: 10px;">
-                    <div id="profile-pic-preview" style="display: none; margin-bottom: 10px;">
-                        <img id="profile-preview-img" src="" alt="Preview" style="max-width: 150px; max-height: 150px; border-radius: 50%; object-fit: cover;">
-                        <button type="button" id="remove-profile-upload" style="display: block; margin-top: 5px; padding: 5px 10px; background: var(--accent-danger); color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
+                    <label>Profile Picture</label>
+                    <div class="profile-pic-options">
+                        <div class="default-avatars">
+                            <label class="avatar-option-label">Choose a default avatar:</label>
+                            <div class="avatar-grid">
+                                <label class="avatar-option">
+                                    <input type="radio" name="profile-pic-choice" value="avatar1">
+                                    <img src="/assets/default-avatars/avatar1.svg" alt="Avatar 1">
+                                </label>
+                                <label class="avatar-option">
+                                    <input type="radio" name="profile-pic-choice" value="avatar2">
+                                    <img src="/assets/default-avatars/avatar2.svg" alt="Avatar 2">
+                                </label>
+                                <label class="avatar-option">
+                                    <input type="radio" name="profile-pic-choice" value="avatar3">
+                                    <img src="/assets/default-avatars/avatar3.svg" alt="Avatar 3">
+                                </label>
+                                <label class="avatar-option">
+                                    <input type="radio" name="profile-pic-choice" value="avatar4">
+                                    <img src="/assets/default-avatars/avatar4.svg" alt="Avatar 4">
+                                </label>
+                                <label class="avatar-option">
+                                    <input type="radio" name="profile-pic-choice" value="avatar5">
+                                    <img src="/assets/default-avatars/avatar5.svg" alt="Avatar 5">
+                                </label>
+                                <label class="avatar-option">
+                                    <input type="radio" name="profile-pic-choice" value="avatar6">
+                                    <img src="/assets/default-avatars/avatar6.svg" alt="Avatar 6">
+                                </label>
+                            </div>
+                        </div>
+                        <div class="upload-divider">
+                            <span>OR</span>
+                        </div>
+                        <div class="upload-section">
+                            <label for="edit-profile-pic-upload" class="upload-label">Upload your own:</label>
+                            <input type="file" id="edit-profile-pic-upload" accept="image/*">
+                            <div id="profile-pic-preview" style="display: none; margin-top: 10px;">
+                                <img id="profile-preview-img" src="" alt="Preview" style="max-width: 150px; max-height: 150px; border-radius: 50%; object-fit: cover; display: block; margin: 0 auto;">
+                                <button type="button" id="remove-profile-upload" style="display: block; margin: 10px auto 0; padding: 5px 15px; background: var(--accent-danger); color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
+                            </div>
+                            <small>📸 JPG, PNG, GIF, WEBP (max 5 MB)</small>
+                        </div>
                     </div>
-                    <small>📸 Upload an image or enter a URL below</small>
-                </div>
-                <div class="form-group">
-                    <label for="edit-profile-pic">Or Enter Profile Picture URL</label>
-                    <input type="url" id="edit-profile-pic" placeholder="https://example.com/image.jpg">
+                    <input type="hidden" id="edit-profile-pic" value="">
                 </div>
                 <div class="form-group">
                     <label for="edit-bio">Bio</label>

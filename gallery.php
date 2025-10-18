@@ -13,11 +13,58 @@ $showSearch = true;
 <body>
     <?php include 'components/navbar.php'; ?>
 
-    <!-- Gallery Header -->
+    <!-- Gallery Header with Search -->
     <section class="gallery-header">
         <div class="container">
             <h1 class="gallery-title">Creative Gallery</h1>
             <p class="gallery-subtitle">Explore our collection of stunning artwork, photography, and design</p>
+            
+            <!-- Search and Filters -->
+            <div class="gallery-search-section">
+                <div class="search-bar-wrapper">
+                    <i class="fas fa-search search-icon-left"></i>
+                    <input 
+                        type="text" 
+                        id="gallery-search-input" 
+                        class="gallery-search-input"
+                        placeholder="Search by title, description, tags..."
+                        autocomplete="off"
+                    >
+                    <button class="search-clear-btn" id="gallery-search-clear" style="display: none;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button class="filters-icon-btn" id="filters-toggle-btn" title="Toggle Filters">
+                        <i class="fas fa-sliders-h"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Filters Panel (hidden by default) -->
+            <div class="filters-panel" id="filters-panel" style="display: none;">
+                <div class="filters-content">
+                    <div class="filter-section">
+                        <h3 class="filter-title">Category</h3>
+                        <div class="category-filters">
+                            <button class="filter-chip active" data-category="">All</button>
+                            <button class="filter-chip" data-category="art">Art</button>
+                            <button class="filter-chip" data-category="photography">Photography</button>
+                            <button class="filter-chip" data-category="design">Design</button>
+                            <button class="filter-chip" data-category="digital">Digital</button>
+                            <button class="filter-chip" data-category="nature">Nature</button>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h3 class="filter-title">Sort By</h3>
+                        <div class="sort-filters">
+                            <button class="filter-chip active" data-sort="newest">Newest</button>
+                            <button class="filter-chip" data-sort="oldest">Oldest</button>
+                            <button class="filter-chip" data-sort="popular">Most Popular</button>
+                            <button class="filter-chip" data-sort="liked">Most Liked</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
