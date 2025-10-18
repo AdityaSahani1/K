@@ -732,7 +732,8 @@ async function loadNotifications() {
     if (!currentUser) return;
     
     try {
-        const notifications = await loadData('notifications.json');
+        // Notifications moved to API endpoints - not implemented yet
+        const notifications = [];
         const userNotifications = notifications
             .filter(n => n.username === currentUser.username)
             .sort((a, b) => new Date(b.created) - new Date(a.created));

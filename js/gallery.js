@@ -5,6 +5,11 @@ let filteredPosts = [];
 let currentPage = 1;
 const postsPerPage = 30;
 
+// Search and filter state
+let currentSearchTerm = '';
+let currentCategory = '';
+let currentSortBy = 'newest';
+
 document.addEventListener('DOMContentLoaded', function() {
     initGalleryPage();
 });
@@ -16,6 +21,7 @@ function initGalleryPage() {
     initPostModal();
     initSearchToggle();
     initSearchPopup();
+    initGallerySearch();
 }
 
 async function loadAllPosts() {
@@ -23,6 +29,7 @@ async function loadAllPosts() {
         allPosts = await loadData('posts.json');
         filteredPosts = [...allPosts];
         
+        updateCategoryCounts();
         loadGalleryPosts();
         
         // Check for post parameter after posts are loaded
@@ -438,16 +445,17 @@ function initSearch() {
 }
 
 function applyFilters() {
-    const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
-    const activeCategory = document.querySelector('.category-filter.active')?.dataset.category || '';
-    const activeSort = document.querySelector('.sort-option.active')?.dataset.sort || 'newest';
+    // Use global variables for current filter state
+    const searchTerm = currentSearchTerm.toLowerCase();
+    const activeCategory = currentCategory;
+    const activeSort = currentSortBy;
     
     // Filter posts
     filteredPosts = allPosts.filter(post => {
         const matchesSearch = !searchTerm || 
             post.title.toLowerCase().includes(searchTerm) ||
             post.description.toLowerCase().includes(searchTerm) ||
-            post.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+            (post.tags && post.tags.some(tag => tag.toLowerCase().includes(searchTerm)));
         
         const matchesCategory = !activeCategory || post.category === activeCategory;
         
@@ -476,7 +484,6 @@ function applyFilters() {
     currentPage = 1;
     loadGalleryPosts();
 }
-
 function loadMorePosts() {
     currentPage++;
     loadGalleryPosts();
@@ -1230,4 +1237,65 @@ function updateCategoryCounts() {
     document.getElementById('count-photography').textContent = categoryCounts.photography;
     document.getElementById('count-design').textContent = categoryCounts.design;
     document.getElementById('count-digital').textContent = categoryCounts.digital;
+}
+// Gallery search functionality (new inline search)
+function initGallerySearch() {
+    const searchInput = document.getElementById('gallery-search-input');
+    const searchClearBtn = document.getElementById('gallery-search-clear');
+    const filtersToggleBtn = document.getElementById('filters-toggle-btn');
+    const filtersPanel = document.getElementById('filters-panel');
+    const categoryFilters = document.querySelectorAll('.category-filters .filter-chip');
+    const sortFilters = document.querySelectorAll('.sort-filters .filter-chip');
+    
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            const value = this.value.trim();
+            if (searchClearBtn) {
+                searchClearBtn.style.display = value ? 'flex' : 'none';
+            }
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentSearchTerm = value;
+                applyFilters();
+            }, 300);
+        });
+    }
+    
+    if (searchClearBtn) {
+        searchClearBtn.addEventListener('click', function() {
+            if (searchInput) {
+                searchInput.value = '';
+                currentSearchTerm = '';
+                this.style.display = 'none';
+                applyFilters();
+            }
+        });
+    }
+    
+    if (filtersToggleBtn && filtersPanel) {
+        filtersToggleBtn.addEventListener('click', function() {
+            const isHidden = filtersPanel.style.display === 'none';
+            filtersPanel.style.display = isHidden ? 'block' : 'none';
+            this.classList.toggle('active');
+        });
+    }
+    
+    categoryFilters.forEach(filter => {
+        filter.addEventListener('click', function() {
+            categoryFilters.forEach(f => f.classList.remove('active'));
+            this.classList.add('active');
+            currentCategory = this.dataset.category || '';
+            applyFilters();
+        });
+    });
+    
+    sortFilters.forEach(filter => {
+        filter.addEventListener('click', function() {
+            sortFilters.forEach(f => f.classList.remove('active'));
+            this.classList.add('active');
+            currentSortBy = this.dataset.sort || 'newest';
+            applyFilters();
+        });
+    });
 }

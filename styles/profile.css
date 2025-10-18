@@ -901,3 +901,116 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
 }
+
+/* Profile Picture Options */
+.profile-pic-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+}
+
+.avatar-option-label, .upload-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: var(--spacing-sm);
+    max-width: 400px;
+}
+
+.avatar-option {
+    position: relative;
+    cursor: pointer;
+    border: 3px solid transparent;
+    border-radius: 50%;
+    overflow: hidden;
+    transition: all var(--transition-fast);
+    aspect-ratio: 1;
+}
+
+.avatar-option:hover {
+    border-color: var(--accent-primary);
+    transform: scale(1.05);
+}
+
+.avatar-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.avatar-option input[type="radio"]:checked + img {
+    border: 3px solid var(--accent-primary);
+}
+
+.avatar-option img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    transition: all var(--transition-fast);
+}
+
+.avatar-option input[type="radio"]:checked ~ img,
+.avatar-option:has(input[type="radio"]:checked) img {
+    box-shadow: 0 0 0 3px var(--accent-primary);
+}
+
+.upload-divider {
+    text-align: center;
+    position: relative;
+    margin: var(--spacing-sm) 0;
+}
+
+.upload-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.upload-divider span {
+    position: relative;
+    background: var(--bg-tertiary);
+    padding: 0 var(--spacing-md);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.upload-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.upload-section input[type="file"] {
+    padding: var(--spacing-sm);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.upload-section input[type="file"]:hover {
+    border-color: var(--accent-primary);
+    background: var(--bg-hover);
+}
+
+.upload-section small {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}

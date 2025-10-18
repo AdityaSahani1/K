@@ -366,18 +366,18 @@ function navigateToComment(postId, commentId) {
 
 function createProfilePostCard(post) {
     return `
-        <div class="profile-post-card" data-post-id="${post.id}">
+        <div class="profile-post-card" data-post-id="${post.id}" onclick="window.location.href='gallery.php?post=${post.id}'">
             <div class="profile-post-image">
                 <img src="${post.imageUrl}" alt="${post.title}" loading="lazy">
-                <div class="profile-post-overlay">
-                    <i class="fas fa-eye"></i>
-                </div>
             </div>
-            <div class="profile-post-info">
+            <div class="profile-post-details">
                 <h4 class="profile-post-title">${post.title}</h4>
                 <div class="profile-post-meta">
-                    <span>${post.category}</span>
-                    <span><i class="far fa-heart"></i> ${post.likes || 0}</span>
+                    <span class="post-category-badge">${post.category}</span>
+                    <div class="post-stats">
+                        <span><i class="far fa-heart"></i> ${post.likes || 0}</span>
+                        <span><i class="far fa-comment"></i> ${post.comments || 0}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -385,12 +385,6 @@ function createProfilePostCard(post) {
 }
 
 function addProfilePostListeners() {
-    document.querySelectorAll('.profile-post-card').forEach(card => {
-        card.addEventListener('click', function() {
-            const postId = this.dataset.postId;
-            window.location.href = `gallery.php?post=${postId}`;
-        });
-    });
 }
 
 function initEditProfileModal() {
@@ -429,6 +423,22 @@ function initEditProfileModal() {
             }
         });
     }
+    
+    const uploadInput = document.getElementById('edit-profile-pic-upload');
+    const removeUploadBtn = document.getElementById('remove-profile-upload');
+    const avatarRadios = document.querySelectorAll('input[name="profile-pic-choice"]');
+    
+    if (uploadInput) {
+        uploadInput.addEventListener('change', handleProfilePicUpload);
+    }
+    
+    if (removeUploadBtn) {
+        removeUploadBtn.addEventListener('click', removeProfilePicUpload);
+    }
+    
+    avatarRadios.forEach(radio => {
+        radio.addEventListener('change', handleDefaultAvatarSelection);
+    });
 }
 
 function showEditProfileModal() {
@@ -440,6 +450,111 @@ function showEditProfileModal() {
     document.getElementById('edit-bio').value = currentUser.bio || '';
     
     showModal('edit-profile-modal');
+}
+
+async function handleDefaultAvatarSelection(e) {
+    const avatarValue = e.target.value;
+    const avatarPath = '/assets/default-avatars/' + avatarValue + '.svg';
+    
+    await deleteOldProfilePictures();
+    
+    document.getElementById('edit-profile-pic').value = avatarPath;
+    
+    document.getElementById('edit-profile-pic-upload').value = '';
+    document.getElementById('profile-pic-preview').style.display = 'none';
+    
+    showNotification('Default avatar selected', 'success');
+}
+
+async function handleProfilePicUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.match('image.*')) {
+        showNotification('Please select an image file', 'error');
+        return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) {
+        showNotification('Image size must be less than 5MB', 'error');
+        return;
+    }
+    
+    const avatarRadios = document.querySelectorAll('input[name="profile-pic-choice"]');
+    avatarRadios.forEach(radio => radio.checked = false);
+    
+    const reader = new FileReader();
+    reader.onload = async function(event) {
+        const base64Image = event.target.result.split(',')[1];
+        
+        const previewImg = document.getElementById('profile-preview-img');
+        const previewContainer = document.getElementById('profile-pic-preview');
+        
+        previewImg.src = event.target.result;
+        previewContainer.style.display = 'block';
+        
+        try {
+            showNotification('Uploading image...', 'info');
+            
+            const response = await fetch('/api/upload-profile-pic.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    image: base64Image
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                document.getElementById('edit-profile-pic').value = data.url;
+                showNotification('Image uploaded successfully!', 'success');
+            } else {
+                showNotification('Failed to upload image: ' + data.error, 'error');
+                previewContainer.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+            showNotification('Failed to upload image', 'error');
+            previewContainer.style.display = 'none';
+        }
+    };
+    
+    reader.readAsDataURL(file);
+}
+
+async function removeProfilePicUpload() {
+    await deleteOldProfilePictures();
+    
+    document.getElementById('edit-profile-pic-upload').value = '';
+    document.getElementById('edit-profile-pic').value = '';
+    document.getElementById('profile-pic-preview').style.display = 'none';
+    
+    const avatarRadios = document.querySelectorAll('input[name="profile-pic-choice"]');
+    avatarRadios.forEach(radio => radio.checked = false);
+    
+    showNotification('Profile picture removed', 'success');
+}
+
+async function deleteOldProfilePictures() {
+    try {
+        const response = await fetch('/api/delete-profile-pic.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+            console.warn('Failed to delete old profile pictures:', data.error);
+        }
+    } catch (error) {
+        console.error('Error deleting old profile pictures:', error);
+    }
 }
 
 async function handleEditProfile(e) {
@@ -481,17 +596,14 @@ async function handleEditProfile(e) {
         const data = await response.json();
         
         if (response.ok) {
-            // Update current user object in memory
             currentUser.name = name;
             currentUser.username = username;
             currentUser.email = email;
             currentUser.profilePicture = profilePicture;
             currentUser.bio = bio;
             
-            // Update in localStorage for session
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             
-            // Update UI
             loadUserProfile();
             hideModal('edit-profile-modal');
             showNotification('Profile updated successfully!', 'success');
@@ -528,16 +640,12 @@ async function loadUserContent() {
                     // Make sure tab is visible
                     myPostsTab.style.display = 'inline-block';
                     
-                    // Set My Posts as active
+                    // Set My Posts as active using CSS classes only
+                    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                    document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+                    
                     myPostsTab.classList.add('active');
                     myPostsPane.classList.add('active');
-                    myPostsPane.style.display = 'block';
-                    
-                    if (likedTab) likedTab.classList.remove('active');
-                    if (likedPane) {
-                        likedPane.classList.remove('active');
-                        likedPane.style.display = 'none';
-                    }
                     
                     // Load My Posts content
                     await loadTabContent('myposts');
@@ -811,10 +919,6 @@ async function loadMyPosts() {
                    (post.authorName && post.authorName === currentUser.name);
         });
         
-        console.log('Current user:', currentUser.username, currentUser.id);
-        console.log('Total posts:', posts.length);
-        console.log('My posts:', myPosts.length);
-        console.log('My posts container:', myPostsContainer);
         
         if (myPosts.length === 0) {
             myPostsContainer.innerHTML = `
@@ -829,34 +933,8 @@ async function loadMyPosts() {
             return;
         }
         
-        myPostsContainer.innerHTML = myPosts.map(post => `
-            <div class="post-card" data-post-id="${post.id}">
-                <img src="${post.imageUrl}" alt="${post.title}" class="post-image" loading="lazy" onclick="openPost('${post.id}')">
-                <div class="post-overlay">
-                    <div class="post-stats">
-                        <span><i class="fas fa-heart"></i> ${post.likes || 0}</span>
-                        <span><i class="fas fa-comment"></i> ${post.comments || 0}</span>
-                    </div>
-                    <div class="post-menu">
-                        <button class="menu-trigger" onclick="togglePostMenu(event, '${post.id}')">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                        <div class="menu-dropdown" id="menu-${post.id}">
-                            <button onclick="editMyPost('${post.id}')">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <button onclick="deleteMyPost('${post.id}')" class="delete-option">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="post-info">
-                    <h3>${post.title}</h3>
-                    <p class="post-category">${post.category}</p>
-                </div>
-            </div>
-        `).join('');
+        myPostsContainer.innerHTML = myPosts.map(post => createProfilePostCard(post)).join('');
+        addProfilePostListeners();
         
     } catch (error) {
         console.error('Error loading my posts:', error);

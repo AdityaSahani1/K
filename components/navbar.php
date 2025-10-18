@@ -27,9 +27,6 @@ $showSearch = $showSearch ?? false;
         </div>
         
         <div class="nav-actions">
-            <button class="search-btn" id="search-btn" <?= !$showSearch ? 'style="display: none;"' : '' ?>>
-                <i class="fas fa-search"></i>
-            </button>
             <button class="theme-toggle" id="theme-toggle">
                 <i class="fas fa-moon"></i>
             </button>
