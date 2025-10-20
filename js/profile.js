@@ -155,6 +155,7 @@ async function loadUserStats() {
 function initProfileTabs() {
     const tabButtons = document.querySelectorAll('.content-tab');
     const tabPanels = document.querySelectorAll('.content-panel');
+    const addPostBtn = document.getElementById('add-post-btn');
     
     tabButtons.forEach(button => {
         button.addEventListener('click', function() {
@@ -169,6 +170,15 @@ function initProfileTabs() {
             const targetPanel = document.getElementById(`${tabName}-tab`);
             if (targetPanel) {
                 targetPanel.classList.add('active');
+            }
+            
+            // Show/hide Create Post button only for "myposts" tab
+            if (addPostBtn) {
+                if (tabName === 'myposts') {
+                    addPostBtn.style.display = 'inline-flex';
+                } else {
+                    addPostBtn.style.display = 'none';
+                }
             }
             
             // Load content for the active tab
@@ -205,9 +215,11 @@ async function loadLikedPosts() {
         if (likes.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
-                    <i class="far fa-heart"></i>
-                    <h3>No Liked Posts</h3>
-                    <p>Posts you like will appear here</p>
+                    <div class="empty-state-icon">
+                        <i class="far fa-heart"></i>
+                    </div>
+                    <h3>No Liked Posts Yet</h3>
+                    <p>Start exploring and like posts that inspire you. They'll appear here for easy access.</p>
                     <a href="gallery.php" class="empty-state-action">
                         <i class="fas fa-images"></i> Explore Gallery
                     </a>
@@ -227,9 +239,11 @@ async function loadLikedPosts() {
         if (likedPosts.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
-                    <i class="far fa-heart"></i>
-                    <h3>No Liked Posts</h3>
-                    <p>Posts you like will appear here</p>
+                    <div class="empty-state-icon">
+                        <i class="far fa-heart"></i>
+                    </div>
+                    <h3>No Liked Posts Yet</h3>
+                    <p>Start exploring and like posts that inspire you. They'll appear here for easy access.</p>
                     <a href="gallery.php" class="empty-state-action">
                         <i class="fas fa-images"></i> Explore Gallery
                     </a>
@@ -263,9 +277,11 @@ async function loadSavedPosts() {
         if (saves.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
-                    <i class="far fa-bookmark"></i>
-                    <h3>No Saved Posts</h3>
-                    <p>Posts you save will appear here</p>
+                    <div class="empty-state-icon">
+                        <i class="far fa-bookmark"></i>
+                    </div>
+                    <h3>No Saved Posts Yet</h3>
+                    <p>Bookmark your favorite posts to build your personal collection. Access them anytime.</p>
                     <a href="gallery.php" class="empty-state-action">
                         <i class="fas fa-images"></i> Explore Gallery
                     </a>
@@ -285,9 +301,11 @@ async function loadSavedPosts() {
         if (savedPosts.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
-                    <i class="far fa-bookmark"></i>
-                    <h3>No Saved Posts</h3>
-                    <p>Posts you save will appear here</p>
+                    <div class="empty-state-icon">
+                        <i class="far fa-bookmark"></i>
+                    </div>
+                    <h3>No Saved Posts Yet</h3>
+                    <p>Bookmark your favorite posts to build your personal collection. Access them anytime.</p>
                     <a href="gallery.php" class="empty-state-action">
                         <i class="fas fa-images"></i> Explore Gallery
                     </a>
@@ -321,9 +339,11 @@ async function loadUserComments() {
         if (comments.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
-                    <i class="far fa-comment"></i>
-                    <h3>No Comments</h3>
-                    <p>Your comments will appear here</p>
+                    <div class="empty-state-icon">
+                        <i class="far fa-comment"></i>
+                    </div>
+                    <h3>No Comments Yet</h3>
+                    <p>Share your thoughts and engage with the community. Your comments will be displayed here.</p>
                     <a href="gallery.php" class="empty-state-action">
                         <i class="fas fa-images"></i> Explore Gallery
                     </a>
@@ -380,10 +400,23 @@ function createProfilePostCard(post) {
         <div class="profile-post-item">
             <div class="profile-post-image" onclick="openPostModal('${post.id}')">
                 <img src="${post.imageUrl}" alt="${post.title}" loading="lazy">
+                <div class="profile-post-overlay">
+                    <div class="profile-post-actions">
+                        <button class="overlay-action-btn" onclick="event.stopPropagation(); toggleLike('${post.id}')" title="Like">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        <button class="overlay-action-btn" onclick="event.stopPropagation(); toggleSave('${post.id}')" title="Save">
+                            <i class="far fa-bookmark"></i>
+                        </button>
+                        <button class="overlay-action-btn" onclick="event.stopPropagation(); sharePost('${post.id}')" title="Share">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="profile-post-footer">
-                <span class="profile-post-author">
-                    <i class="fas fa-user"></i> ${post.author}
+                <span class="profile-post-title">
+                    <i class="fas fa-image"></i> ${post.title}
                 </span>
                 <button class="profile-post-menu-btn" data-post-id="${post.id}" onclick="event.stopPropagation(); showProfilePostMenu(event, '${post.id}')">
                     <i class="fas fa-ellipsis-v"></i>
@@ -401,6 +434,10 @@ function addProfilePostListeners() {
             if (existingMenu) {
                 existingMenu.remove();
             }
+            const activeItem = document.querySelector('.profile-post-item.menu-active');
+            if (activeItem) {
+                activeItem.classList.remove('menu-active');
+            }
         }
     });
 }
@@ -409,10 +446,20 @@ function showProfilePostMenu(event, postId) {
     event.preventDefault();
     event.stopPropagation();
     
-    // Remove any existing context menu
+    // Remove any existing context menu and active state
     const existingMenu = document.querySelector('.profile-post-context-menu');
     if (existingMenu) {
         existingMenu.remove();
+    }
+    const existingActive = document.querySelector('.profile-post-item.menu-active');
+    if (existingActive) {
+        existingActive.classList.remove('menu-active');
+    }
+    
+    // Add menu-active class to hide hover overlay
+    const postItem = event.target.closest('.profile-post-item');
+    if (postItem) {
+        postItem.classList.add('menu-active');
     }
     
     // Create context menu
@@ -427,19 +474,31 @@ function showProfilePostMenu(event, postId) {
         </button>
     `;
     
-    // Position the menu
+    // Position the menu using fixed positioning
     const rect = event.target.closest('.profile-post-menu-btn').getBoundingClientRect();
     menu.style.position = 'fixed';
     menu.style.top = `${rect.bottom + 5}px`;
     menu.style.right = `${window.innerWidth - rect.right}px`;
     
     document.body.appendChild(menu);
+    
+    // Close menu on scroll
+    const closeOnScroll = () => {
+        menu.remove();
+        if (postItem) {
+            postItem.classList.remove('menu-active');
+        }
+        window.removeEventListener('scroll', closeOnScroll, true);
+    };
+    window.addEventListener('scroll', closeOnScroll, true);
 }
 
 async function editUserPost(postId) {
-    // Close context menu
+    // Close context menu and remove active state
     const menu = document.querySelector('.profile-post-context-menu');
     if (menu) menu.remove();
+    const activeItem = document.querySelector('.profile-post-item.menu-active');
+    if (activeItem) activeItem.classList.remove('menu-active');
     
     try {
         const response = await fetch('/api/posts.php');
@@ -490,9 +549,11 @@ async function editUserPost(postId) {
 }
 
 async function deleteUserPost(postId) {
-    // Close context menu
+    // Close context menu and remove active state
     const menu = document.querySelector('.profile-post-context-menu');
     if (menu) menu.remove();
+    const activeItem = document.querySelector('.profile-post-item.menu-active');
+    if (activeItem) activeItem.classList.remove('menu-active');
     
     if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
         return;
@@ -557,42 +618,46 @@ function initEditProfileModal() {
         });
     }
     
-    const uploadInput = document.getElementById('edit-profile-pic-upload');
-    const removeUploadBtn = document.getElementById('remove-profile-upload');
-    const avatarRadios = document.querySelectorAll('input[name="profile-pic-choice"]');
+    const uploadInput = document.getElementById('profile-picture-upload');
+    const avatarOptions = document.querySelectorAll('.avatar-option');
     
     if (uploadInput) {
         uploadInput.addEventListener('change', handleProfilePicUpload);
     }
     
-    if (removeUploadBtn) {
-        removeUploadBtn.addEventListener('click', removeProfilePicUpload);
-    }
-    
-    avatarRadios.forEach(radio => {
-        radio.addEventListener('change', handleDefaultAvatarSelection);
+    avatarOptions.forEach(option => {
+        option.addEventListener('click', handleDefaultAvatarSelection);
     });
 }
 
 function showEditProfileModal() {
     // Populate form with current user data
-    document.getElementById('edit-name').value = currentUser.name || '';
-    document.getElementById('edit-username').value = currentUser.username;
-    document.getElementById('edit-email').value = currentUser.email;
-    document.getElementById('edit-profile-pic').value = currentUser.profilePicture || '';
-    document.getElementById('edit-bio').value = currentUser.bio || '';
+    const nameField = document.getElementById('edit-name');
+    const bioField = document.getElementById('edit-bio');
+    
+    if (nameField) nameField.value = currentUser.name || '';
+    if (bioField) bioField.value = currentUser.bio || '';
     
     showModal('edit-profile-modal');
 }
 
 async function handleDefaultAvatarSelection(e) {
-    const avatarValue = e.target.value;
+    const avatarOption = e.target.closest('.avatar-option');
+    if (!avatarOption) return;
+    
+    const avatarValue = avatarOption.dataset.avatar;
     const avatarPath = '/assets/default-avatars/' + avatarValue + '.svg';
     
-    document.getElementById('edit-profile-pic').value = avatarPath;
+    // Remove previous selection
+    document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+    avatarOption.classList.add('selected');
     
-    document.getElementById('edit-profile-pic-upload').value = '';
-    document.getElementById('profile-pic-preview').style.display = 'none';
+    // Store the selected avatar path
+    avatarOption.closest('form').dataset.selectedAvatar = avatarPath;
+    
+    // Clear file upload
+    const uploadInput = document.getElementById('profile-picture-upload');
+    if (uploadInput) uploadInput.value = '';
 }
 
 async function handleProfilePicUpload(e) {
@@ -609,59 +674,42 @@ async function handleProfilePicUpload(e) {
         return;
     }
     
-    const avatarRadios = document.querySelectorAll('input[name="profile-pic-choice"]');
-    avatarRadios.forEach(radio => radio.checked = false);
+    // Clear avatar selections
+    document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
     
     const reader = new FileReader();
     reader.onload = async function(event) {
         const base64Image = event.target.result.split(',')[1];
         
-        const previewImg = document.getElementById('profile-preview-img');
-        const previewContainer = document.getElementById('profile-pic-preview');
-        
-        previewImg.src = event.target.result;
-        previewContainer.style.display = 'block';
-        
         try {
-            showNotification('Compressing and uploading to ImgBB...', 'info');
+            showNotification('Uploading image...', 'info');
             
-            const response = await fetch('/api/upload-profile-pic.php', {
+            const response = await fetch('/api/upload-image.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    image: base64Image
-                })
+                body: JSON.stringify({ image: base64Image })
             });
             
             const data = await response.json();
             
             if (data.success) {
-                document.getElementById('edit-profile-pic').value = data.url;
-                showNotification('Image uploaded to ImgBB successfully!', 'success');
+                // Store the uploaded image URL
+                e.target.closest('form').dataset.uploadedImage = data.data.display_url;
+                showNotification('Image uploaded successfully!', 'success');
             } else {
-                showNotification('Failed to upload image: ' + data.error, 'error');
-                previewContainer.style.display = 'none';
+                showNotification('Failed to upload image: ' + (data.error || 'Unknown error'), 'error');
             }
         } catch (error) {
             console.error('Upload error:', error);
             showNotification('Failed to upload image', 'error');
-            previewContainer.style.display = 'none';
         }
     };
     
     reader.readAsDataURL(file);
 }
 
-async function removeProfilePicUpload() {
-    document.getElementById('edit-profile-pic-upload').value = '';
-    document.getElementById('edit-profile-pic').value = '';
-    document.getElementById('profile-pic-preview').style.display = 'none';
-    
-    const avatarRadios = document.querySelectorAll('input[name="profile-pic-choice"]');
-    avatarRadios.forEach(radio => radio.checked = false);
-}
 
 async function deleteOldProfilePictures() {
     try {
@@ -686,18 +734,14 @@ async function handleEditProfile(e) {
     e.preventDefault();
     
     const name = document.getElementById('edit-name').value.trim();
-    const username = document.getElementById('edit-username').value.trim();
-    const email = document.getElementById('edit-email').value.trim();
-    const profilePicture = document.getElementById('edit-profile-pic').value.trim();
     const bio = document.getElementById('edit-bio').value.trim();
     
-    if (!name || !username || !email) {
-        showNotification('Name, username and email are required', 'error');
-        return;
-    }
+    // Get profile picture from uploaded image or selected avatar
+    const form = e.target;
+    const profilePicture = form.dataset.uploadedImage || form.dataset.selectedAvatar || currentUser.profilePicture;
     
-    if (!isValidEmail(email)) {
-        showNotification('Please enter a valid email address', 'error');
+    if (!name) {
+        showNotification('Name is required', 'error');
         return;
     }
     
@@ -711,8 +755,6 @@ async function handleEditProfile(e) {
                 action: 'update_profile',
                 userId: currentUser.id,
                 name: name,
-                username: username,
-                email: email,
                 profilePicture: profilePicture,
                 bio: bio
             })
@@ -722,8 +764,6 @@ async function handleEditProfile(e) {
         
         if (response.ok) {
             currentUser.name = name;
-            currentUser.username = username;
-            currentUser.email = email;
             currentUser.profilePicture = profilePicture;
             currentUser.bio = bio;
             
@@ -1052,9 +1092,11 @@ async function loadMyPosts() {
         if (myPosts.length === 0) {
             myPostsContainer.innerHTML = `
                 <div class="empty-state">
-                    <i class="fas fa-images"></i>
+                    <div class="empty-state-icon">
+                        <i class="fas fa-images"></i>
+                    </div>
                     <h3>No Posts Yet</h3>
-                    <p>You haven't created any posts yet. Click the "Create Post" button below to get started!</p>
+                    <p>You haven't created any posts yet. Share your creative work with the community by clicking the "Create Post" button above.</p>
                 </div>
             `;
             return;
@@ -1075,9 +1117,11 @@ async function loadMyPosts() {
 }
 
 function showAddPostModal() {
-    document.getElementById('user-post-form-title').textContent = 'Add New Post';
+    document.getElementById('user-post-form-title').textContent = 'Create New Post';
     document.getElementById('user-post-form').reset();
-    delete document.getElementById('user-post-form').dataset.postId;
+    document.getElementById('user-post-id').value = '';
+    document.getElementById('user-post-image').value = '';
+    document.getElementById('user-image-upload-preview').style.display = 'none';
     showModal('user-post-form-modal');
 }
 
@@ -1136,18 +1180,41 @@ async function handleUserPostForm(e) {
     e.preventDefault();
     
     const form = e.target;
-    const postId = form.dataset.postId;
+    const postId = document.getElementById('user-post-id').value;
     const isEdit = !!postId;
     
     const title = document.getElementById('user-post-title').value.trim();
     const category = document.getElementById('user-post-category').value;
-    let imageUrl = document.getElementById('user-post-image-url').value.trim();
+    let imageUrl = document.getElementById('user-post-image').value.trim();
     const description = document.getElementById('user-post-description').value.trim();
     const tagsInput = document.getElementById('user-post-tags').value.trim();
     const downloadUrl = document.getElementById('user-post-download-url').value.trim();
     
-    // Convert image URL to direct link if from supported platforms
-    imageUrl = convertToDirectImageUrl(imageUrl);
+    // Check if we need to upload an image
+    const userPostUpload = document.getElementById('user-post-image-upload');
+    if (userPostUpload && userPostUpload.files && userPostUpload.files[0]) {
+        try {
+            showNotification('Uploading image...', 'info');
+            const file = userPostUpload.files[0];
+            const base64 = await fileToBase64(file);
+            const uploadData = await uploadToImgBB(base64);
+            imageUrl = uploadData.displayUrl;
+            
+            // Auto-populate download URL if not set
+            if (!downloadUrl && uploadData.imageUrl) {
+                document.getElementById('user-post-download-url').value = uploadData.imageUrl;
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+            showNotification('Failed to upload image: ' + error.message, 'error');
+            return;
+        }
+    }
+    
+    if (!imageUrl) {
+        showNotification('Please select an image', 'error');
+        return;
+    }
     
     // Parse tags
     const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
@@ -1185,6 +1252,12 @@ async function handleUserPostForm(e) {
         showNotification(isEdit ? 'Post updated successfully!' : 'Post created successfully!', 'success');
         hideModal('user-post-form-modal');
         loadMyPosts();
+        
+        // Reset form
+        form.reset();
+        document.getElementById('user-post-id').value = '';
+        document.getElementById('user-post-image').value = '';
+        document.getElementById('user-image-upload-preview').style.display = 'none';
         
     } catch (error) {
         console.error('Error saving post:', error);
@@ -1346,7 +1419,7 @@ function initProfileImageUpload() {
         });
     }
     
-    // User post image upload
+    // User post image upload - Only show preview, don't upload yet
     const userPostUpload = document.getElementById('user-post-image-upload');
     const userPostUrl = document.getElementById('user-post-image');
     const userPostPreview = document.getElementById('user-image-upload-preview');
@@ -1354,37 +1427,29 @@ function initProfileImageUpload() {
     const removeUserPostUpload = document.getElementById('user-remove-upload');
     
     if (userPostUpload) {
-        userPostUpload.addEventListener('change', async function(e) {
+        userPostUpload.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
             
-            // Show preview
+            // Validate file type
+            if (!file.type.match('image.*')) {
+                showNotification('Please select an image file', 'error');
+                return;
+            }
+            
+            // Validate file size
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification('Image size must be less than 5MB', 'error');
+                return;
+            }
+            
+            // Show preview only, don't upload yet
             const reader = new FileReader();
             reader.onload = function(e) {
                 userPostPreviewImg.src = e.target.result;
                 userPostPreview.style.display = 'block';
             };
             reader.readAsDataURL(file);
-            
-            // Upload to ImgBB
-            try {
-                const base64 = await fileToBase64(file);
-                const uploadData = await uploadToImgBB(base64);
-                userPostUrl.value = uploadData.displayUrl;
-                userPostUrl.removeAttribute('required');
-                
-                // Auto-populate download URL
-                const downloadUrlField = document.getElementById('user-post-download-url');
-                if (downloadUrlField && uploadData.imageUrl) {
-                    downloadUrlField.value = uploadData.imageUrl;
-                }
-                
-                showNotification('Image uploaded successfully!', 'success');
-            } catch (error) {
-                console.error('Upload error:', error);
-                showNotification('Failed to upload image: ' + error.message, 'error');
-                userPostPreview.style.display = 'none';
-            }
         });
     }
     
@@ -1393,7 +1458,6 @@ function initProfileImageUpload() {
             userPostUpload.value = '';
             userPostUrl.value = '';
             userPostPreview.style.display = 'none';
-            userPostUrl.setAttribute('required', '');
         });
     }
 }

@@ -669,16 +669,39 @@ async function downloadPost(postId) {
             return;
         }
         
-        // Create temporary link and trigger download
-        const link = document.createElement('a');
-        link.href = post.downloadUrl;
-        link.download = `${post.title}.zip`;
-        link.target = '_blank';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        showNotification('Preparing download...', 'info');
         
-        showNotification('Download started!', 'success');
+        try {
+            // Fetch the image as a blob to force download
+            const response = await fetch(post.downloadUrl);
+            if (!response.ok) throw new Error('Failed to fetch image');
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            
+            // Create temporary link and trigger download
+            const link = document.createElement('a');
+            link.href = url;
+            
+            // Extract file extension from URL or use default
+            const urlPath = post.downloadUrl.split('?')[0];
+            const extension = urlPath.substring(urlPath.lastIndexOf('.')) || '.jpg';
+            link.download = `${post.title}${extension}`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Clean up the blob URL
+            setTimeout(() => window.URL.revokeObjectURL(url), 100);
+            
+            showNotification('Download started!', 'success');
+        } catch (fetchError) {
+            // Fallback: open in new tab if fetch fails (e.g., CORS issues)
+            console.warn('Fetch failed, falling back to new tab:', fetchError);
+            window.open(post.downloadUrl, '_blank');
+            showNotification('Opening image in new tab...', 'info');
+        }
     } catch (error) {
         console.error('Error downloading post:', error);
         showNotification('Error starting download', 'error');

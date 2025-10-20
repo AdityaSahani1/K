@@ -163,6 +163,9 @@ $showSearch = false;
                                 <img src="/assets/default-avatars/avatar6.svg" alt="Avatar 6">
                             </div>
                         </div>
+                        <div class="or-divider">
+                            <span>or</span>
+                        </div>
                         <div class="upload-section">
                             <label for="profile-picture-upload" class="upload-btn">
                                 <i class="fas fa-upload"></i> Upload Custom Photo
@@ -232,8 +235,9 @@ $showSearch = false;
                 </div>
                 
                 <div class="form-group">
-                    <label for="user-post-image-upload">Upload Image</label>
-                    <input type="file" id="user-post-image-upload" accept="image/*" required style="margin-bottom: 10px;">
+                    <label for="user-post-image-upload">Upload Image *</label>
+                    <input type="file" id="user-post-image-upload" accept="image/*" style="margin-bottom: 10px;">
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">Image will be uploaded when you click "Save Post"</p>
                     <div id="user-image-upload-preview" style="display: none; margin-bottom: 10px;">
                         <img id="user-preview-img" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
                         <button type="button" id="user-remove-upload" style="display: block; margin-top: 5px; padding: 5px 10px; background: var(--accent-danger); color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>

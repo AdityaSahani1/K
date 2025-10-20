@@ -457,7 +457,7 @@ async function loadUsersTable() {
         if (users.length === 0) {
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: var(--spacing-2xl);">
+                    <td colspan="6" style="text-align: center; padding: var(--spacing-2xl);">
                         <i class="fas fa-users" style="font-size: 2rem; color: var(--text-muted); margin-bottom: var(--spacing-md);"></i>
                         <p>No users found</p>
                     </td>
