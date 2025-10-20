@@ -147,21 +147,36 @@ CREATE TABLE IF NOT EXISTS contacts (
     INDEX idx_created (created)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
+-- Delete all existing data
+DELETE FROM comment_likes;
+DELETE FROM likes;
+DELETE FROM saves;
+DELETE FROM views;
+DELETE FROM notifications;
+DELETE FROM contacts;
+DELETE FROM comments;
+DELETE FROM posts;
+DELETE FROM users;
 
 -- Insert default admin user
 -- Password is 'admin123' (bcrypt hashed)
 INSERT INTO users (id, name, username, email, password, role, created, isVerified) VALUES
-('user_68e3e993baeb3', 'SnapSera Admin', 'snapsera', 'snapsera.team@gmail.com', '$2y$10$UIU/aPr84wQuoVJDa79OquN8VCmOtNRTTJTrYlOOUbc28sLqx9Jcm', 'admin', '2025-10-06 16:08:51', 1);
+('user_admin2025', 'SnapSera Admin', 'snapsera', 'snapsera.team@gmail.com', '$2y$10$UIU/aPr84wQuoVJDa79OquN8VCmOtNRTTJTrYlOOUbc28sLqx9Jcm', 'admin', '2025-10-20 00:00:00', 1);
 
--- Insert 10 sample posts with zero stats
-INSERT INTO posts (id, title, description, imageUrl, category, tags, author, created, likes, comments, views, featured) VALUES
-('post_68e3e993cd52f', 'Mountain Sunrise', 'Beautiful sunrise over mountain peaks', 'https://picsum.photos/800/600?random=0', 'art', '["landscape","sunrise","mountains"]', 'user_68e3e993baeb3', '2025-10-06 16:08:51', 0, 0, 0, 1),
-('post_68e3e993d246c', 'City Lights', 'Urban nightscape with city lights', 'https://picsum.photos/800/600?random=1', 'photography', '["city","night","architecture"]', 'user_68e3e993baeb3', '2025-10-05 16:08:51', 0, 0, 0, 0),
-('post_68e3e993d8eee', 'Ocean Waves', 'Peaceful ocean waves at sunset', 'https://picsum.photos/800/600?random=2', 'nature', '["ocean","sunset","waves"]', 'user_68e3e993baeb3', '2025-10-04 16:08:51', 0, 0, 0, 0),
-('post_68e3e993ddfbd', 'Forest Path', 'Mystical path through the forest', 'https://picsum.photos/800/600?random=3', 'nature', '["forest","path","trees"]', 'user_68e3e993baeb3', '2025-10-03 16:08:51', 0, 0, 0, 0),
-('post_68e3e993e2393', 'Street Photography', 'Candid moment in the city', 'https://picsum.photos/800/600?random=4', 'photography', '["street","people","city"]', 'user_68e3e993baeb3', '2025-10-02 16:08:51', 0, 0, 0, 0),
-('post_68e3e993e7890', 'Abstract Art', 'Colorful abstract composition', 'https://picsum.photos/800/600?random=5', 'art', '["abstract","colors","modern"]', 'user_68e3e993baeb3', '2025-10-01 16:08:51', 0, 0, 0, 0),
-('post_68e3e993ec123', 'Desert Landscape', 'Golden sand dunes at dusk', 'https://picsum.photos/800/600?random=6', 'nature', '["desert","landscape","dunes"]', 'user_68e3e993baeb3', '2025-09-30 16:08:51', 0, 0, 0, 0),
-('post_68e3e993f0456', 'Urban Design', 'Modern architectural masterpiece', 'https://picsum.photos/800/600?random=7', 'design', '["architecture","modern","building"]', 'user_68e3e993baeb3', '2025-09-29 16:08:51', 0, 0, 0, 0),
-('post_68e3e993f4789', 'Digital Illustration', 'Vibrant digital artwork', 'https://picsum.photos/800/600?random=8', 'digital', '["illustration","digital","art"]', 'user_68e3e993baeb3', '2025-09-28 16:08:51', 0, 0, 0, 0),
-('post_68e3e993f8abc', 'Nature Macro', 'Close-up of morning dew on leaves', 'https://picsum.photos/800/600?random=9', 'photography', '["macro","nature","closeup"]', 'user_68e3e993baeb3', '2025-09-27 16:08:51', 0, 0, 0, 0);
+-- Insert 15 fresh sample posts with zero stats (5 with download URLs)
+INSERT INTO posts (id, title, description, imageUrl, category, tags, author, created, likes, comments, views, featured, downloadUrl) VALUES
+('post_fresh_001', 'Golden Hour Photography', 'Stunning golden hour landscape with warm tones', 'https://picsum.photos/800/600?random=101', 'photography', '["landscape","golden-hour","nature"]', 'user_admin2025', '2025-10-20 10:00:00', 0, 0, 0, 1, NULL),
+('post_fresh_002', 'Minimalist Design', 'Clean and modern minimalist design concept', 'https://picsum.photos/800/600?random=102', 'design', '["minimalist","modern","clean"]', 'user_admin2025', '2025-10-19 10:00:00', 0, 0, 0, 0, NULL),
+('post_fresh_003', 'Watercolor Dreams', 'Beautiful watercolor painting with soft colors', 'https://picsum.photos/800/600?random=103', 'art', '["watercolor","painting","art"]', 'user_admin2025', '2025-10-18 10:00:00', 0, 0, 0, 0, NULL),
+('post_fresh_004', 'Urban Architecture', 'Modern skyscraper with glass reflections', 'https://picsum.photos/800/600?random=104', 'photography', '["architecture","urban","building"]', 'user_admin2025', '2025-10-17 10:00:00', 0, 0, 0, 0, NULL),
+('post_fresh_005', 'Digital Portrait', 'Creative digital portrait with vibrant colors', 'https://picsum.photos/800/600?random=105', 'digital', '["portrait","digital","illustration"]', 'user_admin2025', '2025-10-16 10:00:00', 0, 0, 0, 0, NULL),
+('post_fresh_006', 'Mountain Peak', 'Majestic mountain peak at sunrise', 'https://picsum.photos/800/600?random=106', 'nature', '["mountain","sunrise","landscape"]', 'user_admin2025', '2025-10-15 10:00:00', 0, 0, 0, 0, NULL),
+('post_fresh_007', 'Abstract Colors', 'Bold abstract art with vibrant color palette', 'https://picsum.photos/800/600?random=107', 'art', '["abstract","colors","modern"]', 'user_admin2025', '2025-10-14 10:00:00', 0, 0, 0, 0, NULL),
+('post_fresh_008', 'Coastal Sunset', 'Breathtaking coastal sunset view', 'https://picsum.photos/800/600?random=108', 'photography', '["sunset","coastal","ocean"]', 'user_admin2025', '2025-10-13 10:00:00', 0, 0, 0, 0, NULL),
+('post_fresh_009', '3D Render', 'Photorealistic 3D rendering', 'https://picsum.photos/800/600?random=109', 'digital', '["3d","render","digital"]', 'user_admin2025', '2025-10-12 10:00:00', 0, 0, 0, 0, NULL),
+('post_fresh_010', 'Nature Details', 'Macro photography of natural textures', 'https://picsum.photos/800/600?random=110', 'nature', '["macro","nature","details"]', 'user_admin2025', '2025-10-11 10:00:00', 0, 0, 0, 0, NULL),
+('post_fresh_011', 'Premium Landscape Pack', 'High-resolution landscape photography collection', 'https://picsum.photos/800/600?random=111', 'photography', '["landscape","collection","premium"]', 'user_admin2025', '2025-10-10 10:00:00', 0, 0, 0, 1, 'https://picsum.photos/1920/1080?random=111'),
+('post_fresh_012', 'Vector Art Bundle', 'Modern vector illustrations and graphics', 'https://picsum.photos/800/600?random=112', 'design', '["vector","bundle","graphics"]', 'user_admin2025', '2025-10-09 10:00:00', 0, 0, 0, 0, 'https://picsum.photos/1920/1080?random=112'),
+('post_fresh_013', 'Texture Collection', 'Seamless patterns and textures for design', 'https://picsum.photos/800/600?random=113', 'art', '["textures","patterns","seamless"]', 'user_admin2025', '2025-10-08 10:00:00', 0, 0, 0, 0, 'https://picsum.photos/1920/1080?random=113'),
+('post_fresh_014', 'Digital Wallpaper Set', 'Beautiful desktop and mobile wallpapers', 'https://picsum.photos/800/600?random=114', 'digital', '["wallpaper","desktop","mobile"]', 'user_admin2025', '2025-10-07 10:00:00', 0, 0, 0, 0, 'https://picsum.photos/1920/1080?random=114'),
+('post_fresh_015', 'Nature Photo Pack', 'Stunning nature photography in 4K', 'https://picsum.photos/800/600?random=115', 'nature', '["nature","4k","photo-pack"]', 'user_admin2025', '2025-10-06 10:00:00', 0, 0, 0, 0, 'https://picsum.photos/1920/1080?random=115');

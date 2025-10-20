@@ -377,29 +377,15 @@ function navigateToComment(postId, commentId) {
 
 function createProfilePostCard(post) {
     return `
-        <div class="gallery-post-wrapper">
-            <article class="gallery-post-card" data-post-id="${post.id}">
-                <div class="gallery-post-image">
-                    <img src="${post.imageUrl}" alt="${post.title}" loading="lazy">
-                    <div class="post-overlay">
-                        <div class="overlay-actions">
-                            <button class="overlay-btn like-btn" data-post-id="${post.id}" title="Like">
-                                <i class="far fa-heart"></i>
-                            </button>
-                            <button class="overlay-btn save-btn" data-post-id="${post.id}" title="Save">
-                                <i class="far fa-bookmark"></i>
-                            </button>
-                            <button class="overlay-btn share-btn" data-post-id="${post.id}" title="Share">
-                                <i class="fas fa-share-alt"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="category-badge ${post.category}">${post.category}</div>
-                </div>
-            </article>
-            <div class="gallery-post-info">
-                <h3 class="gallery-post-title">${post.title}</h3>
-                <button class="post-menu-btn" data-post-id="${post.id}" title="More options">
+        <div class="profile-post-item">
+            <div class="profile-post-image" onclick="openPostModal('${post.id}')">
+                <img src="${post.imageUrl}" alt="${post.title}" loading="lazy">
+            </div>
+            <div class="profile-post-footer">
+                <span class="profile-post-author">
+                    <i class="fas fa-user"></i> ${post.author}
+                </span>
+                <button class="profile-post-menu-btn" data-post-id="${post.id}" onclick="event.stopPropagation(); showProfilePostMenu(event, '${post.id}')">
                     <i class="fas fa-ellipsis-v"></i>
                 </button>
             </div>
@@ -408,6 +394,130 @@ function createProfilePostCard(post) {
 }
 
 function addProfilePostListeners() {
+    // Click outside to close context menu
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.profile-post-menu-btn') && !e.target.closest('.profile-post-context-menu')) {
+            const existingMenu = document.querySelector('.profile-post-context-menu');
+            if (existingMenu) {
+                existingMenu.remove();
+            }
+        }
+    });
+}
+
+function showProfilePostMenu(event, postId) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    // Remove any existing context menu
+    const existingMenu = document.querySelector('.profile-post-context-menu');
+    if (existingMenu) {
+        existingMenu.remove();
+    }
+    
+    // Create context menu
+    const menu = document.createElement('div');
+    menu.className = 'profile-post-context-menu';
+    menu.innerHTML = `
+        <button onclick="editUserPost('${postId}')">
+            <i class="fas fa-edit"></i> Edit Post
+        </button>
+        <button onclick="deleteUserPost('${postId}')" class="delete-btn">
+            <i class="fas fa-trash"></i> Delete Post
+        </button>
+    `;
+    
+    // Position the menu
+    const rect = event.target.closest('.profile-post-menu-btn').getBoundingClientRect();
+    menu.style.position = 'fixed';
+    menu.style.top = `${rect.bottom + 5}px`;
+    menu.style.right = `${window.innerWidth - rect.right}px`;
+    
+    document.body.appendChild(menu);
+}
+
+async function editUserPost(postId) {
+    // Close context menu
+    const menu = document.querySelector('.profile-post-context-menu');
+    if (menu) menu.remove();
+    
+    try {
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        
+        const posts = await response.json();
+        const post = posts.find(p => p.id === postId);
+        
+        if (!post) {
+            showNotification('Post not found', 'error');
+            return;
+        }
+        
+        // Parse tags if they're JSON strings
+        let tags = post.tags;
+        if (typeof tags === 'string') {
+            try {
+                tags = JSON.parse(tags);
+            } catch (e) {
+                tags = [];
+            }
+        }
+        
+        // Populate form
+        document.getElementById('user-post-form-title').textContent = 'Edit Post';
+        document.getElementById('user-post-title').value = post.title;
+        document.getElementById('user-post-category').value = post.category;
+        document.getElementById('user-post-image').value = post.imageUrl;
+        document.getElementById('user-post-description').value = post.description || '';
+        document.getElementById('user-post-tags').value = Array.isArray(tags) ? tags.join(', ') : '';
+        document.getElementById('user-post-download-url').value = post.downloadUrl || '';
+        document.getElementById('user-post-id').value = postId;
+        
+        // Show image preview
+        const previewContainer = document.getElementById('user-image-upload-preview');
+        const previewImg = document.getElementById('user-preview-img');
+        if (post.imageUrl) {
+            previewImg.src = post.imageUrl;
+            previewContainer.style.display = 'block';
+        }
+        
+        showModal('user-post-form-modal');
+        
+    } catch (error) {
+        console.error('Error loading post:', error);
+        showNotification('Error loading post', 'error');
+    }
+}
+
+async function deleteUserPost(postId) {
+    // Close context menu
+    const menu = document.querySelector('.profile-post-context-menu');
+    if (menu) menu.remove();
+    
+    if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/posts.php', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: postId })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to delete post');
+        }
+        
+        showNotification('Post deleted successfully', 'success');
+        loadTabContent('myposts');
+        
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        showNotification('Error deleting post', 'error');
+    }
 }
 
 function initEditProfileModal() {

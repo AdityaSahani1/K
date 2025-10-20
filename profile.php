@@ -211,6 +211,7 @@ $showSearch = false;
             <h2 id="user-post-form-title">Create New Post</h2>
             <form id="user-post-form">
                 <input type="hidden" id="user-post-id" value="">
+                <input type="hidden" id="user-post-image" value="">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="user-post-title">Title</label>
@@ -232,23 +233,11 @@ $showSearch = false;
                 
                 <div class="form-group">
                     <label for="user-post-image-upload">Upload Image</label>
-                    <input type="file" id="user-post-image-upload" accept="image/*" style="margin-bottom: 10px;">
+                    <input type="file" id="user-post-image-upload" accept="image/*" required style="margin-bottom: 10px;">
                     <div id="user-image-upload-preview" style="display: none; margin-bottom: 10px;">
                         <img id="user-preview-img" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
                         <button type="button" id="user-remove-upload" style="display: block; margin-top: 5px; padding: 5px 10px; background: var(--accent-danger); color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
                     </div>
-                    <small>
-                        📸 <strong>Upload an image</strong> or enter a direct URL below<br>
-                        ⚡ Supported formats: JPG, PNG, GIF, WEBP (max 32 MB)
-                    </small>
-                </div>
-                
-                <div class="form-group">
-                    <label for="user-post-image">Or Enter Image URL</label>
-                    <input type="url" id="user-post-image" placeholder="https://example.com/image.jpg">
-                    <small>
-                        📌 Direct image URLs from Imgur, ImgBB, or other platforms
-                    </small>
                 </div>
                 
                 <div class="form-group">
