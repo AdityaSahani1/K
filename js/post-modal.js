@@ -243,15 +243,63 @@ async function loadPostComments(postId) {
     }
 }
 
-// Render comments with likes and replies
+// Render comments with likes and replies (only 2 levels: parent and direct replies)
 async function renderComments(comments) {
-    console.log('All comments:', comments);
     const parentComments = comments.filter(comment => !comment.replyTo);
-    console.log('Parent comments:', parentComments);
     
-    return parentComments.map(comment => {
+    function renderReply(reply) {
+        const isLiked = reply.isLiked || false;
+        
+        return `
+            <div class="comment reply" data-comment-id="${reply.id}">
+                <div class="comment-header">
+                    <div class="comment-meta">
+                        <div class="comment-avatar">
+                            ${reply.profilePicture ? 
+                                `<img src="${reply.profilePicture}" alt="${reply.username || 'User'}">` : 
+                                `<i class="fas fa-user"></i>`
+                            }
+                        </div>
+                        <span class="comment-author">${reply.username || 'anonymous'}</span>
+                        <span class="comment-date">${formatDate(reply.created)}</span>
+                    </div>
+                    ${currentUser ? `
+                        <button class="comment-action-btn comment-like-btn ${isLiked ? 'liked' : ''}" onclick="toggleCommentLike('${reply.id}', this)">
+                            <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> ${reply.likes > 0 ? reply.likes : ''}
+                        </button>
+                    ` : ''}
+                </div>
+                <div class="comment-content">
+                    ${reply.replyToUsername ? `<span class="reply-to">@${reply.replyToUsername}</span> ` : ''}
+                    ${reply.text || reply.content || ''}
+                </div>
+                <div class="comment-actions">
+                    ${currentUser ? `
+                        <button class="comment-action-btn comment-reply-btn" onclick="showReplyInput('${reply.id}', '${reply.username || 'user'}', '${reply.userId}')">
+                            <i class="fas fa-reply"></i> Reply
+                        </button>
+                        ${(currentUser.id === reply.userId || currentUser.role === 'admin') ? `
+                            <button class="comment-action-btn comment-delete-btn" onclick="deleteComment('${reply.id}', this)">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        ` : ''}
+                    ` : ''}
+                </div>
+                <div class="reply-input-container" id="reply-input-${reply.id}" style="display: none;">
+                    <textarea class="reply-textarea" placeholder="Write a reply..." id="reply-text-${reply.id}"></textarea>
+                    <div class="reply-actions">
+                        <button class="btn-secondary" onclick="hideReplyInput('${reply.id}')">Cancel</button>
+                        <button class="btn-primary" onclick="submitReply('${reply.id}', '${reply.username || 'user'}', '${reply.userId}')">Reply</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    function renderParentComment(comment) {
         const isLiked = comment.isLiked || false;
-        const replies = comments.filter(c => c.replyTo === comment.id);
+        const allReplies = comments.filter(c => c.replyTo === comment.id || 
+            comments.some(parent => parent.id === c.replyTo && parent.replyTo === comment.id));
         
         return `
             <div class="comment" data-comment-id="${comment.id}">
@@ -273,7 +321,6 @@ async function renderComments(comments) {
                     ` : ''}
                 </div>
                 <div class="comment-content">
-                    ${comment.replyToUsername ? `<span class="reply-to">@${comment.replyToUsername}</span> ` : ''}
                     ${comment.text || comment.content || ''}
                 </div>
                 <div class="comment-actions">
@@ -295,56 +342,16 @@ async function renderComments(comments) {
                         <button class="btn-primary" onclick="submitReply('${comment.id}', '${comment.username || 'user'}', '${comment.userId}')">Reply</button>
                     </div>
                 </div>
-                ${replies.length > 0 ? `
+                ${allReplies.length > 0 ? `
                     <div class="comment-replies">
-                        ${replies.map(reply => `
-                            <div class="comment reply" data-comment-id="${reply.id}">
-                                <div class="comment-header">
-                                    <div class="comment-meta">
-                                        <div class="comment-avatar">
-                                            ${reply.profilePicture ? 
-                                                `<img src="${reply.profilePicture}" alt="${reply.username || 'User'}">` : 
-                                                `<i class="fas fa-user"></i>`
-                                            }
-                                        </div>
-                                        <span class="comment-author">${reply.username || 'anonymous'}</span>
-                                        <span class="comment-date">${formatDate(reply.created)}</span>
-                                    </div>
-                                    ${currentUser ? `
-                                        <button class="comment-action-btn comment-like-btn ${reply.isLiked ? 'liked' : ''}" onclick="toggleCommentLike('${reply.id}', this)">
-                                            <i class="${reply.isLiked ? 'fas' : 'far'} fa-heart"></i> ${reply.likes > 0 ? reply.likes : ''}
-                                        </button>
-                                    ` : ''}
-                                </div>
-                                <div class="comment-content">
-                                    <span class="reply-to">@${reply.replyToUsername}</span> ${reply.text || reply.content || ''}
-                                </div>
-                                <div class="comment-actions">
-                                    ${currentUser ? `
-                                        <button class="comment-action-btn comment-reply-btn" onclick="showReplyInput('${reply.id}', '${reply.username || 'user'}', '${reply.userId}')">
-                                            <i class="fas fa-reply"></i> Reply
-                                        </button>
-                                    ` : ''}
-                                    ${currentUser && (currentUser.id === reply.userId || currentUser.role === 'admin') ? `
-                                        <button class="comment-action-btn comment-delete-btn" onclick="deleteComment('${reply.id}', this)">
-                                            <i class="fas fa-trash"></i> Delete
-                                        </button>
-                                    ` : ''}
-                                </div>
-                                <div class="reply-input-container" id="reply-input-${reply.id}" style="display: none;">
-                                    <textarea class="reply-textarea" placeholder="Write a reply..." id="reply-text-${reply.id}"></textarea>
-                                    <div class="reply-actions">
-                                        <button class="btn-secondary" onclick="hideReplyInput('${reply.id}')">Cancel</button>
-                                        <button class="btn-primary" onclick="submitReply('${reply.id}', '${reply.username || 'user'}', '${reply.userId}')">Reply</button>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
+                        ${allReplies.map(reply => renderReply(reply)).join('')}
                     </div>
                 ` : ''}
             </div>
         `;
-    }).join('');
+    }
+    
+    return parentComments.map(comment => renderParentComment(comment)).join('');
 }
 
 // Toggle comment like

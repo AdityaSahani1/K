@@ -171,6 +171,10 @@
     border-radius: var(--radius-lg);
     min-width: 80px;
     transition: all var(--transition-fast);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
 }
 
 .stat-item:hover {
@@ -178,12 +182,16 @@
     transform: translateY(-2px);
 }
 
+.stat-icon {
+    font-size: 1.2rem;
+    color: var(--accent-primary);
+}
+
 .stat-number {
     display: block;
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--accent-primary);
-    margin-bottom: var(--spacing-xs);
+    color: var(--text-primary);
 }
 
 .stat-label {
@@ -204,7 +212,12 @@
     margin-bottom: var(--spacing-2xl);
     border-bottom: 2px solid var(--border-color);
     overflow-x: auto;
-    scrollbar-width: thin;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.content-tabs::-webkit-scrollbar {
+    display: none;
 }
 
 .content-tab {
@@ -779,10 +792,6 @@
     .content-tab {
         padding: var(--spacing-sm) var(--spacing-md);
         font-size: 0.85rem;
-    }
-    
-    .content-tab span {
-        display: none;
     }
     
     .content-tab i {

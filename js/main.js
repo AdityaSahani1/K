@@ -296,6 +296,15 @@ function updateAuthUI() {
 
         
 
+        // Show notification menu when logged in
+        const notificationMenu = document.getElementById('notification-menu');
+        if (notificationMenu) {
+            notificationMenu.style.display = 'block';
+        }
+        
+        // Initialize notifications for logged in user
+        initNotifications();
+
         // Show admin link if user is admin
 
         if (currentUser.role === 'admin') {
@@ -345,6 +354,12 @@ function updateAuthUI() {
             `;
 
         }
+        
+        // Hide notification menu when logged out
+        const notificationMenu = document.getElementById('notification-menu');
+        if (notificationMenu) {
+            notificationMenu.style.display = 'none';
+        }
 
     }
 
@@ -385,6 +400,13 @@ function logout() {
     currentUser = null;
 
     localStorage.removeItem('currentUser');
+    
+    // Clear notification interval and reset initialization flag
+    if (notificationIntervalId) {
+        clearInterval(notificationIntervalId);
+        notificationIntervalId = null;
+    }
+    notificationsInitialized = false;
 
     updateAuthUI();
 
@@ -1387,10 +1409,20 @@ function isElementInViewport(element) {
 
 
 // Notifications
+let notificationIntervalId = null;
+let notificationsInitialized = false;
 
 function initNotifications() {
 
     if (!currentUser) return;
+    
+    // Prevent duplicate initialization
+    if (notificationsInitialized) {
+        updateNotificationBadge();
+        return;
+    }
+    
+    notificationsInitialized = true;
 
     
 
@@ -1414,13 +1446,16 @@ function initNotifications() {
 
     if (notificationBtn && notificationDropdown) {
 
-        notificationBtn.addEventListener('click', function(e) {
+        const newNotificationBtn = notificationBtn.cloneNode(true);
+        notificationBtn.parentNode.replaceChild(newNotificationBtn, notificationBtn);
+
+        newNotificationBtn.addEventListener('click', function(e) {
 
             e.stopPropagation();
 
-            notificationDropdown.classList.toggle('show');
+            document.getElementById('notification-dropdown').classList.toggle('show');
 
-            if (notificationDropdown.classList.contains('show')) {
+            if (document.getElementById('notification-dropdown').classList.contains('show')) {
 
                 loadNotifications();
 
@@ -1432,7 +1467,10 @@ function initNotifications() {
 
         document.addEventListener('click', function() {
 
-            notificationDropdown.classList.remove('show');
+            const dropdown = document.getElementById('notification-dropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
 
         });
 
@@ -1442,7 +1480,9 @@ function initNotifications() {
 
     if (markAllReadBtn) {
 
-        markAllReadBtn.addEventListener('click', markAllNotificationsRead);
+        const newMarkAllReadBtn = markAllReadBtn.cloneNode(true);
+        markAllReadBtn.parentNode.replaceChild(newMarkAllReadBtn, markAllReadBtn);
+        newMarkAllReadBtn.addEventListener('click', markAllNotificationsRead);
 
     }
 
@@ -1454,9 +1494,11 @@ function initNotifications() {
 
     
 
-    // Poll for new notifications every 30 seconds
-
-    setInterval(updateNotificationBadge, 30000);
+    // Clear any existing interval and start a new one
+    if (notificationIntervalId) {
+        clearInterval(notificationIntervalId);
+    }
+    notificationIntervalId = setInterval(updateNotificationBadge, 30000);
 
 }
 
@@ -1470,14 +1512,11 @@ async function loadNotifications() {
 
     try {
 
-        // Notifications moved to API endpoints - not implemented yet
-        const notifications = [];
+        const response = await fetch(`/api/notifications.php?userId=${currentUser.id}`);
+        if (!response.ok) throw new Error('Failed to load notifications');
+        const notifications = await response.json();
 
-        const userNotifications = notifications
-
-            .filter(n => n.username === currentUser.username)
-
-            .sort((a, b) => new Date(b.created) - new Date(a.created));
+        const userNotifications = notifications.sort((a, b) => new Date(b.created) - new Date(a.created));
 
         
 
@@ -1499,11 +1538,11 @@ async function loadNotifications() {
 
         notificationList.innerHTML = userNotifications.map(notification => `
 
-            <div class="notification-item ${notification.read ? 'read' : 'unread'}" data-notification-id="${notification.id}">
+            <div class="notification-item ${notification.isRead ? 'read' : 'unread'}" data-notification-id="${notification.id}">
 
-                <div class="notification-content" onclick="handleNotificationClick('${notification.id}', '${notification.postId}', '${notification.commentId}')">
+                <div class="notification-content" onclick="handleNotificationClick('${notification.id}', '${notification.relatedId || ''}')">
 
-                    <p><strong>${notification.from}</strong> replied to your comment</p>
+                    <p>${notification.message}</p>
 
                     <span class="notification-time">${formatDate(notification.created)}</span>
 

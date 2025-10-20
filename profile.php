@@ -42,20 +42,20 @@ $showSearch = false;
                 </div>
                 <div class="profile-stats">
                     <div class="stat-item">
+                        <i class="fas fa-images stat-icon"></i>
                         <span class="stat-number" id="posts-count">0</span>
-                        <span class="stat-label">Posts</span>
                     </div>
                     <div class="stat-item">
+                        <i class="fas fa-heart stat-icon"></i>
                         <span class="stat-number" id="likes-count">0</span>
-                        <span class="stat-label">Likes</span>
                     </div>
                     <div class="stat-item">
+                        <i class="fas fa-comments stat-icon"></i>
                         <span class="stat-number" id="comments-count">0</span>
-                        <span class="stat-label">Comments</span>
                     </div>
                     <div class="stat-item">
+                        <i class="fas fa-bookmark stat-icon"></i>
                         <span class="stat-number" id="saves-count">0</span>
-                        <span class="stat-label">Saved</span>
                     </div>
                 </div>
             </div>
@@ -67,30 +67,30 @@ $showSearch = false;
         <div class="container">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg);">
                 <div class="content-tabs" style="margin-bottom: 0; flex: 1;">
-                    <button class="content-tab" data-tab="myposts" id="myposts-tab-btn" style="display: none;">
-                        <i class="fas fa-images"></i>
-                        <span>My Posts</span>
-                    </button>
-                    <button class="content-tab active" data-tab="liked">
-                        <i class="fas fa-heart"></i>
-                        <span>Liked</span>
-                    </button>
-                    <button class="content-tab" data-tab="saved">
-                        <i class="fas fa-bookmark"></i>
-                        <span>Saved</span>
-                    </button>
-                    <button class="content-tab" data-tab="comments">
-                        <i class="fas fa-comments"></i>
-                        <span>Comments</span>
-                    </button>
-                </div>
-                <button id="add-post-btn" style="display: none;">
-                    <i class="fas fa-plus"></i> Create Post
+                <button class="content-tab" data-tab="myposts" id="myposts-tab-btn" style="display: none;">
+                    <i class="fas fa-images"></i>
+                    <span>My Posts</span>
+                </button>
+                <button class="content-tab active" data-tab="liked">
+                    <i class="fas fa-heart"></i>
+                    <span>Liked</span>
+                </button>
+                <button class="content-tab" data-tab="saved">
+                    <i class="fas fa-bookmark"></i>
+                    <span>Saved</span>
+                </button>
+                <button class="content-tab" data-tab="comments">
+                    <i class="fas fa-comments"></i>
+                    <span>Comments</span>
                 </button>
             </div>
+            <button id="add-post-btn" class="btn-primary" style="display: none;">
+                <i class="fas fa-plus"></i> Create Post
+            </button>
+        </div>
             
             <div class="content-panels">
-                <div class="content-panel" id="myposts-tab" style="display: none;">
+                <div class="content-panel" id="myposts-tab">
                     <div class="posts-grid" id="my-posts">
                         <div class="loading-spinner">
                             <i class="fas fa-spinner fa-spin"></i> Loading posts...

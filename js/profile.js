@@ -166,7 +166,10 @@ function initProfileTabs() {
             
             // Add active class to clicked tab and corresponding panel
             this.classList.add('active');
-            document.getElementById(`${tabName}-tab`).classList.add('active');
+            const targetPanel = document.getElementById(`${tabName}-tab`);
+            if (targetPanel) {
+                targetPanel.classList.add('active');
+            }
             
             // Load content for the active tab
             loadTabContent(tabName);
@@ -635,22 +638,27 @@ async function loadUserContent() {
     }
     
     if (canPost) {
-        // Show My Posts tab and make it active
+        // Show My Posts tab and button
         const myPostsTab = document.getElementById('myposts-tab-btn');
-        const myPostsPanel = document.getElementById('myposts-tab');
-        const likedTab = document.querySelector('.content-tab[data-tab="liked"]');
-        const likedPanel = document.getElementById('liked-tab');
+        const addPostBtn = document.getElementById('add-post-btn');
         
-        if (myPostsTab && myPostsPanel) {
+        if (myPostsTab) {
             myPostsTab.style.display = 'inline-flex';
-            myPostsPanel.style.display = 'block';
+            if (addPostBtn) {
+                addPostBtn.style.display = 'inline-flex';
+            }
             
-            // Set My Posts as active
+            // Set My Posts as active by default
             document.querySelectorAll('.content-tab').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.content-panel').forEach(panel => panel.classList.remove('active'));
+            document.querySelectorAll('.content-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
             
             myPostsTab.classList.add('active');
-            myPostsPanel.classList.add('active');
+            const myPostsPanel = document.getElementById('myposts-tab');
+            if (myPostsPanel) {
+                myPostsPanel.classList.add('active');
+            }
             
             await loadTabContent('myposts');
             return;
@@ -919,10 +927,8 @@ async function loadMyPosts() {
             myPostsContainer.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-images"></i>
-                    <p>You haven't created any posts yet</p>
-                    <button class="btn-primary" onclick="showAddPostModal()">
-                        <i class="fas fa-plus"></i> Create Your First Post
-                    </button>
+                    <h3>No Posts Yet</h3>
+                    <p>You haven't created any posts yet. Click the "Create Post" button above to get started!</p>
                 </div>
             `;
             return;

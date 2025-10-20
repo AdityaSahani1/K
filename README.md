@@ -30,7 +30,47 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Overview
+
+
+
+
+
+
+
+
 
 
 
@@ -46,7 +86,23 @@ SnapSera is a PHP-based photography portfolio and gallery application featuring:
 
 
 
+
+
+
+
+
+
+
+
 - Photo gallery with categories and tags
+
+
+
+
+
+
+
+
 
 
 
@@ -62,7 +118,23 @@ SnapSera is a PHP-based photography portfolio and gallery application featuring:
 
 
 
+
+
+
+
+
+
+
+
 - Admin panel for managing posts and users
+
+
+
+
+
+
+
+
 
 
 
@@ -76,6 +148,12 @@ SnapSera is a PHP-based photography portfolio and gallery application featuring:
 
 
 
+
+
+
+
+
+
 - Contact form with email notifications
 
 
@@ -84,7 +162,63 @@ SnapSera is a PHP-based photography portfolio and gallery application featuring:
 
 
 
+
+
+
+
+
+
+
+
 - Responsive design with modern UI
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -164,7 +298,55 @@ SnapSera is a PHP-based photography portfolio and gallery application featuring:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 - **Backend**: PHP 8.2 with PDO
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -196,7 +378,39 @@ SnapSera is a PHP-based photography portfolio and gallery application featuring:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   - SQLite (for local development)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -228,6 +442,22 @@ SnapSera is a PHP-based photography portfolio and gallery application featuring:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 - **Dependencies**: PHPMailer for email functionality
 
 
@@ -244,7 +474,55 @@ SnapSera is a PHP-based photography portfolio and gallery application featuring:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 - **Frontend**: Vanilla JavaScript, CSS3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -308,7 +586,71 @@ SnapSera is a PHP-based photography portfolio and gallery application featuring:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 The application supports dual database backends controlled by the `DB_TYPE` environment variable:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -356,7 +698,87 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 - `DB_TYPE=mysql` - Uses MySQL on InfinityFree hosting
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -452,7 +874,55 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 - Database: SQLite
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -484,7 +954,39 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 - Admin credentials:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -516,6 +1018,22 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   - Password: `admin123`
 
 
@@ -532,7 +1050,55 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   - Email: `snapsera.team@gmail.com`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -596,7 +1162,55 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -628,7 +1242,39 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ├── api/                 # Backend API endpoints
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -660,7 +1306,39 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ├── config/             # Database and environment configuration
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -692,7 +1370,39 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ├── js/                 # Frontend JavaScript
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -724,7 +1434,39 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ├── vendor/             # Composer dependencies (PHPMailer)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -756,7 +1498,39 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ├── gallery.php         # Photo gallery
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -788,7 +1562,39 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ├── admin.php           # Admin panel
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -820,7 +1626,39 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ├── contact.php         # Contact form
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -852,7 +1690,55 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -916,6 +1802,38 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 1. Run SQLite migration: `php migrate-sqlite.php`
 
 
@@ -932,7 +1850,39 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 2. Start PHP server: `DB_TYPE=sqlite php -S 0.0.0.0:5000`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -980,7 +1930,55 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## API Endpoints
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1012,7 +2010,39 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 - **POST /api/register.php** - User registration
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1044,7 +2074,39 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 - **POST /api/posts.php** - Create new post
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1076,7 +2138,39 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 - **DELETE /api/posts.php** - Delete post
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1108,6 +2202,22 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 - **PUT /api/get-users.php** - Update user details
 
 
@@ -1124,7 +2234,39 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 - **DELETE /api/get-users.php** - Delete user
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1172,7 +2314,55 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Recent Changes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1220,7 +2410,55 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   - All data now stored in SQLite database
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1252,6 +2490,22 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   - Updated all JavaScript to use REST API endpoints
 
 
@@ -1268,7 +2522,39 @@ The application supports dual database backends controlled by the `DB_TYPE` envi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   - Admin operations (add/edit/delete posts, edit/delete users) fully functional
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
