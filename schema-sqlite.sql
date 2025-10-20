@@ -99,12 +99,15 @@ CREATE TABLE IF NOT EXISTS views (
 CREATE TABLE IF NOT EXISTS notifications (
     id TEXT PRIMARY KEY,
     userId TEXT NOT NULL,
+    actorId TEXT,
     type TEXT NOT NULL,
     message TEXT NOT NULL,
     relatedId TEXT,
     isRead INTEGER DEFAULT 0,
-    created TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+    readAt TEXT,
+    created TEXT,
+    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (actorId) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- Contacts table
@@ -129,6 +132,8 @@ CREATE INDEX IF NOT EXISTS idx_likes_userId ON likes(userId);
 CREATE INDEX IF NOT EXISTS idx_saves_userId ON saves(userId);
 CREATE INDEX IF NOT EXISTS idx_views_postId ON views(postId);
 CREATE INDEX IF NOT EXISTS idx_notifications_userId ON notifications(userId);
+CREATE INDEX IF NOT EXISTS idx_notifications_isRead ON notifications(isRead);
+CREATE INDEX IF NOT EXISTS idx_notifications_created ON notifications(created DESC);
 
 -- Insert default admin user
 -- Password is 'admin123' (bcrypt hashed)

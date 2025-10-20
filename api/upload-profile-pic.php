@@ -20,10 +20,21 @@ if (!isset($input['image']) || empty($input['image'])) {
 }
 
 try {
+    $db = Database::getInstance();
+    $conn = $db->getConnection();
+    
     // Check if it's a default avatar
     if (strpos($input['image'], 'avatar') === 0 && strlen($input['image']) < 20) {
         // It's a default avatar like "avatar1", "avatar2", etc.
         $avatarPath = '/assets/default-avatars/' . $input['image'] . '.svg';
+        
+        // Delete old profile picture if it's a local upload
+        deleteOldProfilePicture($_SESSION['user_id'], $conn);
+        
+        // Update database
+        $stmt = $conn->prepare("UPDATE users SET profilePicture = ? WHERE id = ?");
+        $stmt->execute([$avatarPath, $_SESSION['user_id']]);
+        
         echo json_encode([
             'success' => true,
             'url' => $avatarPath
@@ -32,12 +43,19 @@ try {
     }
     
     // It's an uploaded image - decode base64
-    $imageData = base64_decode($input['image']);
+    $imageData = $input['image'];
+    
+    // Remove data:image/xxx;base64, prefix if present
+    if (strpos($imageData, 'data:image') === 0) {
+        $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $imageData);
+    }
+    
+    $imageData = base64_decode($imageData);
     if ($imageData === false) {
         throw new Exception('Invalid image data');
     }
     
-    // Get image info
+    // Get image info using finfo
     $finfo = new finfo(FILEINFO_MIME_TYPE);
     $mimeType = $finfo->buffer($imageData);
     
@@ -52,7 +70,7 @@ try {
         throw new Exception('Image size exceeds 5MB limit');
     }
     
-    // Create image from string
+    // Create image from string for compression
     $image = imagecreatefromstring($imageData);
     if ($image === false) {
         throw new Exception('Failed to process image');
@@ -62,28 +80,34 @@ try {
     $originalWidth = imagesx($image);
     $originalHeight = imagesy($image);
     
-    // Calculate new dimensions (max 400x400 while maintaining aspect ratio)
+    // Calculate new dimensions (max 400x400, maintain aspect ratio)
     $maxSize = 400;
-    $ratio = min($maxSize / $originalWidth, $maxSize / $originalHeight);
-    $newWidth = round($originalWidth * $ratio);
-    $newHeight = round($originalHeight * $ratio);
+    if ($originalWidth > $maxSize || $originalHeight > $maxSize) {
+        if ($originalWidth > $originalHeight) {
+            $newWidth = $maxSize;
+            $newHeight = (int)(($maxSize / $originalWidth) * $originalHeight);
+        } else {
+            $newHeight = $maxSize;
+            $newWidth = (int)(($maxSize / $originalHeight) * $originalWidth);
+        }
+    } else {
+        $newWidth = $originalWidth;
+        $newHeight = $originalHeight;
+    }
     
-    // Create a new image with the new dimensions
+    // Create new image
     $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
     
     // Preserve transparency for PNG and GIF
     if ($mimeType === 'image/png' || $mimeType === 'image/gif') {
         imagealphablending($resizedImage, false);
         imagesavealpha($resizedImage, true);
-        $transparent = imagecolorallocatealpha($resizedImage, 255, 255, 255, 127);
-        imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $transparent);
     }
     
-    // Copy and resize
+    // Resize image
     imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $originalWidth, $originalHeight);
     
-    // Generate unique filename
-    $userId = $_SESSION['user_id'];
+    // Generate secure filename
     $extension = match($mimeType) {
         'image/jpeg' => 'jpg',
         'image/png' => 'png',
@@ -92,54 +116,93 @@ try {
         default => 'jpg'
     };
     
-    $filename = 'profile_' . $userId . '_' . time() . '.' . $extension;
-    $uploadDir = '../uploads/profiles/';
+    $filename = 'profile_' . $_SESSION['user_id'] . '_' . uniqid() . '.' . $extension;
+    $uploadDir = __DIR__ . '/../uploads/profile_pics/';
+    $tempPath = $uploadDir . 'temp_' . $filename;
+    $finalPath = $uploadDir . $filename;
     
-    // Create directory if it doesn't exist
-    if (!file_exists($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
+    // Ensure directory exists
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0750, true);
     }
     
-    // Remove old profile pictures for this user
-    $oldFiles = glob($uploadDir . 'profile_' . $userId . '_*.*');
-    foreach ($oldFiles as $oldFile) {
-        if (file_exists($oldFile)) {
-            unlink($oldFile);
-        }
-    }
-    
-    $filepath = $uploadDir . $filename;
-    
-    // Save the resized image with compression
-    $quality = 85; // Good balance between quality and file size
-    $success = match($mimeType) {
-        'image/jpeg' => imagejpeg($resizedImage, $filepath, $quality),
-        'image/png' => imagepng($resizedImage, $filepath, round((100 - $quality) / 11.11)),
-        'image/gif' => imagegif($resizedImage, $filepath),
-        'image/webp' => imagewebp($resizedImage, $filepath, $quality),
-        default => false
+    // Save to temp file first
+    $saved = match($mimeType) {
+        'image/jpeg' => imagejpeg($resizedImage, $tempPath, 90),
+        'image/png' => imagepng($resizedImage, $tempPath, 8),
+        'image/gif' => imagegif($resizedImage, $tempPath),
+        'image/webp' => imagewebp($resizedImage, $tempPath, 90),
+        default => imagejpeg($resizedImage, $tempPath, 90)
     };
     
-    // Free up memory
+    // Clean up memory
     imagedestroy($image);
     imagedestroy($resizedImage);
     
-    if (!$success) {
+    if (!$saved) {
+        if (file_exists($tempPath)) {
+            unlink($tempPath);
+        }
         throw new Exception('Failed to save image');
     }
     
-    // Return the URL path
-    $url = '/uploads/profiles/' . $filename;
+    // Set file permissions
+    chmod($tempPath, 0640);
+    
+    // Delete old profile picture
+    deleteOldProfilePicture($_SESSION['user_id'], $conn);
+    
+    // Atomic rename temp to final
+    if (!rename($tempPath, $finalPath)) {
+        unlink($tempPath);
+        throw new Exception('Failed to finalize image');
+    }
+    
+    // Save to database (relative path)
+    $relativeUrl = '/uploads/profile_pics/' . $filename;
+    $stmt = $conn->prepare("UPDATE users SET profilePicture = ? WHERE id = ?");
+    $stmt->execute([$relativeUrl, $_SESSION['user_id']]);
     
     echo json_encode([
         'success' => true,
-        'url' => $url
+        'url' => $relativeUrl
     ]);
     
 } catch (Exception $e) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'error' => $e->getMessage()
-    ]);
+    http_response_code(500);
+    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    error_log('Profile picture upload error: ' . $e->getMessage());
 }
+
+/**
+ * Delete old profile picture from uploads folder
+ */
+function deleteOldProfilePicture($userId, $conn) {
+    try {
+        $stmt = $conn->prepare("SELECT profilePicture FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($user && $user['profilePicture']) {
+            $oldPicture = $user['profilePicture'];
+            
+            // Only delete if it's in the uploads folder (not default avatars)
+            if (strpos($oldPicture, '/uploads/profile_pics/') === 0) {
+                $filePath = __DIR__ . '/../' . $oldPicture;
+                
+                // Security: Ensure path is within allowed directory
+                $realPath = realpath($filePath);
+                $uploadDir = realpath(__DIR__ . '/../uploads/profile_pics/');
+                
+                if ($realPath && $uploadDir && strpos($realPath, $uploadDir) === 0) {
+                    if (file_exists($realPath)) {
+                        unlink($realPath);
+                    }
+                }
+            }
+        }
+    } catch (Exception $e) {
+        error_log('Error deleting old profile picture: ' . $e->getMessage());
+    }
+}
+?>

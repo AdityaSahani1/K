@@ -8,11 +8,26 @@ function initHomePage() {
     loadLatestPosts();
     initCategoryNavigation();
     initPostModal();
+    updateJoinCommunityButton();
+}
+
+function updateJoinCommunityButton() {
+    const joinButton = document.querySelector('.cta-btn-secondary');
+    if (!joinButton) return;
+    
+    if (currentUser) {
+        joinButton.style.display = 'none';
+    } else {
+        joinButton.style.display = 'inline-flex';
+    }
 }
 
 async function loadLatestPosts() {
     try {
-        const posts = await loadData('posts.json');
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        const posts = await response.json();
+        
         const postsGrid = document.getElementById('posts-grid');
         
         if (!postsGrid) return;
@@ -224,8 +239,9 @@ async function toggleSave(postId, button) {
 
 async function updatePostLikeCount(postId) {
     try {
-        const likes = await loadData('likes.json');
-        const posts = await loadData('posts.json');
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        const posts = await response.json();
         const post = posts.find(p => p.id === postId);
         const postLikes = post ? (post.likes || 0) : 0;
         

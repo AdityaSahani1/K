@@ -1,14 +1,22 @@
 // Profile page JavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
-    initProfilePage();
+    // Wait a bit for main.js to load currentUser from localStorage
+    setTimeout(initProfilePage, 50);
 });
 
 function initProfilePage() {
-    if (!currentUser) {
+    // Check localStorage directly to avoid race condition
+    const userData = localStorage.getItem('currentUser');
+    if (!userData) {
         // Redirect to home if not logged in
         window.location.href = 'index.php';
         return;
+    }
+    
+    // Ensure currentUser is set
+    if (!currentUser) {
+        currentUser = JSON.parse(userData);
     }
     
     loadUserProfile();
@@ -145,18 +153,18 @@ async function loadUserStats() {
 }
 
 function initProfileTabs() {
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabPanes = document.querySelectorAll('.tab-pane');
+    const tabButtons = document.querySelectorAll('.content-tab');
+    const tabPanels = document.querySelectorAll('.content-panel');
     
     tabButtons.forEach(button => {
         button.addEventListener('click', function() {
             const tabName = this.dataset.tab;
             
-            // Remove active class from all tabs and panes
+            // Remove active class from all tabs and panels
             tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabPanes.forEach(pane => pane.classList.remove('active'));
+            tabPanels.forEach(panel => panel.classList.remove('active'));
             
-            // Add active class to clicked tab and corresponding pane
+            // Add active class to clicked tab and corresponding panel
             this.classList.add('active');
             document.getElementById(`${tabName}-tab`).classList.add('active');
             
@@ -456,14 +464,10 @@ async function handleDefaultAvatarSelection(e) {
     const avatarValue = e.target.value;
     const avatarPath = '/assets/default-avatars/' + avatarValue + '.svg';
     
-    await deleteOldProfilePictures();
-    
     document.getElementById('edit-profile-pic').value = avatarPath;
     
     document.getElementById('edit-profile-pic-upload').value = '';
     document.getElementById('profile-pic-preview').style.display = 'none';
-    
-    showNotification('Default avatar selected', 'success');
 }
 
 async function handleProfilePicUpload(e) {
@@ -494,7 +498,7 @@ async function handleProfilePicUpload(e) {
         previewContainer.style.display = 'block';
         
         try {
-            showNotification('Uploading image...', 'info');
+            showNotification('Compressing and uploading to ImgBB...', 'info');
             
             const response = await fetch('/api/upload-profile-pic.php', {
                 method: 'POST',
@@ -510,7 +514,7 @@ async function handleProfilePicUpload(e) {
             
             if (data.success) {
                 document.getElementById('edit-profile-pic').value = data.url;
-                showNotification('Image uploaded successfully!', 'success');
+                showNotification('Image uploaded to ImgBB successfully!', 'success');
             } else {
                 showNotification('Failed to upload image: ' + data.error, 'error');
                 previewContainer.style.display = 'none';
@@ -526,16 +530,12 @@ async function handleProfilePicUpload(e) {
 }
 
 async function removeProfilePicUpload() {
-    await deleteOldProfilePictures();
-    
     document.getElementById('edit-profile-pic-upload').value = '';
     document.getElementById('edit-profile-pic').value = '';
     document.getElementById('profile-pic-preview').style.display = 'none';
     
     const avatarRadios = document.querySelectorAll('input[name="profile-pic-choice"]');
     avatarRadios.forEach(radio => radio.checked = false);
-    
-    showNotification('Profile picture removed', 'success');
 }
 
 async function deleteOldProfilePictures() {
@@ -617,48 +617,48 @@ async function handleEditProfile(e) {
 }
 
 async function loadUserContent() {
-    // Determine which tab to show first
+    // Check if user has posting permission
     const isAdmin = currentUser && currentUser.role === 'admin';
+    let canPost = isAdmin;
     
-    try {
-        const response = await fetch('/api/get-users.php');
-        if (response.ok) {
-            const users = await response.json();
-            const userData = users.find(u => u.id === currentUser.id);
-            
-            if (userData && (userData.canPost || isAdmin)) {
-                // Wait a bit for the tab to be made visible by initPostPermissions
-                await new Promise(resolve => setTimeout(resolve, 100));
-                
-                // User can post - show My Posts tab first
-                const myPostsTab = document.getElementById('myposts-tab-btn');
-                const likedTab = document.querySelector('.tab-btn[data-tab="liked"]');
-                const myPostsPane = document.getElementById('myposts-tab');
-                const likedPane = document.getElementById('liked-tab');
-                
-                if (myPostsTab && myPostsPane) {
-                    // Make sure tab is visible
-                    myPostsTab.style.display = 'inline-block';
-                    
-                    // Set My Posts as active using CSS classes only
-                    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-                    document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
-                    
-                    myPostsTab.classList.add('active');
-                    myPostsPane.classList.add('active');
-                    
-                    // Load My Posts content
-                    await loadTabContent('myposts');
-                    return;
-                }
+    if (!isAdmin) {
+        try {
+            const response = await fetch('/api/get-users.php');
+            if (response.ok) {
+                const users = await response.json();
+                const userData = users.find(u => u.id === currentUser.id);
+                canPost = userData && userData.canPost;
             }
+        } catch (error) {
+            console.error('Error checking post permissions:', error);
         }
-    } catch (error) {
-        console.error('Error checking user permissions:', error);
+    }
+    
+    if (canPost) {
+        // Show My Posts tab and make it active
+        const myPostsTab = document.getElementById('myposts-tab-btn');
+        const myPostsPanel = document.getElementById('myposts-tab');
+        const likedTab = document.querySelector('.content-tab[data-tab="liked"]');
+        const likedPanel = document.getElementById('liked-tab');
+        
+        if (myPostsTab && myPostsPanel) {
+            myPostsTab.style.display = 'inline-flex';
+            myPostsPanel.style.display = 'block';
+            
+            // Set My Posts as active
+            document.querySelectorAll('.content-tab').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.content-panel').forEach(panel => panel.classList.remove('active'));
+            
+            myPostsTab.classList.add('active');
+            myPostsPanel.classList.add('active');
+            
+            await loadTabContent('myposts');
+            return;
+        }
     }
     
     // Default: Load liked posts
-    loadTabContent('liked');
+    await loadTabContent('liked');
 }
 
 function initChangePasswordModal() {
@@ -911,13 +911,8 @@ async function loadMyPosts() {
         
         const posts = await response.json();
         
-        // Filter posts by matching author (can be username or ID)
-        const myPosts = posts.filter(post => {
-            return post.author === currentUser.username || 
-                   post.author === currentUser.id ||
-                   post.author === currentUser.username.toLowerCase() ||
-                   (post.authorName && post.authorName === currentUser.name);
-        });
+        // Filter to show ONLY this user's posts (by user ID)
+        const myPosts = posts.filter(post => post.author === currentUser.id);
         
         
         if (myPosts.length === 0) {

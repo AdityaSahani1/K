@@ -200,6 +200,23 @@ function handleComment($conn, $input) {
     $stmt = $conn->prepare("UPDATE posts SET comments = comments + 1 WHERE id = ?");
     $stmt->execute([$postId]);
     
+    // Get post author to create notification
+    $stmt = $conn->prepare("SELECT p.author, u.id as authorId, u.username FROM posts p JOIN users u ON p.author = u.username WHERE p.id = ?");
+    $stmt->execute([$postId]);
+    $postData = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Create notification for post author (if not commenting on own post)
+    if ($postData && $postData['authorId'] !== $userId) {
+        $stmt = $conn->prepare("SELECT username FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $commenter = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $notifId = uniqid('notif_');
+        $message = $commenter['username'] . ' commented on your post';
+        $stmt = $conn->prepare("INSERT INTO notifications (id, userId, actorId, type, message, relatedId, created) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$notifId, $postData['authorId'], $userId, 'comment', $message, $postId, $created]);
+    }
+    
     // Get updated count
     $stmt = $conn->prepare("SELECT comments FROM posts WHERE id = ?");
     $stmt->execute([$postId]);
@@ -276,6 +293,46 @@ function handleCommentReply($conn, $input) {
     
     $stmt = $conn->prepare("UPDATE posts SET comments = comments + 1 WHERE id = ?");
     $stmt->execute([$postId]);
+    
+    // Get the user being replied to
+    $stmt = $conn->prepare("SELECT c.userId FROM comments c WHERE c.id = ?");
+    $stmt->execute([$replyTo]);
+    $parentComment = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Create notification for the user being replied to (if not replying to self)
+    if ($parentComment && $parentComment['userId'] !== $userId) {
+        $stmt = $conn->prepare("SELECT username FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $replier = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $notifId = uniqid('notif_');
+        $message = $replier['username'] . ' replied to your comment: "' . substr($text, 0, 50) . (strlen($text) > 50 ? '...' : '') . '"';
+        $stmt = $conn->prepare("INSERT INTO notifications (id, userId, actorId, type, message, relatedId, created) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$notifId, $parentComment['userId'], $userId, 'reply', $message, $postId, $created]);
+    }
+    
+    // Check for @mentions in the text
+    if (preg_match_all('/@(\w+)/', $text, $matches)) {
+        $mentionedUsernames = array_unique($matches[1]);
+        foreach ($mentionedUsernames as $mentionedUsername) {
+            // Get mentioned user's ID
+            $stmt = $conn->prepare("SELECT id FROM users WHERE username = ?");
+            $stmt->execute([$mentionedUsername]);
+            $mentionedUser = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Create notification if user exists and not mentioning self
+            if ($mentionedUser && $mentionedUser['id'] !== $userId) {
+                $stmt = $conn->prepare("SELECT username FROM users WHERE id = ?");
+                $stmt->execute([$userId]);
+                $mentioner = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                $notifId = uniqid('notif_');
+                $message = $mentioner['username'] . ' mentioned you in a comment';
+                $stmt = $conn->prepare("INSERT INTO notifications (id, userId, actorId, type, message, relatedId, created) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$notifId, $mentionedUser['id'], $userId, 'mention', $message, $postId, $created]);
+            }
+        }
+    }
     
     // Get updated count
     $stmt = $conn->prepare("SELECT comments FROM posts WHERE id = ?");

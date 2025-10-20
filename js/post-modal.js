@@ -278,7 +278,7 @@ async function renderComments(comments) {
                 </div>
                 <div class="comment-actions">
                     ${currentUser ? `
-                        <button class="comment-action-btn comment-reply-btn" onclick="showReplyInput('${comment.id}', '${comment.username || 'user'}')">
+                        <button class="comment-action-btn comment-reply-btn" onclick="showReplyInput('${comment.id}', '${comment.username || 'user'}', '${comment.userId}')">
                             <i class="fas fa-reply"></i> Reply
                         </button>
                         ${(currentUser.id === comment.userId || currentUser.role === 'admin') ? `
@@ -292,7 +292,7 @@ async function renderComments(comments) {
                     <textarea class="reply-textarea" placeholder="Write a reply..." id="reply-text-${comment.id}"></textarea>
                     <div class="reply-actions">
                         <button class="btn-secondary" onclick="hideReplyInput('${comment.id}')">Cancel</button>
-                        <button class="btn-primary" onclick="submitReply('${comment.id}', '${comment.username || 'user'}')">Reply</button>
+                        <button class="btn-primary" onclick="submitReply('${comment.id}', '${comment.username || 'user'}', '${comment.userId}')">Reply</button>
                     </div>
                 </div>
                 ${replies.length > 0 ? `
@@ -320,11 +320,23 @@ async function renderComments(comments) {
                                     <span class="reply-to">@${reply.replyToUsername}</span> ${reply.text || reply.content || ''}
                                 </div>
                                 <div class="comment-actions">
+                                    ${currentUser ? `
+                                        <button class="comment-action-btn comment-reply-btn" onclick="showReplyInput('${reply.id}', '${reply.username || 'user'}', '${reply.userId}')">
+                                            <i class="fas fa-reply"></i> Reply
+                                        </button>
+                                    ` : ''}
                                     ${currentUser && (currentUser.id === reply.userId || currentUser.role === 'admin') ? `
                                         <button class="comment-action-btn comment-delete-btn" onclick="deleteComment('${reply.id}', this)">
                                             <i class="fas fa-trash"></i> Delete
                                         </button>
                                     ` : ''}
+                                </div>
+                                <div class="reply-input-container" id="reply-input-${reply.id}" style="display: none;">
+                                    <textarea class="reply-textarea" placeholder="Write a reply..." id="reply-text-${reply.id}"></textarea>
+                                    <div class="reply-actions">
+                                        <button class="btn-secondary" onclick="hideReplyInput('${reply.id}')">Cancel</button>
+                                        <button class="btn-primary" onclick="submitReply('${reply.id}', '${reply.username || 'user'}', '${reply.userId}')">Reply</button>
+                                    </div>
                                 </div>
                             </div>
                         `).join('')}
@@ -375,11 +387,15 @@ async function toggleCommentLike(commentId, button) {
 }
 
 // Show reply input
-function showReplyInput(commentId, authorUsername) {
+function showReplyInput(commentId, authorUsername, authorUserId) {
     const replyInput = document.getElementById(`reply-input-${commentId}`);
     if (replyInput) {
         replyInput.style.display = 'block';
-        document.getElementById(`reply-text-${commentId}`).focus();
+        const textarea = document.getElementById(`reply-text-${commentId}`);
+        if (textarea) {
+            textarea.focus();
+            textarea.dataset.replyToUserId = authorUserId;
+        }
     }
 }
 
@@ -393,13 +409,14 @@ function hideReplyInput(commentId) {
 }
 
 // Submit reply
-async function submitReply(commentId, replyToUsername) {
+async function submitReply(commentId, replyToUsername, replyToUserId) {
     if (!currentUser) {
         showAuthModal();
         return;
     }
     
-    const replyText = document.getElementById(`reply-text-${commentId}`).value.trim();
+    const textarea = document.getElementById(`reply-text-${commentId}`);
+    const replyText = textarea.value.trim();
     
     if (!replyText) {
         showNotification('Please enter a reply', 'warning');
@@ -425,7 +442,8 @@ async function submitReply(commentId, replyToUsername) {
                 userId: currentUser.id,
                 text: replyText,
                 replyTo: commentId,
-                replyToUsername: replyToUsername
+                replyToUsername: replyToUsername,
+                replyToUserId: replyToUserId
             })
         });
         

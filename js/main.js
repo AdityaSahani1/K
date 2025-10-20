@@ -218,6 +218,10 @@ function updateAuthUI() {
 
     
 
+    if (typeof updateJoinCommunityButton === 'function') {
+        updateJoinCommunityButton();
+    }
+
     if (currentUser) {
 
         // User is logged in
@@ -1535,9 +1539,10 @@ async function updateNotificationBadge() {
 
     try {
 
-        const notifications = await loadData('notifications.json');
-
-        const unreadCount = notifications.filter(n => n.username === currentUser.username && !n.read).length;
+        const response = await fetch(`/api/notifications.php?userId=${currentUser.id}`);
+        if (!response.ok) throw new Error('Failed to load notifications');
+        const notifications = await response.json();
+        const unreadCount = notifications.filter(n => !n.isRead).length;
 
         
 
