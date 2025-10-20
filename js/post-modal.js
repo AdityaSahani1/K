@@ -644,7 +644,9 @@ async function togglePostSave(postId, button) {
 // Update like count in modal view
 async function updateModalLikeCount(postId) {
     try {
-        const posts = await loadData('posts.json');
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        const posts = await response.json();
         const post = posts.find(p => p.id === postId);
         const postLikes = post ? (post.likes || 0) : 0;
         
@@ -661,10 +663,12 @@ async function updateModalLikeCount(postId) {
 // Download post
 async function downloadPost(postId) {
     try {
-        const posts = await loadData('posts.json');
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        const posts = await response.json();
         const post = posts?.find(p => p.id === postId);
         
-        if (!post || !post.downloadUrl) {
+        if (!post || !post.downloadUrl || post.downloadUrl.trim() === '') {
             showNotification('Download not available for this post', 'warning');
             return;
         }
@@ -673,10 +677,10 @@ async function downloadPost(postId) {
         
         try {
             // Fetch the image as a blob to force download
-            const response = await fetch(post.downloadUrl);
-            if (!response.ok) throw new Error('Failed to fetch image');
+            const imgResponse = await fetch(post.downloadUrl);
+            if (!imgResponse.ok) throw new Error('Failed to fetch image');
             
-            const blob = await response.blob();
+            const blob = await imgResponse.blob();
             const url = window.URL.createObjectURL(blob);
             
             // Create temporary link and trigger download
@@ -711,11 +715,13 @@ async function downloadPost(postId) {
 // Update view count in modal view
 async function updateModalViewCount(postId) {
     try {
-        const posts = await loadData('posts.json');
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        const posts = await response.json();
         const post = posts.find(p => p.id === postId);
         const postViews = post ? (post.views || 0) : 0;
         
-        const viewCountElement = document.querySelector('#post-detail .post-detail-meta span:nth-child(1)');
+        const viewCountElement = document.querySelector('#post-detail .post-detail-meta span:nth-child(5)');
         if (viewCountElement && viewCountElement.innerHTML.includes('fa-eye')) {
             viewCountElement.innerHTML = `<i class="far fa-eye"></i> ${postViews}`;
         }
@@ -727,11 +733,13 @@ async function updateModalViewCount(postId) {
 // Update comment count in modal view
 async function updateModalCommentCount(postId) {
     try {
-        const posts = await loadData('posts.json');
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        const posts = await response.json();
         const post = posts.find(p => p.id === postId);
         const postComments = post ? (post.comments || 0) : 0;
         
-        const commentCountElement = document.querySelector('#post-detail .post-detail-meta span:nth-child(2)');
+        const commentCountElement = document.querySelector('#post-detail .post-detail-meta span:nth-child(4)');
         if (commentCountElement && commentCountElement.innerHTML.includes('fa-comment')) {
             commentCountElement.innerHTML = `<i class="far fa-comment"></i> ${postComments}`;
         }

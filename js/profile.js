@@ -633,10 +633,37 @@ function initEditProfileModal() {
 function showEditProfileModal() {
     // Populate form with current user data
     const nameField = document.getElementById('edit-name');
+    const usernameField = document.getElementById('edit-username');
+    const emailField = document.getElementById('edit-email');
     const bioField = document.getElementById('edit-bio');
+    const profilePicField = document.getElementById('edit-profile-pic');
+    const form = document.getElementById('edit-profile-form');
     
     if (nameField) nameField.value = currentUser.name || '';
+    if (usernameField) usernameField.value = currentUser.username || '';
+    if (emailField) emailField.value = currentUser.email || '';
     if (bioField) bioField.value = currentUser.bio || '';
+    if (profilePicField) profilePicField.value = '';
+    
+    // Clear any previous selections and uploads
+    document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+    if (form) {
+        form.dataset.uploadedImage = '';
+        form.dataset.selectedAvatar = '';
+    }
+    
+    // Hide preview
+    const preview = document.getElementById('profile-pic-preview');
+    if (preview) preview.style.display = 'none';
+    
+    // Highlight currently selected avatar if it's a default one
+    if (currentUser.profilePicture && currentUser.profilePicture.includes('/assets/default-avatars/')) {
+        const avatarName = currentUser.profilePicture.split('/').pop().replace('.svg', '');
+        const currentAvatarOption = document.querySelector(`.avatar-option[data-avatar="${avatarName}"]`);
+        if (currentAvatarOption) {
+            currentAvatarOption.classList.add('selected');
+        }
+    }
     
     showModal('edit-profile-modal');
 }
@@ -655,9 +682,15 @@ async function handleDefaultAvatarSelection(e) {
     // Store the selected avatar path
     avatarOption.closest('form').dataset.selectedAvatar = avatarPath;
     
-    // Clear file upload
-    const uploadInput = document.getElementById('profile-picture-upload');
+    // Clear file upload and URL input
+    const uploadInput = document.getElementById('edit-profile-pic-upload');
+    const urlInput = document.getElementById('edit-profile-pic');
     if (uploadInput) uploadInput.value = '';
+    if (urlInput) urlInput.value = '';
+    
+    // Hide preview
+    const preview = document.getElementById('profile-pic-preview');
+    if (preview) preview.style.display = 'none';
 }
 
 async function handleProfilePicUpload(e) {
@@ -735,10 +768,11 @@ async function handleEditProfile(e) {
     
     const name = document.getElementById('edit-name').value.trim();
     const bio = document.getElementById('edit-bio').value.trim();
+    const profilePicUrl = document.getElementById('edit-profile-pic').value.trim();
     
-    // Get profile picture from uploaded image or selected avatar
+    // Get profile picture from: uploaded image > URL input > selected avatar > current picture
     const form = e.target;
-    const profilePicture = form.dataset.uploadedImage || form.dataset.selectedAvatar || currentUser.profilePicture;
+    const profilePicture = form.dataset.uploadedImage || profilePicUrl || form.dataset.selectedAvatar || currentUser.profilePicture;
     
     if (!name) {
         showNotification('Name is required', 'error');
@@ -1117,11 +1151,27 @@ async function loadMyPosts() {
 }
 
 function showAddPostModal() {
+    const form = document.getElementById('user-post-form');
+    const uploadInput = document.getElementById('user-post-image-upload');
+    const optionalLabel = document.getElementById('image-upload-optional');
+    
     document.getElementById('user-post-form-title').textContent = 'Create New Post';
-    document.getElementById('user-post-form').reset();
+    form.reset();
     document.getElementById('user-post-id').value = '';
     document.getElementById('user-post-image').value = '';
     document.getElementById('user-image-upload-preview').style.display = 'none';
+    
+    // Update label to show required for new posts
+    if (optionalLabel) {
+        optionalLabel.textContent = '*';
+        optionalLabel.style.color = 'var(--accent-danger)';
+    }
+    
+    // Clear the upload requirement
+    if (uploadInput) {
+        uploadInput.removeAttribute('required');
+    }
+    
     showModal('user-post-form-modal');
 }
 
@@ -1160,13 +1210,33 @@ async function editMyPost(postId) {
         document.getElementById('user-post-form-title').textContent = 'Edit Post';
         document.getElementById('user-post-title').value = post.title || '';
         document.getElementById('user-post-category').value = post.category || '';
-        document.getElementById('user-post-image-url').value = post.imageUrl || '';
+        document.getElementById('user-post-image').value = post.imageUrl || ''; // Store existing image URL
         document.getElementById('user-post-description').value = post.description || '';
         document.getElementById('user-post-tags').value = tags.join(', ');
         document.getElementById('user-post-download-url').value = post.downloadUrl || '';
+        document.getElementById('user-post-id').value = postId; // Store post ID for edit
         
-        // Store post ID for update
-        document.getElementById('user-post-form').dataset.postId = postId;
+        // Clear the upload input (user can choose to upload a new image or keep existing)
+        const uploadInput = document.getElementById('user-post-image-upload');
+        if (uploadInput) {
+            uploadInput.value = '';
+            uploadInput.removeAttribute('required'); // Make image optional when editing
+        }
+        
+        // Update label to show optional for editing
+        const optionalLabel = document.getElementById('image-upload-optional');
+        if (optionalLabel) {
+            optionalLabel.textContent = '(Optional when editing)';
+            optionalLabel.style.color = 'var(--text-muted)';
+        }
+        
+        // Show current image preview
+        const previewContainer = document.getElementById('user-image-upload-preview');
+        const previewImg = document.getElementById('user-preview-img');
+        if (post.imageUrl && previewImg && previewContainer) {
+            previewImg.src = post.imageUrl;
+            previewContainer.style.display = 'block';
+        }
         
         showModal('user-post-form-modal');
         
@@ -1211,8 +1281,13 @@ async function handleUserPostForm(e) {
         }
     }
     
+    // Validate image: required for new posts, optional for edits
     if (!imageUrl) {
-        showNotification('Please select an image', 'error');
+        if (isEdit) {
+            showNotification('Cannot save post without an image', 'error');
+        } else {
+            showNotification('Please select an image', 'error');
+        }
         return;
     }
     
@@ -1455,8 +1530,19 @@ function initProfileImageUpload() {
     
     if (removeUserPostUpload) {
         removeUserPostUpload.addEventListener('click', function() {
+            const postId = document.getElementById('user-post-id').value;
+            const isEdit = !!postId;
+            
+            // Clear the upload input
             userPostUpload.value = '';
-            userPostUrl.value = '';
+            
+            // Only clear the image URL if creating a new post
+            // When editing, keep the original image URL
+            if (!isEdit) {
+                userPostUrl.value = '';
+            }
+            
+            // Hide the preview
             userPostPreview.style.display = 'none';
         });
     }

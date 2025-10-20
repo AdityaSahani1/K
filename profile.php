@@ -1,7 +1,7 @@
 <?php
 $pageTitle = 'SnapSera - Profile';
-$pageSpecificCSS = 'profile.css';
-$pageSpecificJS = ['profile.js'];
+$pageSpecificCSS = ['profile.css', 'post-modal.css'];
+$pageSpecificJS = ['post-modal.js', 'profile.js'];
 $currentPage = 'profile';
 $showSearch = false;
 ?>
@@ -136,46 +136,63 @@ $showSearch = false;
                     <label for="edit-name">Full Name</label>
                     <input type="text" id="edit-name" required>
                 </div>
+                
+                <div class="form-group">
+                    <label for="edit-username">Username</label>
+                    <input type="text" id="edit-username" readonly style="background-color: var(--bg-secondary); cursor: not-allowed;">
+                    <small style="color: var(--text-muted); font-size: 0.85rem;">Username cannot be changed</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-email">Email</label>
+                    <input type="email" id="edit-email" readonly style="background-color: var(--bg-secondary); cursor: not-allowed;">
+                    <small style="color: var(--text-muted); font-size: 0.85rem;">Email cannot be changed</small>
+                </div>
+                
                 <div class="form-group">
                     <label for="edit-bio">Bio</label>
-                    <textarea id="edit-bio" rows="4" placeholder="Tell us about yourself..."></textarea>
+                    <textarea id="edit-bio" rows="3" placeholder="Tell us about yourself..."></textarea>
                 </div>
+                
                 <div class="form-group">
-                    <label>Profile Picture</label>
-                    <div class="profile-picture-options">
-                        <div class="default-avatars">
-                            <div class="avatar-option" data-avatar="avatar1">
-                                <img src="/assets/default-avatars/avatar1.svg" alt="Avatar 1">
-                            </div>
-                            <div class="avatar-option" data-avatar="avatar2">
-                                <img src="/assets/default-avatars/avatar2.svg" alt="Avatar 2">
-                            </div>
-                            <div class="avatar-option" data-avatar="avatar3">
-                                <img src="/assets/default-avatars/avatar3.svg" alt="Avatar 3">
-                            </div>
-                            <div class="avatar-option" data-avatar="avatar4">
-                                <img src="/assets/default-avatars/avatar4.svg" alt="Avatar 4">
-                            </div>
-                            <div class="avatar-option" data-avatar="avatar5">
-                                <img src="/assets/default-avatars/avatar5.svg" alt="Avatar 5">
-                            </div>
-                            <div class="avatar-option" data-avatar="avatar6">
-                                <img src="/assets/default-avatars/avatar6.svg" alt="Avatar 6">
-                            </div>
+                    <label for="edit-profile-pic-upload">Upload Profile Picture</label>
+                    <input type="file" id="edit-profile-pic-upload" accept="image/*" style="margin-bottom: 10px;">
+                    <div id="profile-pic-preview" style="display: none; margin-bottom: 10px;">
+                        <img id="profile-preview-img" src="" alt="Preview" style="max-width: 150px; max-height: 150px; border-radius: 50%; object-fit: cover;">
+                        <button type="button" id="remove-profile-upload" style="display: block; margin-top: 5px; padding: 5px 10px; background: var(--accent-danger); color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
+                    </div>
+                    <small>📸 Upload an image or enter a URL below</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-profile-pic">Or Enter Profile Picture URL</label>
+                    <input type="url" id="edit-profile-pic" placeholder="https://example.com/image.jpg">
+                </div>
+                
+                <div class="form-group">
+                    <label>Or Choose a Default Avatar</label>
+                    <div class="avatar-grid">
+                        <div class="avatar-option" data-avatar="avatar1">
+                            <img src="/assets/default-avatars/avatar1.svg" alt="Avatar 1">
                         </div>
-                        <div class="or-divider">
-                            <span>or</span>
+                        <div class="avatar-option" data-avatar="avatar2">
+                            <img src="/assets/default-avatars/avatar2.svg" alt="Avatar 2">
                         </div>
-                        <div class="upload-section">
-                            <label for="profile-picture-upload" class="upload-btn">
-                                <i class="fas fa-upload"></i> Upload Custom Photo
-                            </label>
-                            <input type="file" id="profile-picture-upload" accept="image/*" style="display: none;">
-                            <p class="help-text">Max 5MB. JPG, PNG, GIF, or WEBP</p>
+                        <div class="avatar-option" data-avatar="avatar3">
+                            <img src="/assets/default-avatars/avatar3.svg" alt="Avatar 3">
+                        </div>
+                        <div class="avatar-option" data-avatar="avatar4">
+                            <img src="/assets/default-avatars/avatar4.svg" alt="Avatar 4">
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="btn-primary">Save Changes</button>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="cancel-edit">Cancel</button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -235,12 +252,12 @@ $showSearch = false;
                 </div>
                 
                 <div class="form-group">
-                    <label for="user-post-image-upload">Upload Image *</label>
+                    <label for="user-post-image-upload">Upload Image <span id="image-upload-optional">(Optional when editing)</span></label>
                     <input type="file" id="user-post-image-upload" accept="image/*" style="margin-bottom: 10px;">
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">Image will be uploaded when you click "Save Post"</p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">Upload a new image or keep the existing one when editing</p>
                     <div id="user-image-upload-preview" style="display: none; margin-bottom: 10px;">
                         <img id="user-preview-img" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
-                        <button type="button" id="user-remove-upload" style="display: block; margin-top: 5px; padding: 5px 10px; background: var(--accent-danger); color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
+                        <button type="button" id="user-remove-upload" style="display: block; margin-top: 5px; padding: 5px 10px; background: var(--accent-danger); color: white; border: none; border-radius: 4px; cursor: pointer;">Clear Preview</button>
                     </div>
                 </div>
                 

@@ -1518,51 +1518,49 @@ async function sharePostNative(postId) {
 // Download post from gallery
 
 async function downloadPostFromGallery(postId) {
-
     try {
-
-        const posts = await loadData('posts.json');
-
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        const posts = await response.json();
         const post = posts?.find(p => p.id === postId);
-
         
-
-        if (!post || !post.downloadUrl) {
-
+        if (!post || !post.downloadUrl || post.downloadUrl.trim() === '') {
             showNotification('Download not available for this post', 'warning');
-
             return;
-
         }
-
         
-
-        const link = document.createElement('a');
-
-        link.href = post.downloadUrl;
-
-        link.download = `${post.title}.zip`;
-
-        link.target = '_blank';
-
-        document.body.appendChild(link);
-
-        link.click();
-
-        document.body.removeChild(link);
-
+        showNotification('Preparing download...', 'info');
         
-
-        showNotification('Download started!', 'success');
-
+        try {
+            const imgResponse = await fetch(post.downloadUrl);
+            if (!imgResponse.ok) throw new Error('Failed to fetch image');
+            
+            const blob = await imgResponse.blob();
+            const url = window.URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            
+            const urlPath = post.downloadUrl.split('?')[0];
+            const extension = urlPath.substring(urlPath.lastIndexOf('.')) || '.jpg';
+            link.download = `${post.title}${extension}`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            setTimeout(() => window.URL.revokeObjectURL(url), 100);
+            
+            showNotification('Download started!', 'success');
+        } catch (fetchError) {
+            console.warn('Fetch failed, falling back to new tab:', fetchError);
+            window.open(post.downloadUrl, '_blank');
+            showNotification('Opening image in new tab...', 'info');
+        }
     } catch (error) {
-
         console.error('Error downloading post:', error);
-
         showNotification('Error starting download', 'error');
-
     }
-
 }
 
 
@@ -1803,49 +1801,29 @@ async function toggleSave(postId, button) {
 
 
 async function updatePostLikeCount(postId) {
-
     try {
-
-        const posts = await loadData('posts.json');
-
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        const posts = await response.json();
         const post = posts.find(p => p.id === postId);
-
         const postLikes = post ? (post.likes || 0) : 0;
-
         
-
         // Update like count in all instances of this post across the page
-
         const likeCountElements = document.querySelectorAll(`[data-post-id="${postId}"] .post-stats span:first-child, [data-post-id="${postId}"] .post-meta span:first-child`);
-
         likeCountElements.forEach(element => {
-
             element.innerHTML = `<i class="far fa-heart"></i> ${postLikes}`;
-
         });
-
         
-
         // Also update the modal view if it's open
-
         const modalDetailElements = document.querySelectorAll('#post-detail .post-detail-meta span:nth-child(3)');
-
         modalDetailElements.forEach(element => {
-
             if (element.innerHTML.includes('fa-heart')) {
-
                 element.innerHTML = `<i class="far fa-heart"></i> ${postLikes}`;
-
             }
-
         });
-
     } catch (error) {
-
         console.error('Error updating post like count:', error);
-
     }
-
 }
 
 
