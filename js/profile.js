@@ -377,19 +377,31 @@ function navigateToComment(postId, commentId) {
 
 function createProfilePostCard(post) {
     return `
-        <div class="profile-post-card" data-post-id="${post.id}" onclick="window.location.href='gallery.php?post=${post.id}'">
-            <div class="profile-post-image">
-                <img src="${post.imageUrl}" alt="${post.title}" loading="lazy">
-            </div>
-            <div class="profile-post-details">
-                <h4 class="profile-post-title">${post.title}</h4>
-                <div class="profile-post-meta">
-                    <span class="post-category-badge">${post.category}</span>
-                    <div class="post-stats">
-                        <span><i class="far fa-heart"></i> ${post.likes || 0}</span>
-                        <span><i class="far fa-comment"></i> ${post.comments || 0}</span>
+        <div class="gallery-post-wrapper">
+            <article class="gallery-post-card" data-post-id="${post.id}">
+                <div class="gallery-post-image">
+                    <img src="${post.imageUrl}" alt="${post.title}" loading="lazy">
+                    <div class="post-overlay">
+                        <div class="overlay-actions">
+                            <button class="overlay-btn like-btn" data-post-id="${post.id}" title="Like">
+                                <i class="far fa-heart"></i>
+                            </button>
+                            <button class="overlay-btn save-btn" data-post-id="${post.id}" title="Save">
+                                <i class="far fa-bookmark"></i>
+                            </button>
+                            <button class="overlay-btn share-btn" data-post-id="${post.id}" title="Share">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                        </div>
                     </div>
+                    <div class="category-badge ${post.category}">${post.category}</div>
                 </div>
+            </article>
+            <div class="gallery-post-info">
+                <h3 class="gallery-post-title">${post.title}</h3>
+                <button class="post-menu-btn" data-post-id="${post.id}" title="More options">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
             </div>
         </div>
     `;
@@ -919,8 +931,12 @@ async function loadMyPosts() {
         
         const posts = await response.json();
         
-        // Filter to show ONLY this user's posts (by user ID)
-        const myPosts = posts.filter(post => post.author === currentUser.id);
+        // Filter to show ONLY this user's posts (by user ID or username)
+        const myPosts = posts.filter(post => 
+            post.author === currentUser.id || 
+            post.author === currentUser.username ||
+            post.authorId === currentUser.id
+        );
         
         
         if (myPosts.length === 0) {
@@ -928,7 +944,7 @@ async function loadMyPosts() {
                 <div class="empty-state">
                     <i class="fas fa-images"></i>
                     <h3>No Posts Yet</h3>
-                    <p>You haven't created any posts yet. Click the "Create Post" button above to get started!</p>
+                    <p>You haven't created any posts yet. Click the "Create Post" button below to get started!</p>
                 </div>
             `;
             return;
@@ -1201,8 +1217,8 @@ function initProfileImageUpload() {
             // Upload to ImgBB
             try {
                 const base64 = await fileToBase64(file);
-                const imageUrl = await uploadToImgBB(base64);
-                profilePicUrl.value = imageUrl;
+                const uploadData = await uploadToImgBB(base64);
+                profilePicUrl.value = uploadData.displayUrl;
                 showNotification('Profile picture uploaded successfully!', 'success');
             } catch (error) {
                 console.error('Upload error:', error);
@@ -1222,10 +1238,10 @@ function initProfileImageUpload() {
     
     // User post image upload
     const userPostUpload = document.getElementById('user-post-image-upload');
-    const userPostUrl = document.getElementById('user-post-image-url');
-    const userPostPreview = document.getElementById('user-post-preview');
-    const userPostPreviewImg = document.getElementById('user-post-preview-img');
-    const removeUserPostUpload = document.getElementById('remove-user-post-upload');
+    const userPostUrl = document.getElementById('user-post-image');
+    const userPostPreview = document.getElementById('user-image-upload-preview');
+    const userPostPreviewImg = document.getElementById('user-preview-img');
+    const removeUserPostUpload = document.getElementById('user-remove-upload');
     
     if (userPostUpload) {
         userPostUpload.addEventListener('change', async function(e) {
@@ -1243,9 +1259,16 @@ function initProfileImageUpload() {
             // Upload to ImgBB
             try {
                 const base64 = await fileToBase64(file);
-                const imageUrl = await uploadToImgBB(base64);
-                userPostUrl.value = imageUrl;
+                const uploadData = await uploadToImgBB(base64);
+                userPostUrl.value = uploadData.displayUrl;
                 userPostUrl.removeAttribute('required');
+                
+                // Auto-populate download URL
+                const downloadUrlField = document.getElementById('user-post-download-url');
+                if (downloadUrlField && uploadData.imageUrl) {
+                    downloadUrlField.value = uploadData.imageUrl;
+                }
+                
                 showNotification('Image uploaded successfully!', 'success');
             } catch (error) {
                 console.error('Upload error:', error);
@@ -1298,7 +1321,12 @@ async function uploadToImgBB(base64Image) {
             throw new Error(data.error || 'Upload failed');
         }
         
-        return data.data.display_url;
+        // Return full data object with display_url and image URL
+        return {
+            displayUrl: data.data.display_url,
+            imageUrl: data.data.url,
+            deleteUrl: data.data.delete_url
+        };
     } catch (error) {
         console.error('ImgBB upload error:', error);
         throw error;

@@ -65,8 +65,7 @@ $showSearch = false;
     <!-- Profile Content -->
     <section class="profile-content">
         <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg);">
-                <div class="content-tabs" style="margin-bottom: 0; flex: 1;">
+            <div class="content-tabs">
                 <button class="content-tab" data-tab="myposts" id="myposts-tab-btn" style="display: none;">
                     <i class="fas fa-images"></i>
                     <span>My Posts</span>
@@ -84,10 +83,10 @@ $showSearch = false;
                     <span>Comments</span>
                 </button>
             </div>
-            <button id="add-post-btn" class="btn-primary" style="display: none;">
+            
+            <button id="add-post-btn" class="btn-primary add-post-below-tabs" style="display: none;">
                 <i class="fas fa-plus"></i> Create Post
             </button>
-        </div>
             
             <div class="content-panels">
                 <div class="content-panel" id="myposts-tab">
@@ -205,46 +204,72 @@ $showSearch = false;
 
     <!-- Create/Edit Post Modal -->
     <div class="modal" id="user-post-form-modal">
-        <div class="modal-content">
+        <div class="modal-content large">
             <button class="modal-close-btn" id="user-post-form-close">
                 <i class="fas fa-times"></i>
             </button>
             <h2 id="user-post-form-title">Create New Post</h2>
             <form id="user-post-form">
                 <input type="hidden" id="user-post-id" value="">
-                <div class="form-group">
-                    <label for="user-post-title">Title *</label>
-                    <input type="text" id="user-post-title" required>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="user-post-title">Title</label>
+                        <input type="text" id="user-post-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-post-category">Category</label>
+                        <select id="user-post-category" required>
+                            <option value="">Select Category</option>
+                            <option value="art">Art</option>
+                            <option value="photography">Photography</option>
+                            <option value="design">Design</option>
+                            <option value="digital">Digital</option>
+                            <option value="nature">Nature</option>
+                            <option value="urban">Urban</option>
+                        </select>
+                    </div>
                 </div>
+                
+                <div class="form-group">
+                    <label for="user-post-image-upload">Upload Image</label>
+                    <input type="file" id="user-post-image-upload" accept="image/*" style="margin-bottom: 10px;">
+                    <div id="user-image-upload-preview" style="display: none; margin-bottom: 10px;">
+                        <img id="user-preview-img" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
+                        <button type="button" id="user-remove-upload" style="display: block; margin-top: 5px; padding: 5px 10px; background: var(--accent-danger); color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
+                    </div>
+                    <small>
+                        📸 <strong>Upload an image</strong> or enter a direct URL below<br>
+                        ⚡ Supported formats: JPG, PNG, GIF, WEBP (max 32 MB)
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-post-image">Or Enter Image URL</label>
+                    <input type="url" id="user-post-image" placeholder="https://example.com/image.jpg">
+                    <small>
+                        📌 Direct image URLs from Imgur, ImgBB, or other platforms
+                    </small>
+                </div>
+                
                 <div class="form-group">
                     <label for="user-post-description">Description</label>
-                    <textarea id="user-post-description" rows="4"></textarea>
+                    <textarea id="user-post-description" rows="4" placeholder="Describe your post..."></textarea>
                 </div>
+                
                 <div class="form-group">
-                    <label for="user-post-image">Image URL *</label>
-                    <input type="url" id="user-post-image" required placeholder="https://example.com/image.jpg">
+                    <label for="user-post-tags">Tags</label>
+                    <input type="text" id="user-post-tags" placeholder="art, creative, design (comma separated)">
                 </div>
+                
                 <div class="form-group">
-                    <label for="user-post-category">Category *</label>
-                    <select id="user-post-category" required>
-                        <option value="">Select a category</option>
-                        <option value="nature">Nature</option>
-                        <option value="urban">Urban</option>
-                        <option value="portrait">Portrait</option>
-                        <option value="abstract">Abstract</option>
-                        <option value="wildlife">Wildlife</option>
-                        <option value="landscape">Landscape</option>
-                        <option value="architecture">Architecture</option>
-                        <option value="street">Street Photography</option>
-                        <option value="art">Art</option>
-                        <option value="other">Other</option>
-                    </select>
+                    <label for="user-post-download-url">Download URL (Optional)</label>
+                    <input type="url" id="user-post-download-url" placeholder="https://example.com/download.zip">
                 </div>
-                <div class="form-group">
-                    <label for="user-post-tags">Tags (comma separated)</label>
-                    <input type="text" id="user-post-tags" placeholder="nature, landscape, mountains">
+                
+                <div class="form-actions">
+                    <button type="button" id="user-cancel-post">Cancel</button>
+                    <button type="submit" id="user-save-post">Save Post</button>
                 </div>
-                <button type="submit" class="btn-primary">Save Post</button>
             </form>
         </div>
     </div>

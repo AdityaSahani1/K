@@ -1548,9 +1548,9 @@ async function loadNotifications() {
 
                 </div>
 
-                <button class="notification-delete" onclick="deleteNotification('${notification.id}')">
+                <button class="notification-mark-read" onclick="markNotificationRead(event, '${notification.id}')" title="${notification.isRead ? 'Already read' : 'Mark as read'}">
 
-                    <i class="fas fa-times"></i>
+                    <i class="fas fa-check"></i>
 
                 </button>
 
@@ -1631,19 +1631,32 @@ async function handleNotificationClick(notificationId, postId, commentId) {
 
 
 
-async function deleteNotification(notificationId) {
+async function markNotificationRead(event, notificationId) {
+    event.stopPropagation();
+    
+    if (!currentUser) return;
 
     try {
+        const response = await fetch('/api/notifications.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'mark_read',
+                notificationId: notificationId,
+                userId: currentUser.id
+            })
+        });
 
-        console.log('Delete notification:', notificationId);
+        if (!response.ok) throw new Error('Failed to mark notification as read');
 
         loadNotifications();
-
         updateNotificationBadge();
 
     } catch (error) {
 
-        console.error('Error deleting notification:', error);
+        console.error('Error marking notification as read:', error);
 
     }
 
@@ -1658,12 +1671,22 @@ async function markAllNotificationsRead() {
     
 
     try {
+        const response = await fetch('/api/notifications.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'mark_all_read',
+                userId: currentUser.id
+            })
+        });
 
-        console.log('Mark all notifications as read');
+        if (!response.ok) throw new Error('Failed to mark all notifications as read');
 
-        loadNotifications();
+        await loadNotifications();
 
-        updateNotificationBadge();
+        await updateNotificationBadge();
 
         showNotification('All notifications marked as read', 'success');
 

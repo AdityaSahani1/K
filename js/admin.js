@@ -836,9 +836,16 @@ function initImageUpload() {
             // Upload to ImgBB
             try {
                 const base64 = await fileToBase64(file);
-                const imageUrl = await uploadToImgBB(base64);
-                postImageUrl.value = imageUrl;
+                const uploadData = await uploadToImgBB(base64);
+                postImageUrl.value = uploadData.displayUrl;
                 postImageUrl.removeAttribute('required');
+                
+                // Auto-populate download URL
+                const downloadUrlField = document.getElementById('post-download-url');
+                if (downloadUrlField && uploadData.imageUrl) {
+                    downloadUrlField.value = uploadData.imageUrl;
+                }
+                
                 showNotification('Image uploaded successfully!', 'success');
             } catch (error) {
                 console.error('Upload error:', error);
@@ -880,8 +887,8 @@ function initImageUpload() {
             // Upload to ImgBB
             try {
                 const base64 = await fileToBase64(file);
-                const imageUrl = await uploadToImgBB(base64);
-                userPicUrl.value = imageUrl;
+                const uploadData = await uploadToImgBB(base64);
+                userPicUrl.value = uploadData.displayUrl;
                 showNotification('Profile picture uploaded successfully!', 'success');
             } catch (error) {
                 console.error('Upload error:', error);
@@ -933,7 +940,12 @@ async function uploadToImgBB(base64Image) {
             throw new Error(data.error || 'Upload failed');
         }
         
-        return data.data.display_url;
+        // Return full data object with display_url and image URL
+        return {
+            displayUrl: data.data.display_url,
+            imageUrl: data.data.url,
+            deleteUrl: data.data.delete_url
+        };
     } catch (error) {
         console.error('ImgBB upload error:', error);
         throw error;

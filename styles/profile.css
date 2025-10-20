@@ -209,7 +209,7 @@
 .content-tabs {
     display: flex;
     gap: var(--spacing-md);
-    margin-bottom: var(--spacing-2xl);
+    margin-bottom: var(--spacing-lg);
     border-bottom: 2px solid var(--border-color);
     overflow-x: auto;
     scrollbar-width: none;
@@ -218,6 +218,12 @@
 
 .content-tabs::-webkit-scrollbar {
     display: none;
+}
+
+.add-post-below-tabs {
+    margin-bottom: var(--spacing-2xl);
+    margin-left: auto;
+    display: block;
 }
 
 .content-tab {
@@ -493,35 +499,35 @@
 .comments-list {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-lg);
-    padding: var(--spacing-lg) 0;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) 0;
 }
 
 .user-comment {
     background-color: var(--bg-primary);
-    border-radius: var(--radius-xl);
-    padding: var(--spacing-xl);
-    box-shadow: 0 2px 8px var(--shadow-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    box-shadow: 0 1px 3px var(--shadow-color);
     border: 1px solid var(--border-color);
-    border-left: 4px solid var(--accent-primary);
-    transition: all 0.3s ease;
+    border-left: 3px solid var(--accent-primary);
+    transition: all 0.2s ease;
     position: relative;
     cursor: pointer;
 }
 
 .user-comment:hover {
-    box-shadow: 0 8px 24px var(--shadow-hover);
+    box-shadow: 0 4px 12px var(--shadow-hover);
     border-left-color: var(--accent-secondary);
-    transform: translateX(8px);
+    transform: translateX(4px);
 }
 
 .comment-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
     flex-wrap: wrap;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
 }
 
 .comment-post-info {
@@ -533,7 +539,7 @@
     color: var(--text-primary);
     text-decoration: none;
     transition: color var(--transition-fast);
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-xs);
@@ -555,25 +561,23 @@
 
 .comment-date {
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    margin-top: var(--spacing-xs);
 }
 
 .reply-tag {
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-xs);
-    padding: 0.25rem 0.75rem;
+    padding: 0.2rem 0.6rem;
     background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
     color: white;
     border-radius: var(--radius-full);
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     font-weight: 500;
-    margin-bottom: var(--spacing-sm);
-    margin-top: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
 }
 
 .reply-tag i {
@@ -582,20 +586,20 @@
 
 .comment-content {
     color: var(--text-secondary);
-    line-height: 1.8;
-    padding: var(--spacing-md);
+    line-height: 1.5;
+    padding: var(--spacing-sm) var(--spacing-md);
     background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     position: relative;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
 }
 
 .comment-content::before {
     content: '\201C';
     position: absolute;
-    top: -10px;
-    left: 10px;
-    font-size: 3rem;
+    top: -8px;
+    left: 8px;
+    font-size: 2rem;
     color: var(--accent-primary);
     opacity: 0.2;
     font-family: Georgia, serif;
@@ -795,7 +799,11 @@
     }
     
     .content-tab i {
-        margin: 0;
+        display: none;
+    }
+    
+    .content-tab.active i {
+        display: inline-flex;
     }
     
     .panel-header {

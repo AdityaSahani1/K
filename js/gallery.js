@@ -1063,6 +1063,11 @@ function addPostMenuListeners() {
             
 
             // Create dropdown with Share option
+            
+            // Find the post to check if it has a download URL
+            const post = allPosts.find(p => p.id == postId);
+            const hasDownloadUrl = post && post.downloadUrl;
+            
 
             const dropdown = document.createElement('div');
 
@@ -1094,13 +1099,13 @@ function addPostMenuListeners() {
 
                 </button>
 
-                <button class="post-menu-item" data-action="download" data-post-id="${postId}">
+                ${hasDownloadUrl ? `<button class="post-menu-item" data-action="download" data-post-id="${postId}">
 
                     <i class="fas fa-download"></i>
 
                     <span>Download</span>
 
-                </button>
+                </button>` : ''}
 
             `;
 
