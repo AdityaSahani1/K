@@ -1,38 +1,28 @@
 
 
+
+
 <?php
-
-
 
 $pageTitle = 'SnapSera - Home';
 
-
-
 $pageSpecificCSS = ['home.css', 'post-modal.css'];
-
-
 
 $pageSpecificJS = ['post-modal.js', 'home.js'];
 
-
-
 $currentPage = 'home';
-
-
 
 $showSearch = false;
 
-
-
 ?>
-
-
 
 <!DOCTYPE html>
 
-
-
 <html lang="en">
+
+
+
+
 
 
 
@@ -40,7 +30,15 @@ $showSearch = false;
 
 
 
+
+
+
+
     <?php include 'components/head.php';  ?>
+
+
+
+
 
 
 
@@ -48,7 +46,15 @@ $showSearch = false;
 
 
 
+
+
+
+
 <body>
+
+
+
+
 
 
 
@@ -60,7 +66,19 @@ $showSearch = false;
 
 
 
+
+
+
+
+
+
+
+
     <!-- Hero Section -->
+
+
+
+
 
 
 
@@ -68,7 +86,15 @@ $showSearch = false;
 
 
 
+
+
+
+
         <div class="hero-content">
+
+
+
+
 
 
 
@@ -76,7 +102,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                 <h1 class="hero-title">SnapSera</h1>
+
+
+
+
 
 
 
@@ -84,7 +118,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                 <div class="hero-buttons">
+
+
+
+
 
 
 
@@ -92,7 +134,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                         <i class="fas fa-images"></i>
+
+
+
+
 
 
 
@@ -100,7 +150,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                     </a>
+
+
+
+
 
 
 
@@ -108,7 +166,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                         <i class="fas fa-user-plus"></i>
+
+
+
+
 
 
 
@@ -116,7 +182,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                     </button>
+
+
+
+
 
 
 
@@ -124,7 +198,15 @@ $showSearch = false;
 
 
 
+
+
+
+
             </div>
+
+
+
+
 
 
 
@@ -132,7 +214,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                 <div class="hero-image">
+
+
+
+
 
 
 
@@ -140,7 +230,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                         <div class="decoration-circle circle-1"></div>
+
+
+
+
 
 
 
@@ -148,7 +246,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                         <div class="decoration-circle circle-3"></div>
+
+
+
+
 
 
 
@@ -156,7 +262,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                 </div>
+
+
+
+
 
 
 
@@ -164,11 +278,27 @@ $showSearch = false;
 
 
 
+
+
+
+
         </div>
 
 
 
+
+
+
+
     </section>
+
+
+
+
+
+
+
+
 
 
 
@@ -180,7 +310,15 @@ $showSearch = false;
 
 
 
+
+
+
+
     <section class="categories">
+
+
+
+
 
 
 
@@ -188,7 +326,15 @@ $showSearch = false;
 
 
 
+
+
+
+
             <h2 class="section-title">Browse Categories</h2>
+
+
+
+
 
 
 
@@ -196,7 +342,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                 <div class="category-item" data-category="art">
+
+
+
+
 
 
 
@@ -204,11 +358,23 @@ $showSearch = false;
 
 
 
+
+
+
+
                     <span>Art</span>
 
 
 
+
+
+
+
                 </div>
+
+
+
+
 
 
 
@@ -216,7 +382,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                     <i class="fas fa-camera"></i>
+
+
+
+
 
 
 
@@ -224,7 +398,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                 </div>
+
+
+
+
 
 
 
@@ -232,7 +414,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                     <i class="fas fa-pen-nib"></i>
+
+
+
+
 
 
 
@@ -240,7 +430,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                 </div>
+
+
+
+
 
 
 
@@ -248,7 +446,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                     <i class="fas fa-laptop"></i>
+
+
+
+
 
 
 
@@ -256,7 +462,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                 </div>
+
+
+
+
 
 
 
@@ -264,11 +478,27 @@ $showSearch = false;
 
 
 
+
+
+
+
         </div>
 
 
 
+
+
+
+
     </section>
+
+
+
+
+
+
+
+
 
 
 
@@ -280,7 +510,15 @@ $showSearch = false;
 
 
 
+
+
+
+
     <section class="latest-posts">
+
+
+
+
 
 
 
@@ -288,7 +526,15 @@ $showSearch = false;
 
 
 
+
+
+
+
             <h2 class="section-title">Latest Work</h2>
+
+
+
+
 
 
 
@@ -296,11 +542,23 @@ $showSearch = false;
 
 
 
+
+
+
+
                 <!-- Posts will be loaded dynamically -->
 
 
 
+
+
+
+
             </div>
+
+
+
+
 
 
 
@@ -308,7 +566,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                 <a href="gallery.php" class="view-all-btn">View All Posts</a>
+
+
+
+
 
 
 
@@ -316,7 +582,15 @@ $showSearch = false;
 
 
 
+
+
+
+
         </div>
+
+
+
+
 
 
 
@@ -328,7 +602,19 @@ $showSearch = false;
 
 
 
+
+
+
+
+
+
+
+
     <!-- Auth Modal -->
+
+
+
+
 
 
 
@@ -336,7 +622,15 @@ $showSearch = false;
 
 
 
+
+
+
+
         <div class="modal-content">
+
+
+
+
 
 
 
@@ -344,7 +638,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                 <i class="fas fa-times"></i>
+
+
+
+
 
 
 
@@ -352,7 +654,15 @@ $showSearch = false;
 
 
 
+
+
+
+
             
+
+
+
+
 
 
 
@@ -360,7 +670,15 @@ $showSearch = false;
 
 
 
+
+
+
+
             <div class="auth-form" id="login-form">
+
+
+
+
 
 
 
@@ -368,11 +686,23 @@ $showSearch = false;
 
 
 
+
+
+
+
                 <form id="login-form-element">
 
 
 
+
+
+
+
                     <div class="form-group">
+
+
+
+
 
 
 
@@ -380,7 +710,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                         <i class="fas fa-user"></i>
+
+
+
+
 
 
 
@@ -388,7 +726,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                     <div class="form-group">
+
+
+
+
 
 
 
@@ -396,11 +742,23 @@ $showSearch = false;
 
 
 
+
+
+
+
                         <i class="fas fa-lock"></i>
 
 
 
+
+
+
+
                     </div>
+
+
+
+
 
 
 
@@ -408,11 +766,23 @@ $showSearch = false;
 
 
 
+
+
+
+
                 </form>
 
 
 
+
+
+
+
                 <p class="auth-switch">
+
+
+
+
 
 
 
@@ -420,11 +790,23 @@ $showSearch = false;
 
 
 
+
+
+
+
                     <a href="#" id="show-register">Sign up</a>
 
 
 
+
+
+
+
                     <br>
+
+
+
+
 
 
 
@@ -432,7 +814,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                 </p>
+
+
+
+
 
 
 
@@ -440,7 +830,15 @@ $showSearch = false;
 
 
 
+
+
+
+
             
+
+
+
+
 
 
 
@@ -448,7 +846,15 @@ $showSearch = false;
 
 
 
+
+
+
+
             <div class="auth-form hidden" id="register-form">
+
+
+
+
 
 
 
@@ -456,11 +862,23 @@ $showSearch = false;
 
 
 
+
+
+
+
                 <form id="register-form-element">
 
 
 
+
+
+
+
                     <div class="form-group">
+
+
+
+
 
 
 
@@ -468,7 +886,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                         <i class="fas fa-id-card"></i>
+
+
+
+
 
 
 
@@ -476,7 +902,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                     <div class="form-group">
+
+
+
+
 
 
 
@@ -484,7 +918,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                         <i class="fas fa-user"></i>
+
+
+
+
 
 
 
@@ -492,7 +934,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                     <div class="form-group">
+
+
+
+
 
 
 
@@ -500,7 +950,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                         <i class="fas fa-envelope"></i>
+
+
+
+
 
 
 
@@ -508,7 +966,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                     <div class="form-group">
+
+
+
+
 
 
 
@@ -516,11 +982,23 @@ $showSearch = false;
 
 
 
+
+
+
+
                         <i class="fas fa-lock"></i>
 
 
 
+
+
+
+
                     </div>
+
+
+
+
 
 
 
@@ -528,11 +1006,23 @@ $showSearch = false;
 
 
 
+
+
+
+
                 </form>
 
 
 
+
+
+
+
                 <p class="auth-switch">
+
+
+
+
 
 
 
@@ -540,7 +1030,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                     <a href="#" id="show-login">Login</a>
+
+
+
+
 
 
 
@@ -548,11 +1046,23 @@ $showSearch = false;
 
 
 
+
+
+
+
             </div>
 
 
 
+
+
+
+
             
+
+
+
+
 
 
 
@@ -560,7 +1070,15 @@ $showSearch = false;
 
 
 
+
+
+
+
             <div class="auth-form hidden" id="forgot-password-form">
+
+
+
+
 
 
 
@@ -568,7 +1086,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                 <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.9em;">Enter your email address and we'll send you a link to reset your password.</p>
+
+
+
+
 
 
 
@@ -576,7 +1102,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                     <div class="form-group">
+
+
+
+
 
 
 
@@ -584,11 +1118,23 @@ $showSearch = false;
 
 
 
+
+
+
+
                         <i class="fas fa-envelope"></i>
 
 
 
+
+
+
+
                     </div>
+
+
+
+
 
 
 
@@ -596,11 +1142,23 @@ $showSearch = false;
 
 
 
+
+
+
+
                 </form>
 
 
 
+
+
+
+
                 <p class="auth-switch">
+
+
+
+
 
 
 
@@ -608,7 +1166,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                     <a href="#" id="back-to-login">Back to Login</a>
+
+
+
+
 
 
 
@@ -616,7 +1182,15 @@ $showSearch = false;
 
 
 
+
+
+
+
             </div>
+
+
+
+
 
 
 
@@ -624,7 +1198,15 @@ $showSearch = false;
 
 
 
+
+
+
+
             <!-- OTP Verification Form -->
+
+
+
+
 
 
 
@@ -632,7 +1214,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                 <h2>Verify Email</h2>
+
+
+
+
 
 
 
@@ -640,7 +1230,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                 <form id="otp-form-element">
+
+
+
+
 
 
 
@@ -648,7 +1246,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                         <input type="text" id="otp-input" placeholder="Enter 6-digit OTP" maxlength="6" pattern="[0-9]{6}" required>
+
+
+
+
 
 
 
@@ -656,7 +1262,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                     </div>
+
+
+
+
 
 
 
@@ -664,7 +1278,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                 </form>
+
+
+
+
 
 
 
@@ -672,7 +1294,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                     Didn't receive the code? 
+
+
+
+
 
 
 
@@ -680,7 +1310,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                     <br>
+
+
+
+
 
 
 
@@ -688,7 +1326,15 @@ $showSearch = false;
 
 
 
+
+
+
+
                 </p>
+
+
+
+
 
 
 
@@ -696,7 +1342,15 @@ $showSearch = false;
 
 
 
+
+
+
+
         </div>
+
+
+
+
 
 
 
@@ -708,11 +1362,31 @@ $showSearch = false;
 
 
 
+
+
+
+
+
+
+
+
     <!-- Post Modal - Reusable Component -->
 
 
 
+
+
+
+
     <?php include 'components/post-modal.php'; ?>
+
+
+
+
+
+
+
+
 
 
 
@@ -728,7 +1402,19 @@ $showSearch = false;
 
 
 
+
+
+
+
+
+
+
+
     <?php include 'components/scripts.php'; ?>
+
+
+
+
 
 
 
@@ -736,7 +1422,15 @@ $showSearch = false;
 
 
 
+
+
+
+
 </html>
+
+
+
+
 
 
 
