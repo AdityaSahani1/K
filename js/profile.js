@@ -705,17 +705,24 @@ async function handleProfilePicUpload(e) {
         return;
     }
     
-    // Clear avatar selections
     document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
     
     const reader = new FileReader();
     reader.onload = async function(event) {
-        const base64Image = event.target.result.split(',')[1];
+        const previewImg = document.getElementById('profile-preview-img');
+        const preview = document.getElementById('profile-pic-preview');
+        
+        if (previewImg && preview) {
+            previewImg.src = event.target.result;
+            preview.style.display = 'block';
+        }
+        
+        const base64Image = event.target.result;
         
         try {
-            showNotification('Uploading image...', 'info');
+            showNotification('Uploading and compressing image...', 'info');
             
-            const response = await fetch('/api/upload-image.php', {
+            const response = await fetch('/api/upload-profile-pic.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -726,37 +733,20 @@ async function handleProfilePicUpload(e) {
             const data = await response.json();
             
             if (data.success) {
-                // Store the uploaded image URL
-                e.target.closest('form').dataset.uploadedImage = data.data.display_url;
+                e.target.closest('form').dataset.uploadedImage = data.url;
                 showNotification('Image uploaded successfully!', 'success');
             } else {
                 showNotification('Failed to upload image: ' + (data.error || 'Unknown error'), 'error');
+                if (preview) preview.style.display = 'none';
             }
         } catch (error) {
             console.error('Upload error:', error);
             showNotification('Failed to upload image', 'error');
+            if (preview) preview.style.display = 'none';
         }
     };
     
     reader.readAsDataURL(file);
-}
-async function deleteOldProfilePictures() {
-    try {
-        const response = await fetch('/api/delete-profile-pic.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        const data = await response.json();
-        
-        if (!data.success) {
-            console.warn('Failed to delete old profile pictures:', data.error);
-        }
-    } catch (error) {
-        console.error('Error deleting old profile pictures:', error);
-    }
 }
 
 async function handleEditProfile(e) {

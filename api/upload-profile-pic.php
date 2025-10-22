@@ -1,9 +1,14 @@
 <?php
-header('Content-Type: application/json');
 require_once '../config/database.php';
 
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+header('Content-Type: application/json');
+
 // Check if user is logged in
-session_start();
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);
@@ -117,13 +122,13 @@ try {
     };
     
     $filename = 'profile_' . $_SESSION['user_id'] . '_' . uniqid() . '.' . $extension;
-    $uploadDir = __DIR__ . '/../assets/uploads/profile_pics/';
+    $uploadDir = __DIR__ . '/../assets/profile_pics/';
     $tempPath = $uploadDir . 'temp_' . $filename;
     $finalPath = $uploadDir . $filename;
     
     // Ensure directory exists
     if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0750, true);
+        mkdir($uploadDir, 0755, true);
     }
     
     // Save to temp file first
@@ -159,7 +164,7 @@ try {
     }
     
     // Save to database (relative path)
-    $relativeUrl = '/assets/uploads/profile_pics/' . $filename;
+    $relativeUrl = '/assets/profile_pics/' . $filename;
     $stmt = $conn->prepare("UPDATE users SET profilePicture = ? WHERE id = ?");
     $stmt->execute([$relativeUrl, $_SESSION['user_id']]);
     
@@ -187,12 +192,12 @@ function deleteOldProfilePicture($userId, $conn) {
             $oldPicture = $user['profilePicture'];
             
             // Only delete if it's in the uploads folder (not default avatars)
-            if (strpos($oldPicture, '/assets/uploads/profile_pics/') === 0) {
+            if (strpos($oldPicture, '/assets/profile_pics/') === 0) {
                 $filePath = __DIR__ . '/../' . $oldPicture;
                 
                 // Security: Ensure path is within allowed directory
                 $realPath = realpath($filePath);
-                $uploadDir = realpath(__DIR__ . '/../assets/uploads/profile_pics/');
+                $uploadDir = realpath(__DIR__ . '/../assets/profile_pics/');
                 
                 if ($realPath && $uploadDir && strpos($realPath, $uploadDir) === 0) {
                     if (file_exists($realPath)) {
