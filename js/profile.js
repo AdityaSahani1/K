@@ -658,7 +658,7 @@ function showEditProfileModal() {
     
     // Highlight currently selected avatar if it's a default one
     if (currentUser.profilePicture && currentUser.profilePicture.includes('/assets/default-avatars/')) {
-        const avatarName = currentUser.profilePicture.split('/').pop().replace('.svg', '');
+        const avatarName = currentUser.profilePicture.split('/').pop().replace('.jpg', '');
         const currentAvatarOption = document.querySelector(`.avatar-option[data-avatar="${avatarName}"]`);
         if (currentAvatarOption) {
             currentAvatarOption.classList.add('selected');
@@ -673,7 +673,7 @@ async function handleDefaultAvatarSelection(e) {
     if (!avatarOption) return;
     
     const avatarValue = avatarOption.dataset.avatar;
-    const avatarPath = '/assets/default-avatars/' + avatarValue + '.svg';
+    const avatarPath = '/assets/default-avatars/' + avatarValue + '.jpg';
     
     // Remove previous selection
     document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));

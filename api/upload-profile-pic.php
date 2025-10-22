@@ -26,7 +26,7 @@ try {
     // Check if it's a default avatar
     if (strpos($input['image'], 'avatar') === 0 && strlen($input['image']) < 20) {
         // It's a default avatar like "avatar1", "avatar2", etc.
-        $avatarPath = '/assets/default-avatars/' . $input['image'] . '.svg';
+        $avatarPath = '/assets/default-avatars/' . $input['image'] . '.jpg';
         
         // Delete old profile picture if it's a local upload
         deleteOldProfilePicture($_SESSION['user_id'], $conn);

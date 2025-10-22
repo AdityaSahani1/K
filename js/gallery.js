@@ -1524,7 +1524,7 @@ async function downloadPostFromGallery(postId) {
         const posts = await response.json();
         const post = posts?.find(p => p.id === postId);
         
-        if (!post || !post.downloadUrl || post.downloadUrl.trim() === '') {
+        if (!post || !post.imageUrl) {
             showNotification('Download not available for this post', 'warning');
             return;
         }
@@ -1532,7 +1532,7 @@ async function downloadPostFromGallery(postId) {
         showNotification('Preparing download...', 'info');
         
         try {
-            const imgResponse = await fetch(post.downloadUrl);
+            const imgResponse = await fetch(post.imageUrl);
             if (!imgResponse.ok) throw new Error('Failed to fetch image');
             
             const blob = await imgResponse.blob();
@@ -1541,7 +1541,7 @@ async function downloadPostFromGallery(postId) {
             const link = document.createElement('a');
             link.href = url;
             
-            const urlPath = post.downloadUrl.split('?')[0];
+            const urlPath = post.imageUrl.split('?')[0];
             const extension = urlPath.substring(urlPath.lastIndexOf('.')) || '.jpg';
             link.download = `${post.title}${extension}`;
             
@@ -1554,7 +1554,7 @@ async function downloadPostFromGallery(postId) {
             showNotification('Download started!', 'success');
         } catch (fetchError) {
             console.warn('Fetch failed, falling back to new tab:', fetchError);
-            window.open(post.downloadUrl, '_blank');
+            window.open(post.imageUrl, '_blank');
             showNotification('Opening image in new tab...', 'info');
         }
     } catch (error) {

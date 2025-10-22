@@ -122,6 +122,27 @@ CREATE TABLE IF NOT EXISTS contacts (
     status TEXT DEFAULT 'unread'
 );
 
+-- Post Images table (for multiple images per post)
+CREATE TABLE IF NOT EXISTS post_images (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    postId TEXT NOT NULL,
+    imageUrl TEXT NOT NULL,
+    displayOrder INTEGER DEFAULT 0,
+    created TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE
+);
+
+-- Post Downloads table (for multiple download URLs with names)
+CREATE TABLE IF NOT EXISTS post_downloads (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    postId TEXT NOT NULL,
+    name TEXT NOT NULL,
+    downloadUrl TEXT NOT NULL,
+    displayOrder INTEGER DEFAULT 0,
+    created TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE
+);
+
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_posts_author ON posts(author);
 CREATE INDEX IF NOT EXISTS idx_posts_category ON posts(category);
@@ -134,8 +155,12 @@ CREATE INDEX IF NOT EXISTS idx_views_postId ON views(postId);
 CREATE INDEX IF NOT EXISTS idx_notifications_userId ON notifications(userId);
 CREATE INDEX IF NOT EXISTS idx_notifications_isRead ON notifications(isRead);
 CREATE INDEX IF NOT EXISTS idx_notifications_created ON notifications(created DESC);
+CREATE INDEX IF NOT EXISTS idx_post_images_postId ON post_images(postId);
+CREATE INDEX IF NOT EXISTS idx_post_downloads_postId ON post_downloads(postId);
 
 -- Delete all existing data
+DELETE FROM post_downloads;
+DELETE FROM post_images;
 DELETE FROM comment_likes;
 DELETE FROM likes;
 DELETE FROM saves;

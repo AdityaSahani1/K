@@ -139,8 +139,7 @@ $showSearch = false;
                 
                 <div class="form-group">
                     <label for="edit-username">Username</label>
-                    <input type="text" id="edit-username" readonly style="background-color: var(--bg-secondary); cursor: not-allowed;">
-                    <small style="color: var(--text-muted); font-size: 0.85rem;">Username cannot be changed</small>
+                    <input type="text" id="edit-username" required>
                 </div>
                 
                 <div class="form-group">
@@ -155,16 +154,6 @@ $showSearch = false;
                 </div>
                 
                 <div class="form-group">
-                    <label for="edit-profile-pic-upload">Upload Profile Picture</label>
-                    <input type="file" id="edit-profile-pic-upload" accept="image/*" style="margin-bottom: 10px;">
-                    <div id="profile-pic-preview" style="display: none; margin-bottom: 10px;">
-                        <img id="profile-preview-img" src="" alt="Preview" style="max-width: 150px; max-height: 150px; border-radius: 50%; object-fit: cover;">
-                        <button type="button" id="remove-profile-upload" style="display: block; margin-top: 5px; padding: 5px 10px; background: var(--accent-danger); color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
-                    </div>
-                    <small>📸 Upload an image or enter a URL below</small>
-                </div>
-                
-                <div class="form-group">
                     <label for="edit-profile-pic">Or Enter Profile Picture URL</label>
                     <input type="url" id="edit-profile-pic" placeholder="https://example.com/image.jpg">
                 </div>
@@ -173,16 +162,22 @@ $showSearch = false;
                     <label>Or Choose a Default Avatar</label>
                     <div class="avatar-grid">
                         <div class="avatar-option" data-avatar="avatar1">
-                            <img src="/assets/default-avatars/avatar1.svg" alt="Avatar 1">
+                            <img src="/assets/default-avatars/avatar1.jpg" alt="Avatar 1">
                         </div>
                         <div class="avatar-option" data-avatar="avatar2">
-                            <img src="/assets/default-avatars/avatar2.svg" alt="Avatar 2">
+                            <img src="/assets/default-avatars/avatar2.jpg" alt="Avatar 2">
                         </div>
                         <div class="avatar-option" data-avatar="avatar3">
-                            <img src="/assets/default-avatars/avatar3.svg" alt="Avatar 3">
+                            <img src="/assets/default-avatars/avatar3.jpg" alt="Avatar 3">
                         </div>
                         <div class="avatar-option" data-avatar="avatar4">
-                            <img src="/assets/default-avatars/avatar4.svg" alt="Avatar 4">
+                            <img src="/assets/default-avatars/avatar4.jpg" alt="Avatar 4">
+                        </div>
+                        <div class="avatar-option" data-avatar="avatar5">
+                            <img src="/assets/default-avatars/avatar5.jpg" alt="Avatar 5">
+                        </div>
+                        <div class="avatar-option" data-avatar="avatar6">
+                            <img src="/assets/default-avatars/avatar6.jpg" alt="Avatar 6">
                         </div>
                     </div>
                 </div>
@@ -209,14 +204,17 @@ $showSearch = false;
                     <label for="current-password">Current Password</label>
                     <input type="password" id="current-password" required>
                 </div>
+                
                 <div class="form-group">
                     <label for="new-password">New Password</label>
                     <input type="password" id="new-password" required>
                 </div>
+                
                 <div class="form-group">
                     <label for="confirm-password">Confirm New Password</label>
                     <input type="password" id="confirm-password" required>
                 </div>
+                
                 <button type="submit" class="btn-primary">Change Password</button>
             </form>
         </div>
@@ -268,24 +266,30 @@ $showSearch = false;
                 
                 <div class="form-group">
                     <label for="user-post-tags">Tags</label>
-                    <input type="text" id="user-post-tags" placeholder="art, creative, design (comma separated)">
+                    <input type="text" id="user-post-tags" placeholder="e.g., landscape, sunset, nature">
+                    <small>Separate tags with commas</small>
                 </div>
                 
                 <div class="form-group">
-                    <label for="user-post-download-url">Download URL (Optional)</label>
-                    <input type="url" id="user-post-download-url" placeholder="https://example.com/download.zip">
+                    <label for="user-post-status">Status</label>
+                    <select id="user-post-status">
+                        <option value="published">Published</option>
+                        <option value="draft">Draft</option>
+                    </select>
                 </div>
                 
-                <div class="form-actions">
-                    <button type="button" id="user-cancel-post">Cancel</button>
-                    <button type="submit" id="user-save-post">Save Post</button>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="user-cancel-post">Cancel</button>
+                    <button type="submit" class="btn-primary" id="user-submit-post">
+                        <i class="fas fa-check"></i> <span id="user-submit-text">Create Post</span>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <?php include 'components/footer.php'; ?>
     <?php include 'components/post-modal.php'; ?>
+    <?php include 'components/footer.php'; ?>
     <?php include 'components/scripts.php'; ?>
 </body>
 </html>

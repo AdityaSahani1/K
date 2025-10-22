@@ -147,7 +147,34 @@ CREATE TABLE IF NOT EXISTS contacts (
     INDEX idx_created (created)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
+-- Post Images Table (for multiple images per post)
+CREATE TABLE IF NOT EXISTS post_images (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    postId VARCHAR(50) NOT NULL,
+    imageUrl VARCHAR(500) NOT NULL,
+    displayOrder INT DEFAULT 0,
+    created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE,
+    INDEX idx_postId (postId),
+    INDEX idx_displayOrder (displayOrder)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- Post Downloads Table (for multiple download URLs with names)
+CREATE TABLE IF NOT EXISTS post_downloads (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    postId VARCHAR(50) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    downloadUrl VARCHAR(500) NOT NULL,
+    displayOrder INT DEFAULT 0,
+    created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE,
+    INDEX idx_postId (postId),
+    INDEX idx_displayOrder (displayOrder)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- Delete all existing data
+DELETE FROM post_downloads;
+DELETE FROM post_images;
 DELETE FROM comment_likes;
 DELETE FROM likes;
 DELETE FROM saves;
