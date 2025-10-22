@@ -506,7 +506,7 @@ $showSearch = false;
 
 
 
-    <!-- Latest Posts -->
+    <!-- Featured Posts -->
 
 
 
@@ -530,7 +530,7 @@ $showSearch = false;
 
 
 
-            <h2 class="section-title">Latest Work</h2>
+            <h2 class="section-title">Featured Work</h2>
 
 
 
