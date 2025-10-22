@@ -154,8 +154,12 @@ $showSearch = false;
                 </div>
                 
                 <div class="form-group">
-                    <label for="edit-profile-pic">Or Enter Profile Picture URL</label>
-                    <input type="url" id="edit-profile-pic" placeholder="https://example.com/image.jpg">
+                    <label for="edit-profile-pic-upload">Upload Profile Picture</label>
+                    <input type="file" id="edit-profile-pic-upload" accept="image/*">
+                    <small style="color: var(--text-muted); font-size: 0.85rem;">Max size: 5MB. Supported: JPG, PNG, GIF, WEBP</small>
+                    <div id="profile-pic-preview" style="display: none; margin-top: 10px;">
+                        <img id="profile-preview-img" src="" alt="Preview" style="max-width: 150px; max-height: 150px; border-radius: 50%; border: 2px solid var(--border-color);">
+                    </div>
                 </div>
                 
                 <div class="form-group">

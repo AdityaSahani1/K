@@ -117,7 +117,7 @@ try {
     };
     
     $filename = 'profile_' . $_SESSION['user_id'] . '_' . uniqid() . '.' . $extension;
-    $uploadDir = __DIR__ . '/../uploads/profile_pics/';
+    $uploadDir = __DIR__ . '/../assets/uploads/profile_pics/';
     $tempPath = $uploadDir . 'temp_' . $filename;
     $finalPath = $uploadDir . $filename;
     
@@ -159,7 +159,7 @@ try {
     }
     
     // Save to database (relative path)
-    $relativeUrl = '/uploads/profile_pics/' . $filename;
+    $relativeUrl = '/assets/uploads/profile_pics/' . $filename;
     $stmt = $conn->prepare("UPDATE users SET profilePicture = ? WHERE id = ?");
     $stmt->execute([$relativeUrl, $_SESSION['user_id']]);
     
@@ -187,12 +187,12 @@ function deleteOldProfilePicture($userId, $conn) {
             $oldPicture = $user['profilePicture'];
             
             // Only delete if it's in the uploads folder (not default avatars)
-            if (strpos($oldPicture, '/uploads/profile_pics/') === 0) {
+            if (strpos($oldPicture, '/assets/uploads/profile_pics/') === 0) {
                 $filePath = __DIR__ . '/../' . $oldPicture;
                 
                 // Security: Ensure path is within allowed directory
                 $realPath = realpath($filePath);
-                $uploadDir = realpath(__DIR__ . '/../uploads/profile_pics/');
+                $uploadDir = realpath(__DIR__ . '/../assets/uploads/profile_pics/');
                 
                 if ($realPath && $uploadDir && strpos($realPath, $uploadDir) === 0) {
                     if (file_exists($realPath)) {

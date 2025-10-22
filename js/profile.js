@@ -94,7 +94,6 @@ async function loadUserProfile() {
         loadUserStats();
     } catch (error) {
         console.error('Error loading user profile:', error);
-        // Fallback to cached data
         document.getElementById('profile-username').textContent = currentUser.name || currentUser.username;
         document.getElementById('profile-email').textContent = currentUser.email;
         const bioElement = document.getElementById('profile-bio');
@@ -618,7 +617,7 @@ function initEditProfileModal() {
         });
     }
     
-    const uploadInput = document.getElementById('profile-picture-upload');
+    const uploadInput = document.getElementById('edit-profile-pic-upload');
     const avatarOptions = document.querySelectorAll('.avatar-option');
     
     if (uploadInput) {
@@ -636,14 +635,12 @@ function showEditProfileModal() {
     const usernameField = document.getElementById('edit-username');
     const emailField = document.getElementById('edit-email');
     const bioField = document.getElementById('edit-bio');
-    const profilePicField = document.getElementById('edit-profile-pic');
     const form = document.getElementById('edit-profile-form');
     
     if (nameField) nameField.value = currentUser.name || '';
     if (usernameField) usernameField.value = currentUser.username || '';
     if (emailField) emailField.value = currentUser.email || '';
     if (bioField) bioField.value = currentUser.bio || '';
-    if (profilePicField) profilePicField.value = '';
     
     // Clear any previous selections and uploads
     document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
@@ -682,15 +679,16 @@ async function handleDefaultAvatarSelection(e) {
     // Store the selected avatar path
     avatarOption.closest('form').dataset.selectedAvatar = avatarPath;
     
-    // Clear file upload and URL input
+    // Clear file upload
     const uploadInput = document.getElementById('edit-profile-pic-upload');
-    const urlInput = document.getElementById('edit-profile-pic');
     if (uploadInput) uploadInput.value = '';
-    if (urlInput) urlInput.value = '';
     
     // Hide preview
     const preview = document.getElementById('profile-pic-preview');
     if (preview) preview.style.display = 'none';
+    
+    // Clear uploaded image data
+    avatarOption.closest('form').dataset.uploadedImage = '';
 }
 
 async function handleProfilePicUpload(e) {
@@ -742,8 +740,6 @@ async function handleProfilePicUpload(e) {
     
     reader.readAsDataURL(file);
 }
-
-
 async function deleteOldProfilePictures() {
     try {
         const response = await fetch('/api/delete-profile-pic.php', {
@@ -767,15 +763,21 @@ async function handleEditProfile(e) {
     e.preventDefault();
     
     const name = document.getElementById('edit-name').value.trim();
+    const username = document.getElementById('edit-username').value.trim();
+    const email = document.getElementById('edit-email').value.trim();
     const bio = document.getElementById('edit-bio').value.trim();
-    const profilePicUrl = document.getElementById('edit-profile-pic').value.trim();
     
-    // Get profile picture from: uploaded image > URL input > selected avatar > current picture
+    // Get profile picture from: uploaded image > selected avatar > current picture
     const form = e.target;
-    const profilePicture = form.dataset.uploadedImage || profilePicUrl || form.dataset.selectedAvatar || currentUser.profilePicture;
+    const profilePicture = form.dataset.uploadedImage || form.dataset.selectedAvatar || currentUser.profilePicture;
     
     if (!name) {
         showNotification('Name is required', 'error');
+        return;
+    }
+    
+    if (!username) {
+        showNotification('Username is required', 'error');
         return;
     }
     
@@ -789,6 +791,8 @@ async function handleEditProfile(e) {
                 action: 'update_profile',
                 userId: currentUser.id,
                 name: name,
+                username: username,
+                email: email,
                 profilePicture: profilePicture,
                 bio: bio
             })
@@ -798,6 +802,7 @@ async function handleEditProfile(e) {
         
         if (response.ok) {
             currentUser.name = name;
+            currentUser.username = username;
             currentUser.profilePicture = profilePicture;
             currentUser.bio = bio;
             
@@ -1409,6 +1414,74 @@ document.addEventListener('click', function(event) {
     }
 });
 
+// Toggle like functionality for profile page
+async function toggleLike(postId) {
+    try {
+        const response = await fetch('/api/post-actions.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'like',
+                postId: postId,
+                userId: currentUser.id
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            if (data.action === 'liked') {
+                showNotification('Post liked!', 'success');
+            } else {
+                showNotification('Post unliked', 'success');
+            }
+            // Reload current tab content to update UI
+            const activeTab = document.querySelector('.content-tab.active');
+            if (activeTab) {
+                const tabName = activeTab.id.replace('-tab-btn', '');
+                loadTabContent(tabName);
+            }
+        }
+    } catch (error) {
+        console.error('Error toggling like:', error);
+        showNotification('Error updating like', 'error');
+    }
+}
+
+// Toggle save functionality for profile page
+async function toggleSave(postId) {
+    try {
+        const response = await fetch('/api/post-actions.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'save',
+                postId: postId,
+                userId: currentUser.id
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            if (data.action === 'saved') {
+                showNotification('Post saved!', 'success');
+            } else {
+                showNotification('Post removed from saved', 'success');
+            }
+            // Reload current tab content to update UI
+            const activeTab = document.querySelector('.content-tab.active');
+            if (activeTab) {
+                const tabName = activeTab.id.replace('-tab-btn', '');
+                loadTabContent(tabName);
+            }
+        }
+    } catch (error) {
+        console.error('Error toggling save:', error);
+        showNotification('Error updating save', 'error');
+    }
+}
+
 // Convert various image hosting URLs to direct image URLs
 function convertToDirectImageUrl(url) {
     if (!url) return url;
@@ -1441,183 +1514,69 @@ function convertToDirectImageUrl(url) {
     return url;
 }
 
+async function handleProfilePicUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.match('image.*')) {
+        showNotification('Please select an image file', 'error');
+        return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) {
+        showNotification('Image size must be less than 5MB', 'error');
+        return;
+    }
+    
+    document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+    
+    const reader = new FileReader();
+    reader.onload = async function(event) {
+        const preview = document.getElementById('profile-pic-preview');
+        const previewImg = document.getElementById('profile-preview-img');
+        
+        if (preview && previewImg) {
+            previewImg.src = event.target.result;
+            preview.style.display = 'block';
+        }
+        
+        const base64Image = event.target.result.split(',')[1];
+        
+        try {
+            showNotification('Uploading image...', 'info');
+            
+            const response = await fetch('/api/upload-profile-pic.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image: base64Image })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                e.target.closest('form').dataset.uploadedImage = data.url;
+                showNotification('Image uploaded successfully!', 'success');
+            } else {
+                showNotification('Failed to upload image: ' + (data.error || 'Unknown error'), 'error');
+                if (preview) preview.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+            showNotification('Failed to upload image', 'error');
+            if (preview) preview.style.display = 'none';
+        }
+    };
+    
+    reader.readAsDataURL(file);
+}
+
 // Initialize profile page when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Small delay to ensure currentUser is loaded
     setTimeout(() => {
         if (window.location.pathname.includes('profile.php')) {
             initProfilePage();
         }
     }, 100);
-});
-// Image Upload Functionality for Profile
-function initProfileImageUpload() {
-    // Profile picture upload
-    const profilePicUpload = document.getElementById('edit-profile-pic-upload');
-    const profilePicUrl = document.getElementById('edit-profile-pic');
-    const profilePicPreview = document.getElementById('profile-pic-preview');
-    const profilePreviewImg = document.getElementById('profile-preview-img');
-    const removeProfileUpload = document.getElementById('remove-profile-upload');
-    
-    if (profilePicUpload) {
-        profilePicUpload.addEventListener('change', async function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            // Show preview
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                profilePreviewImg.src = e.target.result;
-                profilePicPreview.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-            
-            // Upload to ImgBB
-            try {
-                const base64 = await fileToBase64(file);
-                const uploadData = await uploadToImgBB(base64);
-                profilePicUrl.value = uploadData.displayUrl;
-                showNotification('Profile picture uploaded successfully!', 'success');
-            } catch (error) {
-                console.error('Upload error:', error);
-                showNotification('Failed to upload image: ' + error.message, 'error');
-                profilePicPreview.style.display = 'none';
-            }
-        });
-    }
-    
-    if (removeProfileUpload) {
-        removeProfileUpload.addEventListener('click', function() {
-            profilePicUpload.value = '';
-            profilePicUrl.value = '';
-            profilePicPreview.style.display = 'none';
-        });
-    }
-    
-    // User post image upload - Only show preview, don't upload yet
-    const userPostUpload = document.getElementById('user-post-image-upload');
-    const userPostUrl = document.getElementById('user-post-image');
-    const userPostPreview = document.getElementById('user-image-upload-preview');
-    const userPostPreviewImg = document.getElementById('user-preview-img');
-    const removeUserPostUpload = document.getElementById('user-remove-upload');
-    
-    if (userPostUpload) {
-        userPostUpload.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            // Validate file type
-            if (!file.type.match('image.*')) {
-                showNotification('Please select an image file', 'error');
-                return;
-            }
-            
-            // Validate file size
-            if (file.size > 5 * 1024 * 1024) {
-                showNotification('Image size must be less than 5MB', 'error');
-                return;
-            }
-            
-            // Show preview only, don't upload yet
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                userPostPreviewImg.src = e.target.result;
-                userPostPreview.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-    
-    if (removeUserPostUpload) {
-        removeUserPostUpload.addEventListener('click', function() {
-            const postId = document.getElementById('user-post-id').value;
-            const isEdit = !!postId;
-            
-            // Clear the upload input
-            userPostUpload.value = '';
-            
-            // Only clear the image URL if creating a new post
-            // When editing, keep the original image URL
-            if (!isEdit) {
-                userPostUrl.value = '';
-            }
-            
-            // Hide the preview
-            userPostPreview.style.display = 'none';
-        });
-    }
-}
-
-// Convert file to base64
-async function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-            // Get base64 string without the data URL prefix
-            const base64 = reader.result.split(',')[1];
-            resolve(base64);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
-// Upload image to ImgBB
-async function uploadToImgBB(base64Image) {
-    try {
-        const response = await fetch('/api/upload-image.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                image: base64Image
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (!data.success) {
-            throw new Error(data.error || 'Upload failed');
-        }
-        
-        // Return full data object with display_url and image URL
-        return {
-            displayUrl: data.data.display_url,
-            imageUrl: data.data.url,
-            deleteUrl: data.data.delete_url
-        };
-    } catch (error) {
-        console.error('ImgBB upload error:', error);
-        throw error;
-    }
-}
-
-// Initialize when modals are opened
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize when edit profile modal is shown
-    const editProfileModal = document.getElementById('edit-profile-modal');
-    if (editProfileModal) {
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (editProfileModal.classList.contains('show')) {
-                    initProfileImageUpload();
-                }
-            });
-        });
-        observer.observe(editProfileModal, { attributes: true, attributeFilter: ['class'] });
-    }
-    
-    // Initialize when user post form modal is shown
-    const userPostModal = document.getElementById('user-post-form-modal');
-    if (userPostModal) {
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (userPostModal.classList.contains('show')) {
-                    initProfileImageUpload();
-                }
-            });
-        });
-        observer.observe(userPostModal, { attributes: true, attributeFilter: ['class'] });
-    }
 });

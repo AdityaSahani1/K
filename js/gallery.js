@@ -1519,10 +1519,7 @@ async function sharePostNative(postId) {
 
 async function downloadPostFromGallery(postId) {
     try {
-        const response = await fetch('/api/posts.php');
-        if (!response.ok) throw new Error('Failed to load posts');
-        const posts = await response.json();
-        const post = posts?.find(p => p.id === postId);
+        const post = allPosts?.find(p => p.id === postId);
         
         if (!post || !post.imageUrl) {
             showNotification('Download not available for this post', 'warning');
@@ -1531,32 +1528,26 @@ async function downloadPostFromGallery(postId) {
         
         showNotification('Preparing download...', 'info');
         
-        try {
-            const imgResponse = await fetch(post.imageUrl);
-            if (!imgResponse.ok) throw new Error('Failed to fetch image');
-            
-            const blob = await imgResponse.blob();
-            const url = window.URL.createObjectURL(blob);
-            
-            const link = document.createElement('a');
-            link.href = url;
-            
-            const urlPath = post.imageUrl.split('?')[0];
-            const extension = urlPath.substring(urlPath.lastIndexOf('.')) || '.jpg';
-            link.download = `${post.title}${extension}`;
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            setTimeout(() => window.URL.revokeObjectURL(url), 100);
-            
-            showNotification('Download started!', 'success');
-        } catch (fetchError) {
-            console.warn('Fetch failed, falling back to new tab:', fetchError);
-            window.open(post.imageUrl, '_blank');
-            showNotification('Opening image in new tab...', 'info');
-        }
+        const imgResponse = await fetch(post.imageUrl);
+        if (!imgResponse.ok) throw new Error('Failed to fetch image');
+        
+        const blob = await imgResponse.blob();
+        const url = window.URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        
+        const urlPath = post.imageUrl.split('?')[0];
+        const extension = urlPath.substring(urlPath.lastIndexOf('.')) || '.jpg';
+        link.download = `${post.title}${extension}`;
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        setTimeout(() => window.URL.revokeObjectURL(url), 100);
+        
+        showNotification('Download started!', 'success');
     } catch (error) {
         console.error('Error downloading post:', error);
         showNotification('Error starting download', 'error');
