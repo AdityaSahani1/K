@@ -33,6 +33,7 @@
     box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
     position: relative;
     overflow: hidden;
+    --profile-border-color: var(--accent-primary);
 }
 
 .profile-avatar img {
@@ -40,7 +41,10 @@
     height: 100%;
     object-fit: cover;
     border-radius: 50%;
-    border: 3px solid rgba(255, 255, 255, 0.3);
+    border: 3px solid white;
+    box-shadow: 0 0 0 4px var(--profile-border-color),
+                0 0 25px var(--profile-border-color),
+                0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .profile-avatar i {

@@ -108,15 +108,143 @@ async function loadUserProfile() {
 function updateProfilePicture() {
     const profilePic = document.getElementById('profile-picture');
     const defaultAvatar = document.getElementById('default-avatar');
+    const profileAvatar = document.getElementById('profile-avatar');
     
     if (currentUser.profilePicture) {
         profilePic.src = currentUser.profilePicture;
         profilePic.style.display = 'block';
         defaultAvatar.style.display = 'none';
+        
+        // Extract dominant color from image for border
+        extractDominantColor(currentUser.profilePicture, (color) => {
+            if (profileAvatar && color) {
+                profileAvatar.style.setProperty('--profile-border-color', color);
+            }
+        });
     } else {
         profilePic.style.display = 'none';
         defaultAvatar.style.display = 'block';
+        if (profileAvatar) {
+            profileAvatar.style.removeProperty('--profile-border-color');
+        }
     }
+}
+
+// Extract dominant color from image
+function extractDominantColor(imageSrc, callback) {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    
+    img.onload = function() {
+        try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to a small resolution for faster processing
+            canvas.width = 50;
+            canvas.height = 50;
+            
+            // Draw image scaled down
+            ctx.drawImage(img, 0, 0, 50, 50);
+            
+            // Get image data
+            const imageData = ctx.getImageData(0, 0, 50, 50);
+            const pixels = imageData.data;
+            
+            // Calculate average color (excluding very dark and very light pixels)
+            let r = 0, g = 0, b = 0, count = 0;
+            
+            for (let i = 0; i < pixels.length; i += 4) {
+                const red = pixels[i];
+                const green = pixels[i + 1];
+                const blue = pixels[i + 2];
+                const alpha = pixels[i + 3];
+                
+                // Skip transparent or very light/dark pixels
+                if (alpha > 200) {
+                    const brightness = (red + green + blue) / 3;
+                    if (brightness > 30 && brightness < 225) {
+                        r += red;
+                        g += green;
+                        b += blue;
+                        count++;
+                    }
+                }
+            }
+            
+            if (count > 0) {
+                r = Math.floor(r / count);
+                g = Math.floor(g / count);
+                b = Math.floor(b / count);
+                
+                // Make color more vibrant by increasing saturation
+                const hsl = rgbToHsl(r, g, b);
+                hsl.s = Math.min(hsl.s * 1.5, 1); // Increase saturation
+                hsl.l = Math.min(Math.max(hsl.l, 0.4), 0.6); // Normalize lightness
+                
+                const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
+                callback(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`);
+            } else {
+                callback('var(--accent-primary)');
+            }
+        } catch (error) {
+            console.error('Error extracting color:', error);
+            callback('var(--accent-primary)');
+        }
+    };
+    
+    img.onerror = function() {
+        callback('var(--accent-primary)');
+    };
+    
+    img.src = imageSrc;
+}
+
+// RGB to HSL conversion
+function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+
+    if (max === min) {
+        h = s = 0;
+    } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    return { h, s, l };
+}
+
+// HSL to RGB conversion
+function hslToRgb(h, s, l) {
+    let r, g, b;
+
+    if (s === 0) {
+        r = g = b = l;
+    } else {
+        const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1/6) return p + (q - p) * 6 * t;
+            if (t < 1/2) return q;
+            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        };
+
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+    }
+
+    return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
 }
 
 async function loadUserStats() {
@@ -686,8 +814,10 @@ async function handleDefaultAvatarSelection(e) {
     document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
     avatarOption.classList.add('selected');
     
-    // Store the selected avatar path
-    avatarOption.closest('form').dataset.selectedAvatar = avatarPath;
+    // Store the selected avatar for later upload on save
+    const form = avatarOption.closest('form');
+    form.dataset.selectedAvatar = avatarValue;
+    form.dataset.uploadedImage = '';
     
     // Clear file upload
     const uploadInput = document.getElementById('edit-profile-pic-upload');
@@ -696,33 +826,6 @@ async function handleDefaultAvatarSelection(e) {
     // Hide preview
     const preview = document.getElementById('profile-pic-preview');
     if (preview) preview.style.display = 'none';
-    
-    // Upload the selected avatar to API
-    try {
-        showNotification('Updating avatar...', 'info');
-        const response = await fetch('/api/upload-profile-pic.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 
-                image: avatarValue,
-                userId: currentUser.id
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            avatarOption.closest('form').dataset.uploadedImage = data.url;
-            showNotification('Avatar updated successfully!', 'success');
-        } else {
-            showNotification('Failed to update avatar: ' + (data.error || 'Unknown error'), 'error');
-        }
-    } catch (error) {
-        console.error('Avatar update error:', error);
-        showNotification('Failed to update avatar', 'error');
-    }
 }
 
 
@@ -734,10 +837,6 @@ async function handleEditProfile(e) {
     const email = document.getElementById('edit-email').value.trim();
     const bio = document.getElementById('edit-bio').value.trim();
     
-    // Get profile picture from: uploaded image > selected avatar > current picture
-    const form = e.target;
-    const profilePicture = form.dataset.uploadedImage || form.dataset.selectedAvatar || currentUser.profilePicture;
-    
     if (!name) {
         showNotification('Name is required', 'error');
         return;
@@ -748,7 +847,58 @@ async function handleEditProfile(e) {
         return;
     }
     
+    const form = e.target;
+    let profilePicture = currentUser.profilePicture;
+    
     try {
+        // Upload profile picture if there's a pending upload or selected avatar
+        if (form.dataset.pendingUpload) {
+            showNotification('Uploading profile picture...', 'info');
+            
+            const uploadResponse = await fetch('/api/upload-profile-pic.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    image: form.dataset.pendingUpload,
+                    userId: currentUser.id
+                })
+            });
+            
+            const uploadData = await uploadResponse.json();
+            
+            if (uploadData.success) {
+                profilePicture = uploadData.url;
+            } else {
+                showNotification('Failed to upload image: ' + (uploadData.error || 'Unknown error'), 'error');
+                return;
+            }
+        } else if (form.dataset.selectedAvatar) {
+            showNotification('Updating avatar...', 'info');
+            
+            const uploadResponse = await fetch('/api/upload-profile-pic.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    image: form.dataset.selectedAvatar,
+                    userId: currentUser.id
+                })
+            });
+            
+            const uploadData = await uploadResponse.json();
+            
+            if (uploadData.success) {
+                profilePicture = uploadData.url;
+            } else {
+                showNotification('Failed to update avatar: ' + (uploadData.error || 'Unknown error'), 'error');
+                return;
+            }
+        }
+        
+        // Update profile with new data
         const response = await fetch('/api/auth-actions.php', {
             method: 'POST',
             headers: {
@@ -1508,7 +1658,7 @@ async function handleProfilePicUpload(e) {
     document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
     
     const reader = new FileReader();
-    reader.onload = async function(event) {
+    reader.onload = function(event) {
         const preview = document.getElementById('profile-pic-preview');
         const previewImg = document.getElementById('profile-preview-img');
         
@@ -1517,36 +1667,11 @@ async function handleProfilePicUpload(e) {
             preview.style.display = 'block';
         }
         
+        // Store the base64 image for later upload on save
         const base64Image = event.target.result.split(',')[1];
-        
-        try {
-            showNotification('Uploading image...', 'info');
-            
-            const response = await fetch('/api/upload-profile-pic.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ 
-                    image: base64Image,
-                    userId: currentUser.id
-                })
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                e.target.closest('form').dataset.uploadedImage = data.url;
-                showNotification('Image uploaded successfully!', 'success');
-            } else {
-                showNotification('Failed to upload image: ' + (data.error || 'Unknown error'), 'error');
-                if (preview) preview.style.display = 'none';
-            }
-        } catch (error) {
-            console.error('Upload error:', error);
-            showNotification('Failed to upload image', 'error');
-            if (preview) preview.style.display = 'none';
-        }
+        const form = e.target.closest('form');
+        form.dataset.pendingUpload = base64Image;
+        form.dataset.selectedAvatar = '';
     };
     
     reader.readAsDataURL(file);

@@ -147,6 +147,19 @@
     border-color: var(--accent-primary);
 }
 
+.post-actions-bar .action-btn.download-btn {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    border-color: var(--accent-primary);
+    font-weight: 600;
+}
+
+.post-actions-bar .action-btn.download-btn:hover {
+    background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
 /* Comments Section */
 .comments-section {
     margin-top: var(--spacing-lg);

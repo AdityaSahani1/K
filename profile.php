@@ -258,11 +258,11 @@ $showSearch = false;
                 </div>
                 
                 <div class="form-group">
-                    <label for="user-post-image-upload">Upload Images</label>
-                    <input type="file" id="user-post-image-upload" accept="image/*" multiple style="margin-bottom: 10px;">
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">You can select multiple images. They will be shown as a carousel in the post.</p>
-                    <div id="user-images-preview" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 10px;">
-                        <!-- Image previews will be added here -->
+                    <label for="user-post-image-upload">Upload Image <span id="image-upload-optional"></span></label>
+                    <input type="file" id="user-post-image-upload" accept="image/*" required style="margin-bottom: 10px;">
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">Select a cover image for your post.</p>
+                    <div id="user-image-upload-preview" style="display: none; margin-top: 10px;">
+                        <img id="user-preview-img" src="" alt="Preview" style="max-width: 300px; max-height: 300px; border-radius: 8px; border: 2px solid var(--border-color);">
                     </div>
                 </div>
                 
@@ -278,22 +278,9 @@ $showSearch = false;
                 </div>
                 
                 <div class="form-group">
-                    <label>Download Files (Optional)</label>
-                    <div id="user-download-files-container">
-                        <!-- Download file inputs will be added here -->
-                    </div>
-                    <button type="button" class="btn-secondary" id="user-add-download-btn" style="margin-top: 10px;">
-                        <i class="fas fa-plus"></i> Add Download File
-                    </button>
-                    <small style="display: block; margin-top: 5px; color: var(--text-muted);">Add downloadable files (presets, PSD, RAW, etc.)</small>
-                </div>
-                
-                <div class="form-group">
-                    <label for="user-post-status">Status</label>
-                    <select id="user-post-status">
-                        <option value="published">Published</option>
-                        <option value="draft">Draft</option>
-                    </select>
+                    <label for="user-post-download-url">Download URL (Optional)</label>
+                    <input type="url" id="user-post-download-url" placeholder="https://example.com/download-file.zip">
+                    <small style="display: block; margin-top: 5px; color: var(--text-muted);">Provide a direct download link for high-res files, presets, or resources</small>
                 </div>
                 
                 <div class="modal-actions">

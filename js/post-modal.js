@@ -516,10 +516,22 @@ async function submitPostComment(postId) {
             commentInput.value = '';
             showNotification('Comment posted!', 'success');
             
+            // Update comment count immediately with returned data
+            if (data.comments !== undefined) {
+                const commentCountElement = document.querySelector('#post-detail .post-detail-meta span:nth-child(4)');
+                if (commentCountElement && commentCountElement.innerHTML.includes('fa-comment')) {
+                    commentCountElement.innerHTML = `<i class="far fa-comment"></i> ${data.comments}`;
+                }
+                // Update comments title
+                const commentsTitle = document.querySelector('.comments-title');
+                if (commentsTitle) {
+                    commentsTitle.textContent = `Comments (${data.comments})`;
+                }
+            }
+            
             // Refresh comments display
             const updatedComments = await getPostComments(postId);
             document.getElementById('comments-list').innerHTML = await renderComments(updatedComments);
-            updateModalCommentCount(postId);
         } else {
             showNotification(data.error || 'Error posting comment', 'error');
         }
@@ -599,8 +611,13 @@ async function togglePostLike(postId, button) {
                 button.classList.remove('liked');
             }
             
-            // Update like count in modal
-            updateModalLikeCount(postId);
+            // Update like count in modal immediately with returned data
+            if (data.likes !== undefined) {
+                const likeCountElement = document.querySelector('#post-detail .post-detail-meta span:nth-child(3)');
+                if (likeCountElement && likeCountElement.innerHTML.includes('fa-heart')) {
+                    likeCountElement.innerHTML = `<i class="far fa-heart"></i> ${data.likes}`;
+                }
+            }
             showNotification(data.action === 'liked' ? 'Post liked!' : 'Post unliked', 'success');
         }
     } catch (error) {
