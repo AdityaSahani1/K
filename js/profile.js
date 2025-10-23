@@ -687,67 +687,34 @@ async function handleDefaultAvatarSelection(e) {
     const preview = document.getElementById('profile-pic-preview');
     if (preview) preview.style.display = 'none';
     
-    // Clear uploaded image data
-    avatarOption.closest('form').dataset.uploadedImage = '';
+    // Upload the selected avatar to API
+    try {
+        showNotification('Updating avatar...', 'info');
+        const response = await fetch('/api/upload-profile-pic.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                image: avatarValue,
+                userId: currentUser.id
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            avatarOption.closest('form').dataset.uploadedImage = data.url;
+            showNotification('Avatar updated successfully!', 'success');
+        } else {
+            showNotification('Failed to update avatar: ' + (data.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        console.error('Avatar update error:', error);
+        showNotification('Failed to update avatar', 'error');
+    }
 }
 
-async function handleProfilePicUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    if (!file.type.match('image.*')) {
-        showNotification('Please select an image file', 'error');
-        return;
-    }
-    
-    if (file.size > 5 * 1024 * 1024) {
-        showNotification('Image size must be less than 5MB', 'error');
-        return;
-    }
-    
-    document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
-    
-    const reader = new FileReader();
-    reader.onload = async function(event) {
-        const previewImg = document.getElementById('profile-preview-img');
-        const preview = document.getElementById('profile-pic-preview');
-        
-        if (previewImg && preview) {
-            previewImg.src = event.target.result;
-            preview.style.display = 'block';
-        }
-        
-        const base64Image = event.target.result;
-        
-        try {
-            showNotification('Uploading and compressing image...', 'info');
-            
-            const response = await fetch('/api/upload-profile-pic.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ image: base64Image })
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                e.target.closest('form').dataset.uploadedImage = data.url;
-                showNotification('Image uploaded successfully!', 'success');
-            } else {
-                showNotification('Failed to upload image: ' + (data.error || 'Unknown error'), 'error');
-                if (preview) preview.style.display = 'none';
-            }
-        } catch (error) {
-            console.error('Upload error:', error);
-            showNotification('Failed to upload image', 'error');
-            if (preview) preview.style.display = 'none';
-        }
-    };
-    
-    reader.readAsDataURL(file);
-}
 
 async function handleEditProfile(e) {
     e.preventDefault();
@@ -1148,18 +1115,15 @@ async function loadMyPosts() {
 function showAddPostModal() {
     const form = document.getElementById('user-post-form');
     const uploadInput = document.getElementById('user-post-image-upload');
-    const optionalLabel = document.getElementById('image-upload-optional');
+    const imagesPreview = document.getElementById('user-images-preview');
     
     document.getElementById('user-post-form-title').textContent = 'Create New Post';
     form.reset();
     document.getElementById('user-post-id').value = '';
     document.getElementById('user-post-image').value = '';
-    document.getElementById('user-image-upload-preview').style.display = 'none';
     
-    // Update label to show required for new posts
-    if (optionalLabel) {
-        optionalLabel.textContent = '*';
-        optionalLabel.style.color = 'var(--accent-danger)';
+    if (imagesPreview) {
+        imagesPreview.innerHTML = '';
     }
     
     // Clear the upload requirement
@@ -1540,7 +1504,10 @@ async function handleProfilePicUpload(e) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ image: base64Image })
+                body: JSON.stringify({ 
+                    image: base64Image,
+                    userId: currentUser.id
+                })
             });
             
             const data = await response.json();

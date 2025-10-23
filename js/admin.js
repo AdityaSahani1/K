@@ -821,37 +821,17 @@ function initImageUpload() {
     const removeUpload = document.getElementById('remove-upload');
     
     if (postImageUpload) {
-        postImageUpload.addEventListener('change', async function(e) {
+        postImageUpload.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
             
-            // Show preview
+            // Show preview only
             const reader = new FileReader();
             reader.onload = function(e) {
                 previewImg.src = e.target.result;
                 imagePreview.style.display = 'block';
             };
             reader.readAsDataURL(file);
-            
-            // Upload to ImgBB
-            try {
-                const base64 = await fileToBase64(file);
-                const uploadData = await uploadToImgBB(base64);
-                postImageUrl.value = uploadData.displayUrl;
-                postImageUrl.removeAttribute('required');
-                
-                // Auto-populate download URL
-                const downloadUrlField = document.getElementById('post-download-url');
-                if (downloadUrlField && uploadData.imageUrl) {
-                    downloadUrlField.value = uploadData.imageUrl;
-                }
-                
-                showNotification('Image uploaded successfully!', 'success');
-            } catch (error) {
-                console.error('Upload error:', error);
-                showNotification('Failed to upload image: ' + error.message, 'error');
-                imagePreview.style.display = 'none';
-            }
         });
     }
     

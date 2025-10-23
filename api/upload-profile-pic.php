@@ -1,22 +1,19 @@
 <?php
 require_once '../config/database.php';
 
-// Start session if not already started
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 header('Content-Type: application/json');
-
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
-    exit;
-}
 
 // Get the input data
 $input = json_decode(file_get_contents('php://input'), true);
+
+// Check for userId in the request
+if (!isset($input['userId']) || empty($input['userId'])) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'error' => 'User ID is required']);
+    exit;
+}
+
+$userId = $input['userId'];
 
 if (!isset($input['image']) || empty($input['image'])) {
     http_response_code(400);
@@ -34,11 +31,11 @@ try {
         $avatarPath = '/assets/default-avatars/' . $input['image'] . '.jpg';
         
         // Delete old profile picture if it's a local upload
-        deleteOldProfilePicture($_SESSION['user_id'], $conn);
+        deleteOldProfilePicture($userId, $conn);
         
         // Update database
         $stmt = $conn->prepare("UPDATE users SET profilePicture = ? WHERE id = ?");
-        $stmt->execute([$avatarPath, $_SESSION['user_id']]);
+        $stmt->execute([$avatarPath, $userId]);
         
         echo json_encode([
             'success' => true,
@@ -121,7 +118,7 @@ try {
         default => 'jpg'
     };
     
-    $filename = 'profile_' . $_SESSION['user_id'] . '_' . uniqid() . '.' . $extension;
+    $filename = 'profile_' . $userId . '_' . uniqid() . '.' . $extension;
     $uploadDir = __DIR__ . '/../assets/profile_pics/';
     $tempPath = $uploadDir . 'temp_' . $filename;
     $finalPath = $uploadDir . $filename;
@@ -155,7 +152,7 @@ try {
     chmod($tempPath, 0640);
     
     // Delete old profile picture
-    deleteOldProfilePicture($_SESSION['user_id'], $conn);
+    deleteOldProfilePicture($userId, $conn);
     
     // Atomic rename temp to final
     if (!rename($tempPath, $finalPath)) {
@@ -166,7 +163,7 @@ try {
     // Save to database (relative path)
     $relativeUrl = '/assets/profile_pics/' . $filename;
     $stmt = $conn->prepare("UPDATE users SET profilePicture = ? WHERE id = ?");
-    $stmt->execute([$relativeUrl, $_SESSION['user_id']]);
+    $stmt->execute([$relativeUrl, $userId]);
     
     echo json_encode([
         'success' => true,
@@ -179,9 +176,6 @@ try {
     error_log('Profile picture upload error: ' . $e->getMessage());
 }
 
-/**
- * Delete old profile picture from uploads folder
- */
 function deleteOldProfilePicture($userId, $conn) {
     try {
         $stmt = $conn->prepare("SELECT profilePicture FROM users WHERE id = ?");
