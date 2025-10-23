@@ -242,7 +242,6 @@ $showSearch = false;
         </div>
     </div>
 
-    <?php include 'components/footer.php'; ?>
 
     <?php include 'components/scripts.php'; ?>
 </body>

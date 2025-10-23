@@ -3,7 +3,10 @@
     <div class="container">
         <div class="footer-content">
             <div class="footer-section">
-                <h3>SnapSera</h3>
+                <div class="footer-logo">
+                    <img src="/assets/pwa-icons/icon-192x192.png" alt="SnapSera Logo" class="footer-logo-img">
+                    <h3>SnapSera</h3>
+                </div>
                 <p>Discover amazing artwork, photography, and design from talented creators worldwide.</p>
             </div>
             <div class="footer-section">

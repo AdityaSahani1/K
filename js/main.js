@@ -626,15 +626,6 @@ async function loadData(filename) {
 
 
 
-// Legacy function - Use specific API calls instead
-
-async function saveData(filename, data) {
-
-    console.warn('saveData is deprecated. Use specific API endpoints instead.');
-
-    return false;
-
-}
 
 
 

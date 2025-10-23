@@ -1135,3 +1135,33 @@ main {
 .auth-switch a:hover {
     text-decoration: underline;
 }
+/* Navigation Logo with Image */
+.nav-logo a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-logo-img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+/* Footer Logo */
+.footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.footer-logo-img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+.footer-logo h3 {
+    margin: 0;
+}

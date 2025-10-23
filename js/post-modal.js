@@ -474,14 +474,6 @@ async function submitReply(commentId, replyToUsername, replyToUserId) {
     }
 }
 
-// Create notification
-async function createNotification(username, commentId, postId) {
-    try {
-        console.log('Notification created for:', username);
-    } catch (error) {
-        console.error('Error creating notification:', error);
-    }
-}
 
 // Submit comment (unified function name)
 async function submitPostComment(postId) {
@@ -786,15 +778,6 @@ function addCommentToDOM(comment) {
     commentsList.scrollTop = commentsList.scrollHeight;
 }
 
-// Backwards compatibility aliases for existing code
-// These ensure the modal works with both gallery.js and home.js
-function addComment(postId) {
-    submitPostComment(postId);
-}
-
-function submitComment(postId) {
-    submitPostComment(postId);
-}
 
 function addModalActionListeners() {
     addPostModalInteractionListeners();
