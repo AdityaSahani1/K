@@ -177,10 +177,10 @@ function extractDominantColor(imageSrc, callback) {
                 g = Math.floor(g / count);
                 b = Math.floor(b / count);
                 
-                // Make color more vibrant by increasing saturation
+                // Create a lighter tint of the dominant color for the border
                 const hsl = rgbToHsl(r, g, b);
-                hsl.s = Math.min(hsl.s * 1.5, 1); // Increase saturation
-                hsl.l = Math.min(Math.max(hsl.l, 0.4), 0.6); // Normalize lightness
+                hsl.s = Math.min(hsl.s * 1.2, 0.7); // Moderate saturation
+                hsl.l = Math.min(Math.max(hsl.l, 0.75), 0.88); // Much lighter (tinted)
                 
                 const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
                 callback(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`);

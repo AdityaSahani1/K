@@ -101,30 +101,6 @@ $showSearch = false;
             <div class="hero-text">
                 <h1 class="hero-title">SnapSera</h1>
                 <p class="hero-subtitle">Explore stunning photography, illustration, and 3D modeling from a creative professional</p>
-                
-                <div class="hero-features">
-                    <div class="hero-feature">
-                        <i class="fas fa-images"></i>
-                        <div>
-                            <h4>Curated Gallery</h4>
-                            <p>Discover amazing artwork and photography</p>
-                        </div>
-                    </div>
-                    <div class="hero-feature">
-                        <i class="fas fa-users"></i>
-                        <div>
-                            <h4>Community</h4>
-                            <p>Connect with creative professionals</p>
-                        </div>
-                    </div>
-                    <div class="hero-feature">
-                        <i class="fas fa-mobile-alt"></i>
-                        <div>
-                            <h4>Mobile Ready</h4>
-                            <p>Access anywhere on any device</p>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="hero-buttons">
                     <a href="gallery.php" class="cta-btn">
@@ -137,25 +113,6 @@ $showSearch = false;
                     </button>
                 </div>
 
-                <div class="download-section">
-                    <p class="download-title">Get the app</p>
-                    <div class="download-buttons">
-                        <button class="download-btn pwa-install-btn" id="pwa-install-btn" style="display: none;">
-                            <i class="fas fa-download"></i>
-                            <div class="btn-text">
-                                <small>Install</small>
-                                <strong>Progressive Web App</strong>
-                            </div>
-                        </button>
-                        <a href="#" class="download-btn android-download-btn">
-                            <i class="fab fa-android"></i>
-                            <div class="btn-text">
-                                <small>Download on</small>
-                                <strong>Android</strong>
-                            </div>
-                        </a>
-                    </div>
-                </div>
             </div>
 
 

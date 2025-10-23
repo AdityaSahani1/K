@@ -4,10 +4,28 @@
         <div class="footer-content">
             <div class="footer-section">
                 <div class="footer-logo">
-                    <img src="/assets/pwa-icons/icon-192x192.png" alt="SnapSera Logo" class="footer-logo-img">
                     <h3>SnapSera</h3>
                 </div>
                 <p>Discover amazing artwork, photography, and design from talented creators worldwide.</p>
+                <div class="footer-app-section">
+                    <h4>Get the App</h4>
+                    <div class="download-buttons">
+                        <button class="download-btn pwa-install-btn" id="pwa-install-btn">
+                            <i class="fas fa-download"></i>
+                            <div class="btn-text">
+                                <small>Install</small>
+                                <strong>Progressive Web App</strong>
+                            </div>
+                        </button>
+                        <a href="#" class="download-btn android-download-btn">
+                            <i class="fab fa-android"></i>
+                            <div class="btn-text">
+                                <small>Download on</small>
+                                <strong>Android</strong>
+                            </div>
+                        </a>
+                    </div>
+                </div>
             </div>
             <div class="footer-section">
                 <h4>Links</h4>

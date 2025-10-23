@@ -7,7 +7,6 @@ $showSearch = $showSearch ?? false;
     <div class="nav-container">
         <div class="nav-logo">
             <a href="index.php">
-                <img src="/assets/pwa-icons/icon-192x192.png" alt="SnapSera Logo" class="nav-logo-img">
                 <span>SnapSera</span>
             </a>
         </div>
