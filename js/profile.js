@@ -523,20 +523,25 @@ async function editUserPost(postId) {
         
         // Populate form
         document.getElementById('user-post-form-title').textContent = 'Edit Post';
+        document.getElementById('user-submit-text').textContent = 'Update Post';
         document.getElementById('user-post-title').value = post.title;
         document.getElementById('user-post-category').value = post.category;
         document.getElementById('user-post-image').value = post.imageUrl;
         document.getElementById('user-post-description').value = post.description || '';
         document.getElementById('user-post-tags').value = Array.isArray(tags) ? tags.join(', ') : '';
-        document.getElementById('user-post-download-url').value = post.downloadUrl || '';
         document.getElementById('user-post-id').value = postId;
         
-        // Show image preview
-        const previewContainer = document.getElementById('user-image-upload-preview');
-        const previewImg = document.getElementById('user-preview-img');
-        if (post.imageUrl) {
-            previewImg.src = post.imageUrl;
-            previewContainer.style.display = 'block';
+        // Show image preview with the existing image
+        const previewContainer = document.getElementById('user-images-preview');
+        if (previewContainer && post.imageUrl) {
+            previewContainer.innerHTML = `
+                <div style="position: relative; border-radius: 8px; overflow: hidden;">
+                    <img src="${post.imageUrl}" alt="Preview" style="width: 100%; height: 120px; object-fit: cover;">
+                    <div style="padding: 5px; background: var(--bg-secondary); text-align: center; font-size: 0.8rem;">
+                        Current Image
+                    </div>
+                </div>
+            `;
         }
         
         showModal('user-post-form-modal');
@@ -572,6 +577,11 @@ async function deleteUserPost(postId) {
         }
         
         showNotification('Post deleted successfully', 'success');
+        
+        // Reload stats immediately to update counters
+        await loadUserStats();
+        
+        // Reload the tab content
         loadTabContent('myposts');
         
     } catch (error) {
@@ -1285,13 +1295,21 @@ async function handleUserPostForm(e) {
         
         showNotification(isEdit ? 'Post updated successfully!' : 'Post created successfully!', 'success');
         hideModal('user-post-form-modal');
+        
+        // Reload stats immediately to update counters
+        await loadUserStats();
+        
+        // Reload posts
         loadMyPosts();
         
         // Reset form
         form.reset();
         document.getElementById('user-post-id').value = '';
         document.getElementById('user-post-image').value = '';
-        document.getElementById('user-image-upload-preview').style.display = 'none';
+        const previewContainer = document.getElementById('user-images-preview');
+        if (previewContainer) {
+            previewContainer.innerHTML = '';
+        }
         
     } catch (error) {
         console.error('Error saving post:', error);
@@ -1336,6 +1354,11 @@ async function deleteMyPost(postId) {
         }
         
         showNotification('Post deleted successfully!', 'success');
+        
+        // Reload stats immediately to update counters
+        await loadUserStats();
+        
+        // Reload posts
         loadMyPosts();
         
     } catch (error) {

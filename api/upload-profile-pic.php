@@ -30,10 +30,7 @@ try {
         // It's a default avatar like "avatar1", "avatar2", etc.
         $avatarPath = '/assets/default-avatars/' . $input['image'] . '.jpg';
         
-        // Delete old profile picture if it's a local upload
-        deleteOldProfilePicture($userId, $conn);
-        
-        // Update database
+        // Update database with avatar path
         $stmt = $conn->prepare("UPDATE users SET profilePicture = ? WHERE id = ?");
         $stmt->execute([$avatarPath, $userId]);
         
@@ -44,22 +41,26 @@ try {
         exit;
     }
     
-    // It's an uploaded image - decode base64
+    // It's an uploaded image - process and store as base64
     $imageData = $input['image'];
     
-    // Remove data:image/xxx;base64, prefix if present
+    // Remove data:image/xxx;base64, prefix if present for validation
+    $base64Data = $imageData;
     if (strpos($imageData, 'data:image') === 0) {
-        $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $imageData);
+        $base64Data = preg_replace('/^data:image\/\w+;base64,/', '', $imageData);
+    } else {
+        // If no prefix, add it for storage
+        $imageData = 'data:image/jpeg;base64,' . $imageData;
     }
     
-    $imageData = base64_decode($imageData);
-    if ($imageData === false) {
+    $decodedData = base64_decode($base64Data);
+    if ($decodedData === false) {
         throw new Exception('Invalid image data');
     }
     
     // Get image info using finfo
     $finfo = new finfo(FILEINFO_MIME_TYPE);
-    $mimeType = $finfo->buffer($imageData);
+    $mimeType = $finfo->buffer($decodedData);
     
     // Validate image type
     $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -67,13 +68,13 @@ try {
         throw new Exception('Invalid image type. Allowed: JPG, PNG, GIF, WEBP');
     }
     
-    // Check file size (max 5MB)
-    if (strlen($imageData) > 5 * 1024 * 1024) {
-        throw new Exception('Image size exceeds 5MB limit');
+    // Check file size (max 2MB for base64 storage)
+    if (strlen($decodedData) > 2 * 1024 * 1024) {
+        throw new Exception('Image size exceeds 2MB limit');
     }
     
     // Create image from string for compression
-    $image = imagecreatefromstring($imageData);
+    $image = imagecreatefromstring($decodedData);
     if ($image === false) {
         throw new Exception('Failed to process image');
     }
@@ -82,8 +83,8 @@ try {
     $originalWidth = imagesx($image);
     $originalHeight = imagesy($image);
     
-    // Calculate new dimensions (max 400x400, maintain aspect ratio)
-    $maxSize = 400;
+    // Calculate new dimensions (max 300x300, maintain aspect ratio)
+    $maxSize = 300;
     if ($originalWidth > $maxSize || $originalHeight > $maxSize) {
         if ($originalWidth > $originalHeight) {
             $newWidth = $maxSize;
@@ -109,99 +110,46 @@ try {
     // Resize image
     imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $originalWidth, $originalHeight);
     
-    // Generate secure filename
-    $extension = match($mimeType) {
-        'image/jpeg' => 'jpg',
-        'image/png' => 'png',
-        'image/gif' => 'gif',
-        'image/webp' => 'webp',
-        default => 'jpg'
-    };
-    
-    $filename = 'profile_' . $userId . '_' . uniqid() . '.' . $extension;
-    $uploadDir = __DIR__ . '/../assets/profile_pics/';
-    $tempPath = $uploadDir . 'temp_' . $filename;
-    $finalPath = $uploadDir . $filename;
-    
-    // Ensure directory exists
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
+    // Convert to base64
+    ob_start();
+    if ($mimeType === 'image/png') {
+        imagepng($resizedImage, null, 8);
+        $mimeTypeStr = 'image/png';
+    } else if ($mimeType === 'image/gif') {
+        imagegif($resizedImage);
+        $mimeTypeStr = 'image/gif';
+    } else if ($mimeType === 'image/webp') {
+        imagewebp($resizedImage, null, 85);
+        $mimeTypeStr = 'image/webp';
+    } else {
+        imagejpeg($resizedImage, null, 85);
+        $mimeTypeStr = 'image/jpeg';
     }
-    
-    // Save to temp file first
-    $saved = match($mimeType) {
-        'image/jpeg' => imagejpeg($resizedImage, $tempPath, 90),
-        'image/png' => imagepng($resizedImage, $tempPath, 8),
-        'image/gif' => imagegif($resizedImage, $tempPath),
-        'image/webp' => imagewebp($resizedImage, $tempPath, 90),
-        default => imagejpeg($resizedImage, $tempPath, 90)
-    };
+    $imageContent = ob_get_clean();
     
     // Clean up memory
     imagedestroy($image);
     imagedestroy($resizedImage);
     
-    if (!$saved) {
-        if (file_exists($tempPath)) {
-            unlink($tempPath);
-        }
-        throw new Exception('Failed to save image');
+    if (empty($imageContent)) {
+        throw new Exception('Failed to process image');
     }
     
-    // Set file permissions
-    chmod($tempPath, 0640);
+    // Create base64 data URL
+    $base64Image = 'data:' . $mimeTypeStr . ';base64,' . base64_encode($imageContent);
     
-    // Delete old profile picture
-    deleteOldProfilePicture($userId, $conn);
-    
-    // Atomic rename temp to final
-    if (!rename($tempPath, $finalPath)) {
-        unlink($tempPath);
-        throw new Exception('Failed to finalize image');
-    }
-    
-    // Save to database (relative path)
-    $relativeUrl = '/assets/profile_pics/' . $filename;
+    // Save to database as base64
     $stmt = $conn->prepare("UPDATE users SET profilePicture = ? WHERE id = ?");
-    $stmt->execute([$relativeUrl, $userId]);
+    $stmt->execute([$base64Image, $userId]);
     
     echo json_encode([
         'success' => true,
-        'url' => $relativeUrl
+        'url' => $base64Image
     ]);
     
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     error_log('Profile picture upload error: ' . $e->getMessage());
-}
-
-function deleteOldProfilePicture($userId, $conn) {
-    try {
-        $stmt = $conn->prepare("SELECT profilePicture FROM users WHERE id = ?");
-        $stmt->execute([$userId]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($user && $user['profilePicture']) {
-            $oldPicture = $user['profilePicture'];
-            
-            // Only delete if it's in the uploads folder (not default avatars)
-            if (strpos($oldPicture, '/assets/profile_pics/') === 0) {
-                $filePath = __DIR__ . '/../' . $oldPicture;
-                
-                // Security: Ensure path is within allowed directory
-                $realPath = realpath($filePath);
-                $uploadDir = realpath(__DIR__ . '/../assets/profile_pics/');
-                
-                if ($realPath && $uploadDir && strpos($realPath, $uploadDir) === 0) {
-                    if (file_exists($realPath)) {
-                        unlink($realPath);
-                    }
-                }
-            }
-        }
-    } catch (Exception $e) {
-        error_log('Error deleting old profile picture: ' . $e->getMessage());
-    }
 }
 ?>

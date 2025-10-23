@@ -40,6 +40,7 @@
     height: 100%;
     object-fit: cover;
     border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.3);
 }
 
 .profile-avatar i {
@@ -901,15 +902,16 @@
 }
 
 /* Form Actions */
-.form-actions {
+.form-actions,
+.modal-actions {
     display: flex;
     gap: var(--spacing-md);
     margin-top: var(--spacing-xl);
 }
 
-.form-actions .btn-secondary,
-.form-actions .btn-primary {
-    flex: 1;
+/* General button styling */
+.btn-secondary,
+.btn-primary {
     padding: var(--spacing-md) var(--spacing-xl);
     border: none;
     border-radius: var(--radius-lg);
@@ -923,25 +925,32 @@
     gap: var(--spacing-sm);
 }
 
-.form-actions .btn-secondary {
+.form-actions .btn-secondary,
+.form-actions .btn-primary,
+.modal-actions .btn-secondary,
+.modal-actions .btn-primary {
+    flex: 1;
+}
+
+.btn-secondary {
     background-color: var(--bg-secondary);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
 }
 
-.form-actions .btn-secondary:hover {
+.btn-secondary:hover {
     background-color: var(--bg-tertiary);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px var(--shadow-color);
 }
 
-.form-actions .btn-primary {
+.btn-primary {
     background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
     color: white;
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
-.form-actions .btn-primary:hover {
+.btn-primary:hover {
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
