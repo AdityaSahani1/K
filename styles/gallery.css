@@ -1110,7 +1110,8 @@
     text-align: center;
 }
 
-/* Share Menu Dropdown */
+
+/*
 .share-menu-dropdown {
     position: fixed;
     top: 50%;
@@ -1132,7 +1133,7 @@
 
 .share-menu-dropdown.show {
     opacity: 1;
-    visibility: visible;
+    visibility: hidden;
     transform: translate(-50%, -50%) scale(1);
 }
 
@@ -1195,15 +1196,11 @@
 .share-menu-item:hover i {
     color: var(--accent-secondary);
 }
+*/
 
-/* Responsive positioning for share menu */
+/* Responsive positioning */
 @media (max-width: 480px) {
-    .share-menu-dropdown {
-        min-width: calc(100vw - var(--spacing-2xl));
-        max-width: calc(100vw - var(--spacing-2xl));
-        left: 50%;
-        top: 50%;
-    }
+    
     
     .post-menu-dropdown {
         position: absolute;

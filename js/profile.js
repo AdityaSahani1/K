@@ -116,9 +116,12 @@ function updateProfilePicture() {
         defaultAvatar.style.display = 'none';
         
         // Extract dominant color from image for border
+        console.log('Extracting color from:', currentUser.profilePicture);
         extractDominantColor(currentUser.profilePicture, (color) => {
+            console.log('Extracted border color:', color);
             if (profileAvatar && color) {
                 profileAvatar.style.setProperty('--profile-border-color', color);
+                console.log('Applied color to profile avatar');
             }
         });
     } else {
@@ -179,11 +182,18 @@ function extractDominantColor(imageSrc, callback) {
                 
                 // Create a lighter tint of the dominant color for the border
                 const hsl = rgbToHsl(r, g, b);
-                hsl.s = Math.min(hsl.s * 1.2, 0.7); // Moderate saturation
-                hsl.l = Math.min(Math.max(hsl.l, 0.75), 0.88); // Much lighter (tinted)
+                
+                // Increase saturation for vibrancy (but cap it)
+                hsl.s = Math.min(hsl.s * 1.3, 0.65);
+                
+                // Ensure the tint is much lighter to avoid blending with the image
+                // Keep lightness between 80% and 92% for a pastel/tinted effect
+                hsl.l = Math.max(0.80, Math.min(0.92, hsl.l + 0.35));
                 
                 const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
-                callback(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`);
+                const colorValue = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+                console.log('Color extraction successful:', colorValue, 'from RGB:', r, g, b);
+                callback(colorValue);
             } else {
                 callback('var(--accent-primary)');
             }
@@ -193,7 +203,9 @@ function extractDominantColor(imageSrc, callback) {
         }
     };
     
-    img.onerror = function() {
+    img.onerror = function(e) {
+        console.error('Error loading image for color extraction:', e);
+        console.log('Falling back to default accent color');
         callback('var(--accent-primary)');
     };
     

@@ -41,7 +41,7 @@
     height: 100%;
     object-fit: cover;
     border-radius: 50%;
-    border: 3px solid white;
+    border: 3px solid var(--profile-border-color);
     box-shadow: 0 0 0 4px var(--profile-border-color),
                 0 0 25px var(--profile-border-color),
                 0 4px 15px rgba(0, 0, 0, 0.2);
