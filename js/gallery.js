@@ -48,7 +48,9 @@ async function loadAllPosts() {
 
     try {
 
-        allPosts = await loadData('posts.json');
+        const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        allPosts = await response.json();
 
         filteredPosts = [...allPosts];
 
@@ -510,8 +512,10 @@ function createGalleryPostCard(post) {
                                 <i class="far fa-bookmark"></i>
 
                             </button>
+                            <button class="overlay-btn share-btn" data-post-id="${post.id}" title="Share">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
 
-                            <!--
 
                         </div>
 
@@ -965,6 +969,16 @@ function addPostInteractionListeners() {
         });
 
     });
+    // Share button listeners
+    document.querySelectorAll('.share-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const postId = this.dataset.postId;
+            const menuBtn = document.querySelector(`[data-post-id="${postId}"].post-menu-btn`);
+            if (menuBtn) menuBtn.click();
+        });
+    });
 
     
 
@@ -1037,21 +1051,6 @@ function addPostMenuListeners() {
 
             dropdown.innerHTML = `
 
-                <button class="post-menu-item" data-action="like" data-post-id="${postId}">
-
-                    <i class="far fa-heart"></i>
-
-                    <span>Like</span>
-
-                </button>
-
-                <button class="post-menu-item" data-action="save" data-post-id="${postId}">
-
-                    <i class="far fa-bookmark"></i>
-
-                    <span>Save</span>
-
-                </button>
 
                 <button class="post-menu-item" data-action="share-whatsapp" data-post-id="${postId}">
 
@@ -1085,13 +1084,6 @@ function addPostMenuListeners() {
 
                 </button>
 
-                ${hasDownloadUrl ? `<button class="post-menu-item" data-action="download" data-post-id="${postId}">
-
-                    <i class="fas fa-download"></i>
-
-                    <span>Download</span>
-
-                </button>` : ''}
 
             `;
 
@@ -1297,7 +1289,9 @@ async function toggleLikeFromMenu(postId) {
             } else {
                 showNotification('Like removed', 'success');
             }
-            allPosts = await loadData('posts.json');
+            const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        allPosts = await response.json();
             filteredPosts = [...allPosts];
             loadGalleryPosts();
         }
@@ -1467,83 +1461,6 @@ function showErrorState() {
 
 
 
-// Load user interactions when user logs in  
-
-async function loadUserInteractions() {
-
-    if (!currentUser) return;
-
-    
-
-    try {
-
-        const likes = await loadData('likes.json');
-
-        const saves = await loadData('saves.json');
-
-        
-
-        // Update like buttons
-
-        likes.forEach(like => {
-
-            if (like.userId === currentUser.id) {
-
-                const likeBtn = document.querySelector(`[data-post-id="${like.postId}"].like-btn`);
-
-                if (likeBtn) {
-
-                    likeBtn.innerHTML = '<i class="fas fa-heart"></i>';
-
-                    likeBtn.classList.add('liked');
-
-                }
-
-            }
-
-        });
-
-        
-
-        // Update save buttons
-
-        saves.forEach(save => {
-
-            if (save.userId === currentUser.id) {
-
-                const saveBtn = document.querySelector(`[data-post-id="${save.postId}"].save-btn`);
-
-                if (saveBtn) {
-
-                    saveBtn.innerHTML = '<i class="fas fa-bookmark"></i>';
-
-                    saveBtn.classList.add('saved');
-
-                }
-
-            }
-
-        });
-
-    } catch (error) {
-
-        console.error('Error loading user interactions:', error);
-
-    }
-
-}
-
-
-
-setTimeout(() => {
-
-    if (currentUser) {
-
-        loadUserInteractions();
-
-    }
-
-}, 1000);
 
 
 
@@ -1573,7 +1490,9 @@ async function toggleLike(postId, button) {
                 showNotification('Post unliked', 'success');
             }
             // Reload posts to update like counts
-            allPosts = await loadData('posts.json');
+            const response = await fetch('/api/posts.php');
+        if (!response.ok) throw new Error('Failed to load posts');
+        allPosts = await response.json();
             filteredPosts = [...allPosts];
             updatePostLikeCount(postId);
         }
@@ -2107,8 +2026,6 @@ function updateCategoryCounts() {
 
     const countDigital = document.getElementById('count-digital');
 
-
-
     if (countAll) countAll.textContent = categoryCounts.all;
 
     if (countArt) countArt.textContent = categoryCounts.art;
@@ -2120,206 +2037,7 @@ function updateCategoryCounts() {
     if (countDigital) countDigital.textContent = categoryCounts.digital;
 
 }
-    // Update counts in popup (with null checks)
 
-    const countAll = document.getElementById('count-all');
-
-    const countArt = document.getElementById('count-art');
-
-    const countPhotography = document.getElementById('count-photography');
-
-    const countDesign = document.getElementById('count-design');
-
-    const countDigital = document.getElementById('count-digital');
-
-
-
-    if (countAll) countAll.textContent = categoryCounts.all;
-
-    if (countArt) countArt.textContent = categoryCounts.art;
-
-    if (countPhotography) countPhotography.textContent = categoryCounts.photography;
-
-    if (countDesign) countDesign.textContent = categoryCounts.design;
-
-    if (countDigital) countDigital.textContent = categoryCounts.digital;
-
-}
-    // Update counts in popup (with null checks)
-
-    const countAll = document.getElementById('count-all');
-
-    const countArt = document.getElementById('count-art');
-
-    const countPhotography = document.getElementById('count-photography');
-
-    const countDesign = document.getElementById('count-design');
-
-    const countDigital = document.getElementById('count-digital');
-
-
-
-    if (countAll) countAll.textContent = categoryCounts.all;
-
-    if (countArt) countArt.textContent = categoryCounts.art;
-
-    if (countPhotography) countPhotography.textContent = categoryCounts.photography;
-
-    if (countDesign) countDesign.textContent = categoryCounts.design;
-
-    if (countDigital) countDigital.textContent = categoryCounts.digital;
-
-}
-    // Update counts in popup (with null checks)
-
-    const countAll = document.getElementById('count-all');
-
-    const countArt = document.getElementById('count-art');
-
-    const countPhotography = document.getElementById('count-photography');
-
-    const countDesign = document.getElementById('count-design');
-
-    const countDigital = document.getElementById('count-digital');
-
-
-
-    if (countAll) countAll.textContent = categoryCounts.all;
-
-    if (countArt) countArt.textContent = categoryCounts.art;
-
-    if (countPhotography) countPhotography.textContent = categoryCounts.photography;
-
-    if (countDesign) countDesign.textContent = categoryCounts.design;
-
-    if (countDigital) countDigital.textContent = categoryCounts.digital;
-
-}
-    // Update counts in popup (with null checks)
-
-    const countAll = document.getElementById('count-all');
-
-    const countArt = document.getElementById('count-art');
-
-    const countPhotography = document.getElementById('count-photography');
-
-    const countDesign = document.getElementById('count-design');
-
-    const countDigital = document.getElementById('count-digital');
-
-
-
-    if (countAll) countAll.textContent = categoryCounts.all;
-
-    if (countArt) countArt.textContent = categoryCounts.art;
-
-    if (countPhotography) countPhotography.textContent = categoryCounts.photography;
-
-    if (countDesign) countDesign.textContent = categoryCounts.design;
-
-    if (countDigital) countDigital.textContent = categoryCounts.digital;
-
-}
-    // Update counts in popup (with null checks)
-
-    const countAll = document.getElementById('count-all');
-
-    const countArt = document.getElementById('count-art');
-
-    const countPhotography = document.getElementById('count-photography');
-
-    const countDesign = document.getElementById('count-design');
-
-    const countDigital = document.getElementById('count-digital');
-
-
-
-    if (countAll) countAll.textContent = categoryCounts.all;
-
-    if (countArt) countArt.textContent = categoryCounts.art;
-
-    if (countPhotography) countPhotography.textContent = categoryCounts.photography;
-
-    if (countDesign) countDesign.textContent = categoryCounts.design;
-
-    if (countDigital) countDigital.textContent = categoryCounts.digital;
-
-}
-    // Update counts in popup (with null checks)
-
-    const countAll = document.getElementById('count-all');
-
-    const countArt = document.getElementById('count-art');
-
-    const countPhotography = document.getElementById('count-photography');
-
-    const countDesign = document.getElementById('count-design');
-
-    const countDigital = document.getElementById('count-digital');
-
-
-
-    if (countAll) countAll.textContent = categoryCounts.all;
-
-    if (countArt) countArt.textContent = categoryCounts.art;
-
-    if (countPhotography) countPhotography.textContent = categoryCounts.photography;
-
-    if (countDesign) countDesign.textContent = categoryCounts.design;
-
-    if (countDigital) countDigital.textContent = categoryCounts.digital;
-
-}
-    // Update counts in popup (with null checks)
-
-    const countAll = document.getElementById('count-all');
-
-    const countArt = document.getElementById('count-art');
-
-    const countPhotography = document.getElementById('count-photography');
-
-    const countDesign = document.getElementById('count-design');
-
-    const countDigital = document.getElementById('count-digital');
-
-
-
-    if (countAll) countAll.textContent = categoryCounts.all;
-
-    if (countArt) countArt.textContent = categoryCounts.art;
-
-    if (countPhotography) countPhotography.textContent = categoryCounts.photography;
-
-    if (countDesign) countDesign.textContent = categoryCounts.design;
-
-    if (countDigital) countDigital.textContent = categoryCounts.digital;
-
-}
-    // Update counts in popup (with null checks)
-
-    const countAll = document.getElementById('count-all');
-
-    const countArt = document.getElementById('count-art');
-
-    const countPhotography = document.getElementById('count-photography');
-
-    const countDesign = document.getElementById('count-design');
-
-    const countDigital = document.getElementById('count-digital');
-
-
-
-    if (countAll) countAll.textContent = categoryCounts.all;
-
-    if (countArt) countArt.textContent = categoryCounts.art;
-
-    if (countPhotography) countPhotography.textContent = categoryCounts.photography;
-
-    if (countDesign) countDesign.textContent = categoryCounts.design;
-
-    if (countDigital) countDigital.textContent = categoryCounts.digital;
-
-}
 // Gallery search functionality (new inline search)
 function initGallerySearch() {
     const searchInput = document.getElementById('gallery-search-input');

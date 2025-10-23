@@ -840,7 +840,6 @@ async function handleDefaultAvatarSelection(e) {
     if (preview) preview.style.display = 'none';
 }
 
-
 async function handleEditProfile(e) {
     e.preventDefault();
     

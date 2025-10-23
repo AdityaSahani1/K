@@ -198,8 +198,6 @@ $showSearch = true;
         </div>
     </div>
 
-
-
     <!-- Gallery Grid -->
     <section class="gallery">
         <div class="container">

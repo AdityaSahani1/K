@@ -1,14 +1,10 @@
 // Main JavaScript file for common functionality
 
-
-
 // Global variables
 
 let currentUser = null;
 
 let currentTheme = localStorage.getItem('theme') || 'light';
-
-
 
 // Initialize app
 
@@ -27,8 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initNotifications();
 
 });
-
-
 
 // Theme Management
 
@@ -50,8 +44,6 @@ function initTheme() {
 
 }
 
-
-
 function toggleTheme() {
 
     currentTheme = currentTheme === 'light' ? 'dark' : 'light';
@@ -64,8 +56,6 @@ function toggleTheme() {
 
 }
 
-
-
 function updateThemeIcon() {
 
     const themeIcon = document.querySelector('#theme-toggle i');
@@ -77,8 +67,6 @@ function updateThemeIcon() {
     }
 
 }
-
-
 
 // Navigation
 
@@ -182,8 +170,6 @@ function initNavigation() {
 
 }
 
-
-
 // Authentication
 
 function initAuth() {
@@ -191,8 +177,6 @@ function initAuth() {
     updateAuthUI();
 
 }
-
-
 
 function loadCurrentUser() {
 
@@ -207,8 +191,6 @@ function loadCurrentUser() {
     }
 
 }
-
-
 
 function updateAuthUI() {
 
@@ -365,8 +347,6 @@ function updateAuthUI() {
 
 }
 
-
-
 function addAdminNavLink() {
 
     const navList = document.querySelector('.nav-list');
@@ -392,8 +372,6 @@ function addAdminNavLink() {
     }
 
 }
-
-
 
 function logout() {
 
@@ -426,8 +404,6 @@ function logout() {
 
 }
 
-
-
 // Modal Management
 
 function showModal(modalId) {
@@ -444,8 +420,6 @@ function showModal(modalId) {
 
 }
 
-
-
 function hideModal(modalId) {
 
     const modal = document.getElementById(modalId);
@@ -460,15 +434,11 @@ function hideModal(modalId) {
 
 }
 
-
-
 function showAuthModal() {
 
     showModal('auth-modal');
 
 }
-
-
 
 // Utility Functions
 
@@ -522,8 +492,6 @@ function showNotification(message, type = 'info') {
 
 }
 
-
-
 function hideNotification(notification) {
 
     notification.classList.remove('show');
@@ -539,8 +507,6 @@ function hideNotification(notification) {
     }, 300);
 
 }
-
-
 
 function formatDate(dateString) {
 
@@ -558,76 +524,13 @@ function formatDate(dateString) {
 
 }
 
-
-
 function generateId() {
 
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 
 }
 
-
-
-// Data Management - Database API Functions
-
-async function loadData(filename) {
-
-    try {
-
-        let endpoint = '';
-
-        
-
-        // Map legacy JSON files to API endpoints
-
-        switch(filename) {
-
-            case 'posts.json':
-
-                endpoint = '/api/posts.php';
-
-                break;
-
-            case 'users.json':
-
-                endpoint = '/api/get-users.php';
-
-                break;
-
-            default:
-
-                console.warn(`${filename} is no longer supported. Use specific API endpoints instead.`);
-
-                return [];
-
-        }
-
-        
-
-        const response = await fetch(endpoint);
-
-        if (!response.ok) {
-
-            throw new Error(`Failed to load data from ${endpoint}`);
-
-        }
-
-        return await response.json();
-
-    } catch (error) {
-
-        console.error(`Error loading data:`, error);
-
-        return [];
-
-    }
-
-}
-
-
-
-
-
+// Data Management - Database API Functions removed - use direct API calls
 
 // Get user-specific data from database
 
@@ -654,8 +557,6 @@ async function getUserData(userId, type = 'all') {
     }
 
 }
-
-
 
 // Get comments for a specific post
 
@@ -689,8 +590,6 @@ async function getPostComments(postId) {
 
 }
 
-
-
 // Image handling
 
 function loadImage(src) {
@@ -708,8 +607,6 @@ function loadImage(src) {
     });
 
 }
-
-
 
 function createImagePlaceholder(width = 300, height = 200) {
 
@@ -754,8 +651,6 @@ function createImagePlaceholder(width = 300, height = 200) {
     return canvas.toDataURL();
 
 }
-
-
 
 // Social sharing
 
@@ -845,8 +740,6 @@ async function sharePost(postId, platform) {
 
 }
 
-
-
 function copyToClipboard(text) {
 
     if (navigator.clipboard) {
@@ -873,13 +766,11 @@ function copyToClipboard(text) {
 
 }
 
-
-
 async function getCurrentPost(postId) {
 
     try {
 
-        const posts = await loadData('posts.json');
+        const posts = await fetch('/api/posts.php').then(r => r.ok ? r.json() : Promise.reject('Failed to load posts'));
 
         return posts.find(post => post.id === postId);
 
@@ -892,8 +783,6 @@ async function getCurrentPost(postId) {
     }
 
 }
-
-
 
 // Share menu functionality
 
@@ -911,7 +800,7 @@ async function showShareMenu(postId, button) {
 
     // Get post data for title
 
-    const posts = await loadData('posts.json');
+    const posts = await fetch('/api/posts.php').then(r => r.ok ? r.json() : Promise.reject('Failed to load posts'));
 
     const post = posts.find(p => p.id === postId);
 
@@ -1095,8 +984,6 @@ async function showShareMenu(postId, button) {
 
 }
 
-
-
 // Add notification styles to head
 
 const notificationStyles = `
@@ -1129,15 +1016,11 @@ const notificationStyles = `
 
 }
 
-
-
 .notification.show {
 
     transform: translateX(0);
 
 }
-
-
 
 .notification-content {
 
@@ -1151,8 +1034,6 @@ const notificationStyles = `
 
 }
 
-
-
 .notification-message {
 
     color: var(--text-primary);
@@ -1160,8 +1041,6 @@ const notificationStyles = `
     font-weight: 500;
 
 }
-
-
 
 .notification-close {
 
@@ -1179,15 +1058,11 @@ const notificationStyles = `
 
 }
 
-
-
 .notification-success {
 
     border-left: 4px solid var(--accent-success);
 
 }
-
-
 
 .notification-error {
 
@@ -1195,15 +1070,11 @@ const notificationStyles = `
 
 }
 
-
-
 .notification-warning {
 
     border-left: 4px solid var(--accent-warning);
 
 }
-
-
 
 .notification-info {
 
@@ -1215,11 +1086,7 @@ const notificationStyles = `
 
 `;
 
-
-
 document.head.insertAdjacentHTML('beforeend', notificationStyles);
-
-
 
 // Scroll Functionality
 
@@ -1267,8 +1134,6 @@ function initScrollFunctionality() {
 
 }
 
-
-
 function scrollToTop() {
 
     window.scrollTo({
@@ -1280,8 +1145,6 @@ function scrollToTop() {
     });
 
 }
-
-
 
 function initSmoothScrolling() {
 
@@ -1335,8 +1198,6 @@ function initSmoothScrolling() {
 
 }
 
-
-
 // Enhanced scroll utilities
 
 function scrollToElement(element, offset = 80) {
@@ -1364,8 +1225,6 @@ function scrollToElement(element, offset = 80) {
     }
 
 }
-
-
 
 function isElementInViewport(element) {
 
@@ -1396,8 +1255,6 @@ function isElementInViewport(element) {
     );
 
 }
-
-
 
 // Notifications
 let notificationIntervalId = null;
@@ -1493,8 +1350,6 @@ function initNotifications() {
 
 }
 
-
-
 async function loadNotifications() {
 
     if (!currentUser) return;
@@ -1559,8 +1414,6 @@ async function loadNotifications() {
 
 }
 
-
-
 async function updateNotificationBadge() {
 
     if (!currentUser) return;
@@ -1602,8 +1455,6 @@ async function updateNotificationBadge() {
 
 }
 
-
-
 async function handleNotificationClick(notificationId, postId, commentId) {
 
     try {
@@ -1619,8 +1470,6 @@ async function handleNotificationClick(notificationId, postId, commentId) {
     }
 
 }
-
-
 
 async function markNotificationRead(event, notificationId) {
     event.stopPropagation();
@@ -1652,8 +1501,6 @@ async function markNotificationRead(event, notificationId) {
     }
 
 }
-
-
 
 async function markAllNotificationsRead() {
 

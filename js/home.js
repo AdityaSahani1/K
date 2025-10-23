@@ -236,7 +236,6 @@ async function toggleSave(postId, button) {
     }
 }
 
-
 async function updatePostLikeCount(postId) {
     try {
         const response = await fetch('/api/posts.php');

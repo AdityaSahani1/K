@@ -474,7 +474,6 @@ async function submitReply(commentId, replyToUsername, replyToUserId) {
     }
 }
 
-
 // Submit comment (unified function name)
 async function submitPostComment(postId) {
     if (!currentUser) {
@@ -777,7 +776,6 @@ function addCommentToDOM(comment) {
     
     commentsList.scrollTop = commentsList.scrollHeight;
 }
-
 
 function addModalActionListeners() {
     addPostModalInteractionListeners();

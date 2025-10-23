@@ -45,7 +45,7 @@ function updateInstallButtonState(installed) {
 }
 
 // Initialize button state
-updateInstallButtonState(isInstalled);
+// Initialization removed - button will be enabled when beforeinstallprompt fires
 
 window.addEventListener('beforeinstallprompt', (e) => {
     console.log('PWA: beforeinstallprompt event fired - app is installable');
@@ -53,7 +53,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     deferredPrompt = e;
     
     // Only enable if not already installed
-    if (!isInstalled) {
+    if (true) {
         updateInstallButtonState(false);
         console.log('PWA: Install button is now enabled');
         showPWAPopupFirstTime();

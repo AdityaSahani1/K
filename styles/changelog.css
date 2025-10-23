@@ -1,0 +1,349 @@
+.changelog-container {
+
+    max-width: 1000px;
+
+    margin: 100px auto 60px;
+
+    padding: 20px;
+
+}
+
+.changelog-header {
+
+    text-align: center;
+
+    margin-bottom: 60px;
+
+}
+
+.changelog-header h1 {
+
+    font-size: 3rem;
+
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+
+    -webkit-background-clip: text;
+
+    -webkit-text-fill-color: transparent;
+
+    background-clip: text;
+
+    margin-bottom: 10px;
+
+}
+
+.changelog-header .subtitle {
+
+    font-size: 1.2rem;
+
+    color: var(--text-secondary);
+
+}
+
+.changelog-timeline {
+
+    position: relative;
+
+    padding-left: 40px;
+
+}
+
+.changelog-timeline::before {
+
+    content: '';
+
+    position: absolute;
+
+    left: 15px;
+
+    top: 0;
+
+    bottom: 0;
+
+    width: 2px;
+
+    background: linear-gradient(to bottom, var(--primary-color), transparent);
+
+}
+
+.changelog-entry {
+
+    position: relative;
+
+    margin-bottom: 40px;
+
+    padding: 25px;
+
+    background: var(--card-bg);
+
+    border-radius: 12px;
+
+    box-shadow: var(--shadow);
+
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+}
+
+.changelog-entry:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+
+}
+
+.changelog-entry::before {
+
+    content: '';
+
+    position: absolute;
+
+    left: -29px;
+
+    top: 30px;
+
+    width: 12px;
+
+    height: 12px;
+
+    border-radius: 50%;
+
+    background: var(--primary-color);
+
+    border: 3px solid var(--bg-primary);
+
+}
+
+.version-badge {
+
+    display: inline-block;
+
+    padding: 6px 12px;
+
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+
+    color: white;
+
+    border-radius: 20px;
+
+    font-size: 0.9rem;
+
+    font-weight: 600;
+
+    margin-bottom: 10px;
+
+}
+
+.changelog-date {
+
+    color: var(--text-secondary);
+
+    font-size: 0.9rem;
+
+    margin-bottom: 15px;
+
+}
+
+.changelog-title {
+
+    font-size: 1.5rem;
+
+    font-weight: 600;
+
+    color: var(--text-primary);
+
+    margin-bottom: 15px;
+
+}
+
+.changelog-description {
+
+    color: var(--text-secondary);
+
+    line-height: 1.6;
+
+    margin-bottom: 20px;
+
+}
+
+.changelog-changes {
+
+    margin-top: 20px;
+
+}
+
+.changelog-changes h4 {
+
+    color: var(--text-primary);
+
+    font-size: 1rem;
+
+    margin-bottom: 10px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+}
+
+.changelog-changes ul {
+
+    list-style: none;
+
+    padding: 0;
+
+}
+
+.changelog-changes li {
+
+    padding: 8px 0;
+
+    padding-left: 25px;
+
+    position: relative;
+
+    color: var(--text-secondary);
+
+}
+
+.changelog-changes li::before {
+
+    content: '\f058';
+
+    font-family: 'Font Awesome 6 Free';
+
+    font-weight: 900;
+
+    position: absolute;
+
+    left: 0;
+
+    color: var(--primary-color);
+
+}
+
+.change-type {
+
+    display: inline-block;
+
+    padding: 3px 8px;
+
+    border-radius: 4px;
+
+    font-size: 0.75rem;
+
+    font-weight: 600;
+
+    margin-right: 8px;
+
+}
+
+.change-type.feature {
+
+    background: rgba(52, 152, 219, 0.1);
+
+    color: #3498db;
+
+}
+
+.change-type.fix {
+
+    background: rgba(46, 204, 113, 0.1);
+
+    color: #2ecc71;
+
+}
+
+.change-type.improvement {
+
+    background: rgba(155, 89, 182, 0.1);
+
+    color: #9b59b6;
+
+}
+
+.change-type.breaking {
+
+    background: rgba(231, 76, 60, 0.1);
+
+    color: #e74c3c;
+
+}
+
+.loading-state,
+
+.error-state,
+
+.empty-state {
+
+    text-align: center;
+
+    padding: 60px 20px;
+
+    color: var(--text-secondary);
+
+}
+
+.loading-state i,
+
+.error-state i,
+
+.empty-state i {
+
+    font-size: 3rem;
+
+    margin-bottom: 20px;
+
+    color: var(--primary-color);
+
+}
+
+.error-state i {
+
+    color: #e74c3c;
+
+}
+
+@media (max-width: 768px) {
+
+    .changelog-container {
+
+        margin-top: 80px;
+
+        padding: 15px;
+
+    }
+
+    .changelog-header h1 {
+
+        font-size: 2rem;
+
+    }
+
+    .changelog-header .subtitle {
+
+        font-size: 1rem;
+
+    }
+
+    .changelog-timeline {
+
+        padding-left: 30px;
+
+    }
+
+    .changelog-entry {
+
+        padding: 20px;
+
+    }
+
+    .changelog-title {
+
+        font-size: 1.2rem;
+
+    }
+
+}
