@@ -1,4 +1,4 @@
-const CACHE_NAME = 'snapsera-v3';
+const CACHE_NAME = 'snapsera-v4';
 const urlsToCache = [
   '/',
   '/index.php',
@@ -38,13 +38,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  const url = new URL(event.request.url);
+  
+  // Never cache API requests, user data, or dynamic content
+  const skipCache = url.pathname.startsWith('/api/') || 
+                    url.pathname.includes('profile') ||
+                    url.pathname.includes('admin') ||
+                    url.search !== '';
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        if (!response || response.status !== 200 || response.type !== 'basic') {
+        // Always return fresh network response
+        if (!response || response.status !== 200 || response.type !== 'basic' || skipCache) {
           return response;
         }
 
+        // Only cache static assets when online
         const responseToCache = response.clone();
         caches.open(CACHE_NAME)
           .then((cache) => {
@@ -54,6 +64,13 @@ self.addEventListener('fetch', (event) => {
         return response;
       })
       .catch(() => {
+        // Only use cache as fallback when offline
+        if (skipCache) {
+          return new Response('Offline - this content requires an internet connection', {
+            status: 503,
+            statusText: 'Service Unavailable'
+          });
+        }
         return caches.match(event.request)
           .then((cachedResponse) => {
             if (cachedResponse) {

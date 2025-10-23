@@ -184,11 +184,11 @@ function extractDominantColor(imageSrc, callback) {
                 const hsl = rgbToHsl(r, g, b);
                 
                 // Increase saturation for vibrancy (but cap it)
-                hsl.s = Math.min(hsl.s * 1.3, 0.65);
+                hsl.s = Math.min(hsl.s * 1.4, 0.75);
                 
-                // Ensure the tint is much lighter to avoid blending with the image
-                // Keep lightness between 80% and 92% for a pastel/tinted effect
-                hsl.l = Math.max(0.80, Math.min(0.92, hsl.l + 0.35));
+                // Make the border color more visible and vibrant
+                // Keep lightness between 60% and 72% for better visibility
+                hsl.l = Math.max(0.60, Math.min(0.72, hsl.l + 0.20));
                 
                 const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
                 const colorValue = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;

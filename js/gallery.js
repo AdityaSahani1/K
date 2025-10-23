@@ -2094,17 +2094,230 @@ function updateCategoryCounts() {
 
     
 
-    // Update counts in popup
 
-    document.getElementById('count-all').textContent = categoryCounts.all;
+    // Update counts in popup (with null checks)
 
-    document.getElementById('count-art').textContent = categoryCounts.art;
+    const countAll = document.getElementById('count-all');
 
-    document.getElementById('count-photography').textContent = categoryCounts.photography;
+    const countArt = document.getElementById('count-art');
 
-    document.getElementById('count-design').textContent = categoryCounts.design;
+    const countPhotography = document.getElementById('count-photography');
 
-    document.getElementById('count-digital').textContent = categoryCounts.digital;
+    const countDesign = document.getElementById('count-design');
+
+    const countDigital = document.getElementById('count-digital');
+
+
+
+    if (countAll) countAll.textContent = categoryCounts.all;
+
+    if (countArt) countArt.textContent = categoryCounts.art;
+
+    if (countPhotography) countPhotography.textContent = categoryCounts.photography;
+
+    if (countDesign) countDesign.textContent = categoryCounts.design;
+
+    if (countDigital) countDigital.textContent = categoryCounts.digital;
+
+}
+    // Update counts in popup (with null checks)
+
+    const countAll = document.getElementById('count-all');
+
+    const countArt = document.getElementById('count-art');
+
+    const countPhotography = document.getElementById('count-photography');
+
+    const countDesign = document.getElementById('count-design');
+
+    const countDigital = document.getElementById('count-digital');
+
+
+
+    if (countAll) countAll.textContent = categoryCounts.all;
+
+    if (countArt) countArt.textContent = categoryCounts.art;
+
+    if (countPhotography) countPhotography.textContent = categoryCounts.photography;
+
+    if (countDesign) countDesign.textContent = categoryCounts.design;
+
+    if (countDigital) countDigital.textContent = categoryCounts.digital;
+
+}
+    // Update counts in popup (with null checks)
+
+    const countAll = document.getElementById('count-all');
+
+    const countArt = document.getElementById('count-art');
+
+    const countPhotography = document.getElementById('count-photography');
+
+    const countDesign = document.getElementById('count-design');
+
+    const countDigital = document.getElementById('count-digital');
+
+
+
+    if (countAll) countAll.textContent = categoryCounts.all;
+
+    if (countArt) countArt.textContent = categoryCounts.art;
+
+    if (countPhotography) countPhotography.textContent = categoryCounts.photography;
+
+    if (countDesign) countDesign.textContent = categoryCounts.design;
+
+    if (countDigital) countDigital.textContent = categoryCounts.digital;
+
+}
+    // Update counts in popup (with null checks)
+
+    const countAll = document.getElementById('count-all');
+
+    const countArt = document.getElementById('count-art');
+
+    const countPhotography = document.getElementById('count-photography');
+
+    const countDesign = document.getElementById('count-design');
+
+    const countDigital = document.getElementById('count-digital');
+
+
+
+    if (countAll) countAll.textContent = categoryCounts.all;
+
+    if (countArt) countArt.textContent = categoryCounts.art;
+
+    if (countPhotography) countPhotography.textContent = categoryCounts.photography;
+
+    if (countDesign) countDesign.textContent = categoryCounts.design;
+
+    if (countDigital) countDigital.textContent = categoryCounts.digital;
+
+}
+    // Update counts in popup (with null checks)
+
+    const countAll = document.getElementById('count-all');
+
+    const countArt = document.getElementById('count-art');
+
+    const countPhotography = document.getElementById('count-photography');
+
+    const countDesign = document.getElementById('count-design');
+
+    const countDigital = document.getElementById('count-digital');
+
+
+
+    if (countAll) countAll.textContent = categoryCounts.all;
+
+    if (countArt) countArt.textContent = categoryCounts.art;
+
+    if (countPhotography) countPhotography.textContent = categoryCounts.photography;
+
+    if (countDesign) countDesign.textContent = categoryCounts.design;
+
+    if (countDigital) countDigital.textContent = categoryCounts.digital;
+
+}
+    // Update counts in popup (with null checks)
+
+    const countAll = document.getElementById('count-all');
+
+    const countArt = document.getElementById('count-art');
+
+    const countPhotography = document.getElementById('count-photography');
+
+    const countDesign = document.getElementById('count-design');
+
+    const countDigital = document.getElementById('count-digital');
+
+
+
+    if (countAll) countAll.textContent = categoryCounts.all;
+
+    if (countArt) countArt.textContent = categoryCounts.art;
+
+    if (countPhotography) countPhotography.textContent = categoryCounts.photography;
+
+    if (countDesign) countDesign.textContent = categoryCounts.design;
+
+    if (countDigital) countDigital.textContent = categoryCounts.digital;
+
+}
+    // Update counts in popup (with null checks)
+
+    const countAll = document.getElementById('count-all');
+
+    const countArt = document.getElementById('count-art');
+
+    const countPhotography = document.getElementById('count-photography');
+
+    const countDesign = document.getElementById('count-design');
+
+    const countDigital = document.getElementById('count-digital');
+
+
+
+    if (countAll) countAll.textContent = categoryCounts.all;
+
+    if (countArt) countArt.textContent = categoryCounts.art;
+
+    if (countPhotography) countPhotography.textContent = categoryCounts.photography;
+
+    if (countDesign) countDesign.textContent = categoryCounts.design;
+
+    if (countDigital) countDigital.textContent = categoryCounts.digital;
+
+}
+    // Update counts in popup (with null checks)
+
+    const countAll = document.getElementById('count-all');
+
+    const countArt = document.getElementById('count-art');
+
+    const countPhotography = document.getElementById('count-photography');
+
+    const countDesign = document.getElementById('count-design');
+
+    const countDigital = document.getElementById('count-digital');
+
+
+
+    if (countAll) countAll.textContent = categoryCounts.all;
+
+    if (countArt) countArt.textContent = categoryCounts.art;
+
+    if (countPhotography) countPhotography.textContent = categoryCounts.photography;
+
+    if (countDesign) countDesign.textContent = categoryCounts.design;
+
+    if (countDigital) countDigital.textContent = categoryCounts.digital;
+
+}
+    // Update counts in popup (with null checks)
+
+    const countAll = document.getElementById('count-all');
+
+    const countArt = document.getElementById('count-art');
+
+    const countPhotography = document.getElementById('count-photography');
+
+    const countDesign = document.getElementById('count-design');
+
+    const countDigital = document.getElementById('count-digital');
+
+
+
+    if (countAll) countAll.textContent = categoryCounts.all;
+
+    if (countArt) countArt.textContent = categoryCounts.art;
+
+    if (countPhotography) countPhotography.textContent = categoryCounts.photography;
+
+    if (countDesign) countDesign.textContent = categoryCounts.design;
+
+    if (countDigital) countDigital.textContent = categoryCounts.digital;
 
 }
 // Gallery search functionality (new inline search)

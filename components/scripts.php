@@ -25,8 +25,8 @@ if ('serviceWorker' in navigator) {
 let deferredPrompt;
 const pwaInstallBtn = document.getElementById('pwa-install-btn');
 
-// Check if already installed
-const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || localStorage.getItem('pwa_installed') === 'true';
+// Check if already installed (only check actual install state, not localStorage)
+const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
 function updateInstallButtonState(installed) {
     if (!pwaInstallBtn) return;
@@ -36,7 +36,6 @@ function updateInstallButtonState(installed) {
         pwaInstallBtn.disabled = true;
         pwaInstallBtn.style.opacity = '0.7';
         pwaInstallBtn.style.cursor = 'not-allowed';
-        localStorage.setItem('pwa_installed', 'true');
     } else {
         pwaInstallBtn.innerHTML = '<i class="fas fa-download"></i><div class="btn-text"><small>Install</small><strong>Progressive Web App</strong></div>';
         pwaInstallBtn.disabled = false;
@@ -74,7 +73,6 @@ if (pwaInstallBtn) {
         if (outcome === 'accepted') {
             showNotification('Thanks for installing SnapSera!', 'success');
             updateInstallButtonState(true);
-            localStorage.setItem('pwa_popup_shown', 'installed');
         }
         
         deferredPrompt = null;
@@ -84,15 +82,13 @@ if (pwaInstallBtn) {
 window.addEventListener('appinstalled', () => {
     deferredPrompt = null;
     updateInstallButtonState(true);
-    localStorage.setItem('pwa_popup_shown', 'installed');
     showNotification('SnapSera installed successfully!', 'success');
 });
 
 function showPWAPopupFirstTime() {
     const hasSeenPopup = localStorage.getItem('pwa_popup_shown');
-    const isAppInstalled = localStorage.getItem('pwa_installed') === 'true';
     
-    if (hasSeenPopup || isAppInstalled || !deferredPrompt) {
+    if (hasSeenPopup || !deferredPrompt) {
         return;
     }
     
@@ -154,7 +150,6 @@ function showPWAPopupFirstTime() {
         if (outcome === 'accepted') {
             showNotification('Thanks for installing SnapSera!', 'success');
             updateInstallButtonState(true);
-            localStorage.setItem('pwa_popup_shown', 'installed');
         }
         
         closePopup();
