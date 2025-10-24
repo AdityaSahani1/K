@@ -50,12 +50,12 @@ $showSearch = false;
                         <span class="stat-number" id="likes-count">0</span>
                     </div>
                     <div class="stat-item">
-                        <i class="fas fa-comments stat-icon"></i>
-                        <span class="stat-number" id="comments-count">0</span>
-                    </div>
-                    <div class="stat-item">
                         <i class="fas fa-bookmark stat-icon"></i>
                         <span class="stat-number" id="saves-count">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-comments stat-icon"></i>
+                        <span class="stat-number" id="comments-count">0</span>
                     </div>
                 </div>
             </div>
