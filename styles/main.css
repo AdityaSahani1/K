@@ -1346,3 +1346,126 @@ main {
         max-width: none;
     }
 }
+
+/* Changelog Notification Styles */
+.changelog-notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    max-width: 400px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+    z-index: 9999;
+}
+
+.changelog-notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.changelog-notification-content {
+    padding: 20px;
+}
+
+.changelog-notification-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.changelog-notification-header i.fa-rocket {
+    color: var(--accent-primary);
+    font-size: 24px;
+}
+
+.changelog-notification-header h3 {
+    flex: 1;
+    margin: 0;
+    font-size: 18px;
+    color: var(--text-primary);
+}
+
+.changelog-notification-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.2s ease;
+}
+
+.changelog-notification-close:hover {
+    color: var(--text-primary);
+}
+
+.changelog-notification-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.changelog-notification-body .version-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--accent-primary);
+    color: white;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    align-self: flex-start;
+}
+
+.changelog-notification-body p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.changelog-notification-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.changelog-notification-actions button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.changelog-notification-actions .btn-primary {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.changelog-notification-actions .btn-primary:hover {
+    background: var(--accent-primary-dark);
+}
+
+.changelog-notification-actions .btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.changelog-notification-actions .btn-secondary:hover {
+    background: var(--bg-tertiary);
+}
+
+@media (max-width: 768px) {
+    .changelog-notification {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+}

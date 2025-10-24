@@ -58,6 +58,11 @@ async function loadAllPosts() {
 
         updateCategoryCounts();
         loadGalleryPosts();
+        
+        // Update like/save button states based on user's interactions
+        if (currentUser) {
+            await updateInteractionStates();
+        }
 
         
 
@@ -969,14 +974,13 @@ function addPostInteractionListeners() {
         });
 
     });
-    // Share button listeners
+    // Share button listeners - Direct share
     document.querySelectorAll('.share-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             const postId = this.dataset.postId;
-            const menuBtn = document.querySelector(`[data-post-id="${postId}"].post-menu-btn`);
-            if (menuBtn) menuBtn.click();
+            sharePostDirect(postId);
         });
     });
 
@@ -1265,6 +1269,29 @@ function handlePostMenuAction(action, postId) {
     }
 
 }
+
+// Direct share function for gallery share button
+function sharePostDirect(postId) {
+    const url = `${window.location.origin}/gallery.php?post=${postId}`;
+    const post = allPosts.find(p => p.id === postId);
+    const title = post ? post.title : 'Check out this post';
+    
+    if (navigator.share) {
+        navigator.share({
+            title: title,
+            text: post ? post.description : '',
+            url: url
+        }).catch((error) => {
+            if (error.name !== 'AbortError') {
+                copyToClipboard(url);
+            }
+        });
+    } else {
+        copyToClipboard(url);
+        showNotification('Link copied to clipboard!', 'success');
+    }
+}
+
 
 
 
@@ -2098,4 +2125,61 @@ function initGallerySearch() {
             applyFilters();
         });
     });
+}
+
+// Update interaction states (like/save buttons) based on user data
+async function updateInteractionStates() {
+    if (!currentUser) return;
+    
+    try {
+        const response = await fetch(`/api/user-data.php?userId=${currentUser.id}&type=all`);
+        if (!response.ok) return;
+        
+        const userData = await response.json();
+        const likes = userData.likes || [];
+        const saves = userData.saves || [];
+        
+        // Update all like buttons
+        document.querySelectorAll('.like-btn').forEach(btn => {
+            const postId = btn.dataset.postId;
+            const isLiked = likes.some(like => like.postId === postId);
+            
+            if (isLiked) {
+                btn.classList.add('liked');
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-heart';
+                }
+            } else {
+                btn.classList.remove('liked');
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = 'far fa-heart';
+                }
+            }
+        });
+        
+        // Update all save buttons
+        document.querySelectorAll('.save-btn').forEach(btn => {
+            const postId = btn.dataset.postId;
+            const isSaved = saves.some(save => save.postId === postId);
+            
+            if (isSaved) {
+                btn.classList.add('saved');
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-bookmark';
+                }
+            } else {
+                btn.classList.remove('saved');
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = 'far fa-bookmark';
+                }
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error updating interaction states:', error);
+    }
 }

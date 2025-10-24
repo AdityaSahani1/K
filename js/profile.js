@@ -393,6 +393,7 @@ async function loadLikedPosts() {
         
         container.innerHTML = likedPosts.map(post => createProfilePostCard(post)).join('');
         addProfilePostListeners();
+        await syncProfileInteractionStates();
         
     } catch (error) {
         console.error('Error loading liked posts:', error);
@@ -455,6 +456,7 @@ async function loadSavedPosts() {
         
         container.innerHTML = savedPosts.map(post => createProfilePostCard(post)).join('');
         addProfilePostListeners();
+        await syncProfileInteractionStates();
         
     } catch (error) {
         console.error('Error loading saved posts:', error);
@@ -1271,6 +1273,7 @@ async function loadMyPosts() {
         
         myPostsContainer.innerHTML = myPosts.map(post => createProfilePostCard(post)).join('');
         addProfilePostListeners();
+        await syncProfileInteractionStates();
         
     } catch (error) {
         console.error('Error loading my posts:', error);
@@ -1696,3 +1699,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 100);
 });
+
+// Sync interaction button states with database for profile posts
+async function syncProfileInteractionStates() {
+    if (!currentUser) return;
+    
+    try {
+        const userData = await getUserData(currentUser.id, 'all');
+        
+        // Update like buttons
+        if (userData.likes && userData.likes.length > 0) {
+            userData.likes.forEach(like => {
+                const likeBtn = document.querySelector(`.overlay-action-btn[onclick*="toggleLike('${like.postId}')"]`);
+                if (likeBtn) {
+                    const icon = likeBtn.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                    }
+                }
+            });
+        }
+        
+        // Update save buttons
+        if (userData.saves && userData.saves.length > 0) {
+            userData.saves.forEach(save => {
+                const saveBtn = document.querySelector(`.overlay-action-btn[onclick*="toggleSave('${save.postId}')"]`);
+                if (saveBtn) {
+                    const icon = saveBtn.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error syncing profile interaction states:', error);
+    }
+}

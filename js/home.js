@@ -53,6 +53,11 @@ async function loadLatestPosts() {
         // Add event listeners for post interactions
         addPostInteractionListeners();
         
+        // Sync interaction states with database
+        if (currentUser) {
+            await syncInteractionStates();
+        }
+        
     } catch (error) {
         console.error('Error loading latest posts:', error);
         const postsGrid = document.getElementById('posts-grid');
@@ -296,3 +301,43 @@ async function loadUserInteractions() {
 setTimeout(loadUserInteractions, 500);
 
 // Post modal functions now handled by post-modal.js
+// Sync interaction button states with database
+async function syncInteractionStates() {
+    if (!currentUser) return;
+    
+    try {
+        const userData = await getUserData(currentUser.id, 'all');
+        
+        // Update like buttons
+        if (userData.likes && userData.likes.length > 0) {
+            userData.likes.forEach(like => {
+                const likeBtn = document.querySelector(`.like-btn[data-post-id="${like.postId}"]`);
+                if (likeBtn) {
+                    const icon = likeBtn.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                        likeBtn.classList.add('liked');
+                    }
+                }
+            });
+        }
+        
+        // Update save buttons
+        if (userData.saves && userData.saves.length > 0) {
+            userData.saves.forEach(save => {
+                const saveBtn = document.querySelector(`.save-btn[data-post-id="${save.postId}"]`);
+                if (saveBtn) {
+                    const icon = saveBtn.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                        saveBtn.classList.add('saved');
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error syncing interaction states:', error);
+    }
+}

@@ -143,6 +143,17 @@ CREATE TABLE IF NOT EXISTS post_downloads (
     FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE
 );
 
+-- Changelogs table
+CREATE TABLE IF NOT EXISTS changelogs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    version TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
+    description TEXT,
+    changes TEXT,
+    release_date TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_posts_author ON posts(author);
 CREATE INDEX IF NOT EXISTS idx_posts_category ON posts(category);
@@ -157,6 +168,8 @@ CREATE INDEX IF NOT EXISTS idx_notifications_isRead ON notifications(isRead);
 CREATE INDEX IF NOT EXISTS idx_notifications_created ON notifications(created DESC);
 CREATE INDEX IF NOT EXISTS idx_post_images_postId ON post_images(postId);
 CREATE INDEX IF NOT EXISTS idx_post_downloads_postId ON post_downloads(postId);
+CREATE INDEX IF NOT EXISTS idx_changelogs_version ON changelogs(version);
+CREATE INDEX IF NOT EXISTS idx_changelogs_release_date ON changelogs(release_date DESC);
 
 -- Delete all existing data
 DELETE FROM post_downloads;
@@ -193,3 +206,9 @@ INSERT INTO posts (id, title, description, imageUrl, category, tags, author, cre
 ('post_fresh_013', 'Texture Collection', 'Seamless patterns and textures for design', 'https://picsum.photos/800/600?random=113', 'art', '["textures","patterns","seamless"]', 'user_admin2025', '2025-10-08 10:00:00', 0, 0, 0, 0, 'https://picsum.photos/1920/1080?random=113'),
 ('post_fresh_014', 'Digital Wallpaper Set', 'Beautiful desktop and mobile wallpapers', 'https://picsum.photos/800/600?random=114', 'digital', '["wallpaper","desktop","mobile"]', 'user_admin2025', '2025-10-07 10:00:00', 0, 0, 0, 0, 'https://picsum.photos/1920/1080?random=114'),
 ('post_fresh_015', 'Nature Photo Pack', 'Stunning nature photography in 4K', 'https://picsum.photos/800/600?random=115', 'nature', '["nature","4k","photo-pack"]', 'user_admin2025', '2025-10-06 10:00:00', 0, 0, 0, 0, 'https://picsum.photos/1920/1080?random=115');
+
+-- Sample changelog entries
+INSERT INTO changelogs (version, title, description, changes, release_date) VALUES
+('1.2.0', 'Enhanced User Experience', 'Major UI improvements and new features', '{"features":["Changelog auto-detection with notifications","PWA installation detection and handling","Enhanced gallery interactions"],"improvements":["Improved database schema with all required tables","Better error handling across the application"],"fixes":["Fixed share button functionality","Fixed like/save state synchronization","Fixed edit post without re-uploading image"]}', '2025-10-24'),
+('1.1.0', 'Performance & Stability', 'Backend optimizations and bug fixes', '{"improvements":["Optimized database queries","Improved API response times"],"fixes":["Fixed comment deletion","Fixed profile update issues"]}', '2025-10-15'),
+('1.0.0', 'Initial Release', 'First stable release of SnapSera', '{"features":["User authentication and profiles","Photo gallery with categories","Social interactions (likes, comments, saves)","Admin panel","Progressive Web App support"]}', '2025-10-01');

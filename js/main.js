@@ -1535,3 +1535,253 @@ async function markAllNotificationsRead() {
     }
 
 }
+// Utility function to convert file to base64
+async function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const base64 = reader.result.split(',')[1];
+            resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// Upload image to ImgBB
+async function uploadToImgBB(base64Image) {
+    try {
+        const response = await fetch('/api/upload-image.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                image: base64Image
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Upload failed');
+        }
+        
+        return {
+            displayUrl: data.data.display_url,
+            imageUrl: data.data.url,
+            deleteUrl: data.data.delete_url
+        };
+    } catch (error) {
+        console.error('ImgBB upload error:', error);
+        throw error;
+    }
+}
+
+// Changelog auto-detection
+async function checkForUpdates() {
+    try {
+        const response = await fetch('/api/changelog.php');
+        if (!response.ok) return;
+        
+        const changelog = await response.json();
+        if (changelog.length === 0) return;
+        
+        const latestEntry = changelog[0];
+        const lastSeenVersion = localStorage.getItem('lastSeenChangelogVersion');
+        
+        // If this is a new version, show notification
+        if (!lastSeenVersion || lastSeenVersion !== latestEntry.version) {
+            showChangelogNotification(latestEntry);
+        }
+    } catch (error) {
+        console.error('Error checking for updates:', error);
+    }
+}
+
+function showChangelogNotification(entry) {
+    const notification = document.createElement('div');
+    notification.className = 'changelog-notification';
+    notification.innerHTML = `
+        <div class="changelog-notification-content">
+            <div class="changelog-notification-header">
+                <i class="fas fa-rocket"></i>
+                <h3>New Update Available!</h3>
+                <button class="changelog-notification-close" onclick="this.closest('.changelog-notification').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="changelog-notification-body">
+                <span class="version-badge">v${entry.version}</span>
+                <p>${entry.title}</p>
+                <div class="changelog-notification-actions">
+                    <button class="btn-primary" onclick="viewChangelog('${entry.version}')">
+                        View Changelog
+                    </button>
+                    <button class="btn-secondary" onclick="dismissChangelog('${entry.version}')">
+                        Dismiss
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    setTimeout(() => notification.classList.add('show'), 100);
+}
+
+function viewChangelog(version) {
+    localStorage.setItem('lastSeenChangelogVersion', version);
+    document.querySelector('.changelog-notification')?.remove();
+    window.location.href = 'changelog.php';
+}
+
+function dismissChangelog(version) {
+    localStorage.setItem('lastSeenChangelogVersion', version);
+    document.querySelector('.changelog-notification')?.remove();
+}
+
+// Add changelog button to navbar
+function addChangelogButton() {
+    const navMenu = document.querySelector('.nav-list') || document.querySelector('.nav-menu');
+    if (navMenu && !document.querySelector('.nav-link[href="changelog.php"]')) {
+        const changelogItem = document.createElement('li');
+        changelogItem.className = 'nav-item';
+        changelogItem.innerHTML = `
+            <a href="changelog.php" class="nav-link">
+                <i class="fas fa-history"></i> Changelog
+            </a>
+        `;
+        navMenu.appendChild(changelogItem);
+    }
+}
+
+// Initialize changelog features
+document.addEventListener('DOMContentLoaded', function() {
+    checkForUpdates();
+    addChangelogButton();
+});
+
+// PWA Installation Handling
+let deferredPrompt = null;
+let isPWAInstalled = false;
+
+// Check if PWA is already installed
+async function checkPWAInstalled() {
+    // Check if running in standalone mode (actually installed and launched as app)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                        window.navigator.standalone === true;
+    
+    if (isStandalone) {
+        isPWAInstalled = true;
+        return true;
+    }
+    
+    // Check using getInstalledRelatedApps if available
+    if ('getInstalledRelatedApps' in navigator) {
+        try {
+            const relatedApps = await navigator.getInstalledRelatedApps();
+            if (relatedApps && relatedApps.length > 0) {
+                isPWAInstalled = true;
+                return true;
+            }
+        } catch (error) {
+            console.log('Error checking installed apps:', error);
+        }
+    }
+    
+    // Not installed - app is running in browser
+    isPWAInstalled = false;
+    return false;
+}
+
+// Listen for beforeinstallprompt event - this means the app is installable
+window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('beforeinstallprompt event fired - app is installable');
+    e.preventDefault();
+    deferredPrompt = e;
+    isPWAInstalled = false;
+    showInstallButton();
+});
+
+// Listen for appinstalled event - this means the user just installed the app
+window.addEventListener('appinstalled', () => {
+    console.log('appinstalled event fired - app was just installed');
+    isPWAInstalled = true;
+    deferredPrompt = null;
+    hideInstallButton();
+    showNotification('App installed successfully!', 'success');
+});
+
+function showInstallButton() {
+    let installBtn = document.getElementById('pwa-install-btn');
+    if (!installBtn) {
+        const navIcons = document.querySelector('.nav-icons') || document.querySelector('.nav-actions');
+        if (navIcons) {
+            installBtn = document.createElement('button');
+            installBtn.id = 'pwa-install-btn';
+            installBtn.className = 'icon-btn';
+            installBtn.title = 'Install App';
+            installBtn.innerHTML = '<i class="fas fa-download"></i>';
+            installBtn.onclick = installPWA;
+            navIcons.insertBefore(installBtn, navIcons.firstChild);
+        }
+    }
+}
+
+function hideInstallButton() {
+    const installBtn = document.getElementById('pwa-install-btn');
+    if (installBtn) {
+        installBtn.remove();
+    }
+}
+
+async function installPWA() {
+    if (!deferredPrompt) {
+        console.log('Install button clicked but no deferred prompt available');
+        if (isPWAInstalled) {
+            showNotification('App is already installed!', 'info');
+        } else {
+            showNotification('Installation prompt is not available. Try refreshing the page.', 'info');
+        }
+        return;
+    }
+    
+    try {
+        // Show the install prompt
+        await deferredPrompt.prompt();
+        
+        // Wait for the user to respond to the prompt
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+            hideInstallButton();
+        } else {
+            console.log('User dismissed the install prompt');
+        }
+        
+        // Clear the deferredPrompt since it can only be used once
+        deferredPrompt = null;
+    } catch (error) {
+        console.error('Error during PWA installation:', error);
+        showNotification('Failed to install app. Please try again.', 'error');
+    }
+}
+
+// Initialize PWA check on page load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializePWACheck);
+} else {
+    initializePWACheck();
+}
+
+async function initializePWACheck() {
+    const isInstalled = await checkPWAInstalled();
+    console.log('PWA installation check:', isInstalled ? 'installed' : 'not installed');
+    
+    if (isInstalled) {
+        hideInstallButton();
+    }
+    // If not installed, we wait for the beforeinstallprompt event to show the button
+}
