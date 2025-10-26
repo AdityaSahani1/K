@@ -16,7 +16,7 @@ function initAuthModal() {
     const registerForm = document.getElementById('register-form');
     const loginFormElement = document.getElementById('login-form-element');
     const registerFormElement = document.getElementById('register-form-element');
-    
+
     // New form elements
     const forgotPasswordLink = document.getElementById('forgot-password');
     const forgotPasswordForm = document.getElementById('forgot-password-form');
@@ -149,10 +149,10 @@ function hideAllAuthForms() {
 
 async function handleLogin(e) {
     e.preventDefault();
-    
+
     const username = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
-    
+
     if (!username || !password) {
         showNotification('Please fill in all fields', 'error');
         return;
@@ -170,9 +170,9 @@ async function handleLogin(e) {
                 password: password
             })
         });
-        
+
         const result = await response.json();
-        
+
         if (response.ok && result.status === 'success') {
             // Login successful - store session token and user info
             currentUser = {
@@ -184,13 +184,13 @@ async function handleLogin(e) {
                 bio: result.user.bio || '',
                 profilePicture: result.user.profilePicture || ''
             };
-            
+
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             localStorage.setItem('sessionToken', result.sessionToken);
             updateAuthUI();
             hideModal('auth-modal');
             showNotification(`Welcome back, ${result.user.username}!`, 'success');
-            
+
             // Clear form
             document.getElementById('login-form-element').reset();
         } else if (result.needsVerification) {
@@ -211,13 +211,13 @@ async function handleLogin(e) {
 
 async function handleRegister(e) {
     e.preventDefault();
-    
+
     const name = document.getElementById('register-name').value;
     const username = document.getElementById('register-username').value;
     const email = document.getElementById('register-email').value;
     const password = document.getElementById('register-password').value;
     const submitBtn = document.getElementById('register-btn');
-    
+
     if (!name || !username || !email || !password) {
         showNotification('Please fill in all fields', 'error');
         return;
@@ -233,17 +233,17 @@ async function handleRegister(e) {
         showNotification('Password must be at least 8 characters long', 'error');
         return;
     }
-    
+
     if (!/[A-Z]/.test(password)) {
         showNotification('Password must contain at least one uppercase letter', 'error');
         return;
     }
-    
+
     if (!/[a-z]/.test(password)) {
         showNotification('Password must contain at least one lowercase letter', 'error');
         return;
     }
-    
+
     if (!/[0-9]/.test(password)) {
         showNotification('Password must contain at least one number', 'error');
         return;
@@ -303,7 +303,7 @@ async function handleRegister(e) {
             switchToOTPForm();
         } else {
             showNotification(otpData.error || 'Failed to send OTP. Registration cancelled.', 'error');
-            
+
             await fetch(`/api/get-users.php`, {
                 method: 'DELETE',
                 headers: {
@@ -315,7 +315,7 @@ async function handleRegister(e) {
             });
             pendingUserData = null;
         }
-        
+
     } catch (error) {
         console.error('Registration error:', error);
         showNotification('Registration failed. Please try again.', 'error');
@@ -327,10 +327,10 @@ async function handleRegister(e) {
 
 async function handleForgotPassword(e) {
     e.preventDefault();
-    
+
     const email = document.getElementById('forgot-email').value;
     const submitBtn = e.target.querySelector('button[type="submit"]');
-    
+
     if (!email) {
         showNotification('Please enter your email address', 'error');
         return;
@@ -376,10 +376,10 @@ async function handleForgotPassword(e) {
 
 async function handleOTPVerification(e) {
     e.preventDefault();
-    
+
     const otp = document.getElementById('otp-input').value;
     const submitBtn = e.target.querySelector('button[type="submit"]');
-    
+
     if (!otp || otp.length !== 6) {
         showNotification('Please enter a valid 6-digit OTP', 'error');
         return;
@@ -411,7 +411,7 @@ async function handleOTPVerification(e) {
 
         if (response.ok && data.verified) {
             showNotification('Registration successful! You can now login.', 'success');
-            
+
             // Clear form data
             pendingUserData = null;
             document.getElementById('otp-form-element').reset();

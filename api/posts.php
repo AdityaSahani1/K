@@ -15,7 +15,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 try {
     $db = Database::getInstance();
-    
+
     switch ($method) {
         case 'GET':
             if (isset($_GET['id'])) {
@@ -24,11 +24,11 @@ try {
                 getAllPosts($db);
             }
             break;
-            
+
         case 'POST':
             $input = json_decode(file_get_contents('php://input'), true);
             $action = $input['action'] ?? 'create';
-            
+
             switch ($action) {
                 case 'create':
                     createPost($db);
@@ -45,7 +45,7 @@ try {
                     break;
             }
             break;
-            
+
         default:
             http_response_code(405);
             echo json_encode(['error' => 'Method not allowed']);
@@ -81,7 +81,7 @@ function getPost($id, $db) {
     ");
     $stmt->execute([$id]);
     $post = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
     if ($post) {
         echo json_encode(formatPost($post));
     } else {
@@ -92,7 +92,7 @@ function getPost($id, $db) {
 
 function createPost($db) {
     $input = json_decode(file_get_contents('php://input'), true);
-    
+
     $id = $input['id'] ?? uniqid('post_');
     $title = $input['title'] ?? '';
     $description = $input['description'] ?? '';
@@ -103,12 +103,12 @@ function createPost($db) {
     $created = date('Y-m-d H:i:s');
     $featured = $input['featured'] ?? 0;
     $downloadUrl = $input['downloadUrl'] ?? null;
-    
+
     $db->execute(
         "INSERT INTO posts (id, title, description, imageUrl, category, tags, author, created, featured, downloadUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [$id, $title, $description, $imageUrl, $category, $tags, $author, $created, $featured, $downloadUrl]
     );
-    
+
     echo json_encode([
         'status' => 'success',
         'message' => 'Post created successfully',
@@ -118,7 +118,7 @@ function createPost($db) {
 
 function updatePost($db) {
     $input = json_decode(file_get_contents('php://input'), true);
-    
+
     $id = $input['id'] ?? '';
     $title = $input['title'] ?? '';
     $description = $input['description'] ?? '';
@@ -127,7 +127,7 @@ function updatePost($db) {
     $tags = json_encode($input['tags'] ?? []);
     $featured = $input['featured'] ?? 0;
     $downloadUrl = $input['downloadUrl'] ?? null;
-    
+
     if (empty($imageUrl)) {
         $stmt = $db->getConnection()->prepare("SELECT imageUrl FROM posts WHERE id = ?");
         $stmt->execute([$id]);
@@ -136,12 +136,12 @@ function updatePost($db) {
             $imageUrl = $existingPost['imageUrl'];
         }
     }
-    
+
     $db->execute(
         "UPDATE posts SET title = ?, description = ?, imageUrl = ?, category = ?, tags = ?, featured = ?, downloadUrl = ? WHERE id = ?",
         [$title, $description, $imageUrl, $category, $tags, $featured, $downloadUrl, $id]
     );
-    
+
     echo json_encode([
         'status' => 'success',
         'message' => 'Post updated successfully'
@@ -151,15 +151,15 @@ function updatePost($db) {
 function deletePost($db) {
     $input = json_decode(file_get_contents('php://input'), true);
     $id = $input['id'] ?? $_GET['id'] ?? '';
-    
+
     if (empty($id)) {
         http_response_code(400);
         echo json_encode(['error' => 'Post ID is required']);
         return;
     }
-    
+
     $db->execute("DELETE FROM posts WHERE id = ?", [$id]);
-    
+
     echo json_encode([
         'status' => 'success',
         'message' => 'Post deleted successfully'

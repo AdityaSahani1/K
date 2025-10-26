@@ -104,7 +104,7 @@
         max-width: none;
         transform: translateY(-150%);
     }
-    
+
     .changelog-notification.show {
         transform: translateY(0);
     }

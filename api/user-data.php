@@ -29,7 +29,7 @@ if (empty($userId)) {
 try {
     $db = Database::getInstance();
     $conn = $db->getConnection();
-    
+
     switch ($type) {
         case 'likes':
             getUserLikes($conn, $userId);
@@ -58,7 +58,7 @@ function getUserLikes($conn, $userId) {
     $stmt = $conn->prepare("SELECT postId, created FROM likes WHERE userId = ? ORDER BY created DESC");
     $stmt->execute([$userId]);
     $likes = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     echo json_encode($likes);
 }
 
@@ -66,7 +66,7 @@ function getUserSaves($conn, $userId) {
     $stmt = $conn->prepare("SELECT postId, created FROM saves WHERE userId = ? ORDER BY created DESC");
     $stmt->execute([$userId]);
     $saves = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     echo json_encode($saves);
 }
 
@@ -74,7 +74,7 @@ function getUserComments($conn, $userId) {
     $stmt = $conn->prepare("SELECT id, postId, text, created, likes, replyTo, replyToUsername FROM comments WHERE userId = ? ORDER BY created DESC");
     $stmt->execute([$userId]);
     $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     echo json_encode($comments);
 }
 
@@ -82,15 +82,15 @@ function getUserAllData($conn, $userId) {
     $stmt = $conn->prepare("SELECT postId FROM likes WHERE userId = ? ORDER BY created DESC");
     $stmt->execute([$userId]);
     $likes = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     $stmt = $conn->prepare("SELECT postId FROM saves WHERE userId = ? ORDER BY created DESC");
     $stmt->execute([$userId]);
     $saves = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     $stmt = $conn->prepare("SELECT id, postId, text, created, likes, replyTo, replyToUsername FROM comments WHERE userId = ? ORDER BY created DESC");
     $stmt->execute([$userId]);
     $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     echo json_encode([
         'likes' => $likes,
         'saves' => $saves,

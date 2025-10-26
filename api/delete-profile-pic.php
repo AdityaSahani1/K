@@ -13,11 +13,11 @@ if (!isset($_SESSION['user_id'])) {
 try {
     $userId = $_SESSION['user_id'];
     $uploadDir = '../uploads/profiles/';
-    
+
     // Delete all profile pictures for this user
     $oldFiles = glob($uploadDir . 'profile_' . $userId . '_*.*');
     $deletedCount = 0;
-    
+
     foreach ($oldFiles as $oldFile) {
         if (file_exists($oldFile) && is_file($oldFile)) {
             if (unlink($oldFile)) {
@@ -25,13 +25,13 @@ try {
             }
         }
     }
-    
+
     echo json_encode([
         'success' => true,
         'message' => 'Profile pictures deleted',
         'deletedCount' => $deletedCount
     ]);
-    
+
 } catch (Exception $e) {
     http_response_code(400);
     echo json_encode([

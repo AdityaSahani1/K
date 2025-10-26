@@ -47,13 +47,13 @@ async function checkForNewChangelog() {
     try {
         const versionResponse = await fetch('/api/version.php');
         if (!versionResponse.ok) return;
-        
+
         const versionData = await versionResponse.json();
         if (!versionData || !versionData.version) return;
-        
+
         const currentVersion = versionData.version;
         const lastSeenVersion = localStorage.getItem('last_seen_changelog_version');
-        
+
         if (!lastSeenVersion || currentVersion !== lastSeenVersion) {
             showChangelogNotification(currentVersion);
             localStorage.setItem('last_seen_changelog_version', currentVersion);
@@ -66,7 +66,7 @@ async function checkForNewChangelog() {
 function showChangelogNotification(version) {
     const hasSeenNotification = sessionStorage.getItem(`changelog_notif_${version}`);
     if (hasSeenNotification) return;
-    
+
     const notification = document.createElement('div');
     notification.className = 'changelog-notification';
     notification.innerHTML = `
@@ -86,11 +86,11 @@ function showChangelogNotification(version) {
             </button>
         </div>
     `;
-    
+
     document.body.appendChild(notification);
     setTimeout(() => notification.classList.add('show'), 100);
     sessionStorage.setItem(`changelog_notif_${version}`, 'seen');
-    
+
     setTimeout(() => {
         if (notification.parentElement) {
             notification.classList.remove('show');

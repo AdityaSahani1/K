@@ -32,8 +32,6 @@ function initTheme() {
 
     updateThemeIcon();
 
-    
-
     const themeToggle = document.getElementById('theme-toggle');
 
     if (themeToggle) {
@@ -80,8 +78,6 @@ function initNavigation() {
 
     const userDropdown = document.getElementById('user-dropdown');
 
-    
-
     // Mobile menu toggle
 
     if (navToggle && navMenu) {
@@ -96,8 +92,6 @@ function initNavigation() {
 
     }
 
-    
-
     // User dropdown toggle
 
     if (userBtn && userDropdown) {
@@ -110,8 +104,6 @@ function initNavigation() {
 
         });
 
-        
-
         // Close dropdown when clicking outside
 
         document.addEventListener('click', function() {
@@ -121,8 +113,6 @@ function initNavigation() {
         });
 
     }
-
-    
 
     // Search button functionality
 
@@ -155,8 +145,6 @@ function initNavigation() {
         });
 
     }
-
-    
 
     // Logout functionality
 
@@ -198,8 +186,6 @@ function updateAuthUI() {
 
     const userDropdown = document.getElementById('user-dropdown');
 
-    
-
     if (typeof updateJoinCommunityButton === 'function') {
         updateJoinCommunityButton();
     }
@@ -216,13 +202,9 @@ function updateAuthUI() {
 
             userBtn.parentNode.replaceChild(newUserBtn, userBtn);
 
-            
-
             newUserBtn.innerHTML = `<i class="fas fa-user"></i>`;
 
             newUserBtn.title = currentUser.username;
-
-            
 
             // Add the dropdown toggle functionality
 
@@ -242,8 +224,6 @@ function updateAuthUI() {
 
         }
 
-        
-
         if (userDropdown) {
 
             userDropdown.innerHTML = `
@@ -262,8 +242,6 @@ function updateAuthUI() {
 
             `;
 
-            
-
             // Re-attach logout functionality
 
             const logoutBtn = document.getElementById('logout-btn');
@@ -276,14 +254,12 @@ function updateAuthUI() {
 
         }
 
-        
-
         // Show notification menu when logged in
         const notificationMenu = document.getElementById('notification-menu');
         if (notificationMenu) {
             notificationMenu.style.display = 'block';
         }
-        
+
         // Initialize notifications for logged in user
         initNotifications();
 
@@ -307,8 +283,6 @@ function updateAuthUI() {
 
             userBtn.parentNode.replaceChild(newUserBtn, userBtn);
 
-            
-
             newUserBtn.innerHTML = `<i class="fas fa-sign-in-alt"></i>`;
 
             newUserBtn.title = 'Login';
@@ -320,8 +294,6 @@ function updateAuthUI() {
             });
 
         }
-
-        
 
         if (userDropdown) {
 
@@ -336,7 +308,7 @@ function updateAuthUI() {
             `;
 
         }
-        
+
         // Hide notification menu when logged out
         const notificationMenu = document.getElementById('notification-menu');
         if (notificationMenu) {
@@ -378,7 +350,7 @@ function logout() {
     currentUser = null;
 
     localStorage.removeItem('currentUser');
-    
+
     // Clear notification interval and reset initialization flag
     if (notificationIntervalId) {
         clearInterval(notificationIntervalId);
@@ -388,8 +360,6 @@ function logout() {
 
     updateAuthUI();
 
-    
-
     // Redirect to home if on admin or profile page
 
     if (window.location.pathname.includes('admin.php') || window.location.pathname.includes('profile.php')) {
@@ -397,8 +367,6 @@ function logout() {
         window.location.href = 'index.php';
 
     }
-
-    
 
     showNotification('Logged out successfully', 'success');
 
@@ -462,25 +430,17 @@ function showNotification(message, type = 'info') {
 
     `;
 
-    
-
     // Add to page
 
     document.body.appendChild(notification);
-
-    
 
     // Show notification
 
     setTimeout(() => notification.classList.add('show'), 100);
 
-    
-
     // Auto hide after 5 seconds
 
     setTimeout(() => hideNotification(notification), 5000);
-
-    
 
     // Close button functionality
 
@@ -564,7 +524,7 @@ async function getPostComments(postId) {
 
     try {
 
-        const url = currentUser 
+        const url = currentUser
 
             ? `/api/post-comments.php?postId=${postId}&userId=${currentUser.id}`
 
@@ -618,8 +578,6 @@ function createImagePlaceholder(width = 300, height = 200) {
 
     const ctx = canvas.getContext('2d');
 
-    
-
     // Create gradient background
 
     const gradient = ctx.createLinearGradient(0, 0, width, height);
@@ -628,13 +586,9 @@ function createImagePlaceholder(width = 300, height = 200) {
 
     gradient.addColorStop(1, '#e2e8f0');
 
-    
-
     ctx.fillStyle = gradient;
 
     ctx.fillRect(0, 0, width, height);
-
-    
 
     // Add icon
 
@@ -645,8 +599,6 @@ function createImagePlaceholder(width = 300, height = 200) {
     ctx.textAlign = 'center';
 
     ctx.fillText('🖼️', width / 2, height / 2);
-
-    
 
     return canvas.toDataURL();
 
@@ -660,17 +612,11 @@ async function sharePost(postId, platform) {
 
     if (!post) return;
 
-    
-
     const url = `${window.location.origin}/post.html?id=${postId}`;
 
     const text = `Check out this amazing post: ${post.title}`;
 
-    
-
     let shareUrl = '';
-
-    
 
     switch (platform) {
 
@@ -729,8 +675,6 @@ async function sharePost(postId, platform) {
             return;
 
     }
-
-    
 
     if (shareUrl) {
 
@@ -794,12 +738,10 @@ async function showShareMenu(postId, button) {
     if (existingMenu) {
         existingMenu.remove();
     }
-    
+
     if (existingBackdrop) {
         existingBackdrop.remove();
     }
-
-    
 
     // Get post data for title
 
@@ -811,8 +753,6 @@ async function showShareMenu(postId, button) {
 
     const url = `${window.location.origin}/gallery.php?post=${postId}`;
 
-    
-    
     // Create backdrop
     const backdrop = document.createElement('div');
     backdrop.className = 'share-menu-backdrop';
@@ -860,11 +800,7 @@ async function showShareMenu(postId, button) {
 
     `;
 
-    
-
     document.body.appendChild(shareMenu);
-
-    
 
     // Show menu and backdrop with animation
 
@@ -872,8 +808,6 @@ async function showShareMenu(postId, button) {
         shareMenu.classList.add('show');
         backdrop.classList.add('show');
     }, 10);
-
-    
 
     // Function to close menu
     const closeMenu = () => {
@@ -884,11 +818,9 @@ async function showShareMenu(postId, button) {
             backdrop.remove();
         }, 400);
     };
-    
+
     // Add backdrop click listener
     backdrop.addEventListener('click', closeMenu);
-
-    
 
     // Add event listeners
 
@@ -900,13 +832,9 @@ async function showShareMenu(postId, button) {
 
             e.stopPropagation();
 
-            
-
             const platform = this.dataset.platform;
 
             closeMenu();
-
-            
 
             switch(platform) {
 
@@ -1102,8 +1030,6 @@ function initScrollFunctionality() {
 
         });
 
-        
-
         // Smooth scroll to top functionality
 
         scrollToTopBtn.addEventListener('click', function(e) {
@@ -1115,8 +1041,6 @@ function initScrollFunctionality() {
         });
 
     }
-
-    
 
     // Initialize smooth scrolling for anchor links
 
@@ -1148,13 +1072,9 @@ function initSmoothScrolling() {
 
             const targetId = this.getAttribute('href');
 
-            
-
             // Skip if it's just "#" or empty
 
             if (targetId === '#' || targetId === '') return;
-
-            
 
             const targetElement = document.querySelector(targetId);
 
@@ -1162,15 +1082,11 @@ function initSmoothScrolling() {
 
                 e.preventDefault();
 
-                
-
                 // Calculate offset to account for fixed navbar
 
                 const navbarHeight = document.querySelector('.navbar')?.offsetHeight || 80;
 
                 const targetPosition = targetElement.offsetTop - navbarHeight;
-
-                
 
                 window.scrollTo({
 
@@ -1198,8 +1114,6 @@ function scrollToElement(element, offset = 80) {
 
     }
 
-    
-
     if (element) {
 
         const targetPosition = element.offsetTop - offset;
@@ -1224,11 +1138,7 @@ function isElementInViewport(element) {
 
     }
 
-    
-
     if (!element) return false;
-
-    
 
     const rect = element.getBoundingClientRect();
 
@@ -1253,16 +1163,14 @@ let notificationsInitialized = false;
 function initNotifications() {
 
     if (!currentUser) return;
-    
+
     // Prevent duplicate initialization
     if (notificationsInitialized) {
         updateNotificationBadge();
         return;
     }
-    
-    notificationsInitialized = true;
 
-    
+    notificationsInitialized = true;
 
     const notificationMenu = document.getElementById('notification-menu');
 
@@ -1272,15 +1180,11 @@ function initNotifications() {
 
     const markAllReadBtn = document.getElementById('mark-all-read');
 
-    
-
     if (notificationMenu) {
 
         notificationMenu.style.display = 'block';
 
     }
-
-    
 
     if (notificationBtn && notificationDropdown) {
 
@@ -1301,8 +1205,6 @@ function initNotifications() {
 
         });
 
-        
-
         document.addEventListener('click', function() {
 
             const dropdown = document.getElementById('notification-dropdown');
@@ -1314,8 +1216,6 @@ function initNotifications() {
 
     }
 
-    
-
     if (markAllReadBtn) {
 
         const newMarkAllReadBtn = markAllReadBtn.cloneNode(true);
@@ -1324,13 +1224,9 @@ function initNotifications() {
 
     }
 
-    
-
     // Load notification count on init
 
     updateNotificationBadge();
-
-    
 
     // Clear any existing interval and start a new one
     if (notificationIntervalId) {
@@ -1344,8 +1240,6 @@ async function loadNotifications() {
 
     if (!currentUser) return;
 
-    
-
     try {
 
         const response = await fetch(`/api/notifications.php?userId=${currentUser.id}`);
@@ -1354,13 +1248,9 @@ async function loadNotifications() {
 
         const userNotifications = notifications.sort((a, b) => new Date(b.created) - new Date(a.created));
 
-        
-
         const notificationList = document.getElementById('notification-list');
 
         if (!notificationList) return;
-
-        
 
         if (userNotifications.length === 0) {
 
@@ -1369,8 +1259,6 @@ async function loadNotifications() {
             return;
 
         }
-
-        
 
         notificationList.innerHTML = userNotifications.map(notification => `
 
@@ -1394,8 +1282,6 @@ async function loadNotifications() {
 
         `).join('');
 
-        
-
     } catch (error) {
 
         console.error('Error loading notifications:', error);
@@ -1408,16 +1294,12 @@ async function updateNotificationBadge() {
 
     if (!currentUser) return;
 
-    
-
     try {
 
         const response = await fetch(`/api/notifications.php?userId=${currentUser.id}`);
         if (!response.ok) throw new Error('Failed to load notifications');
         const notifications = await response.json();
         const unreadCount = notifications.filter(n => !n.isRead).length;
-
-        
 
         const badge = document.getElementById('notification-badge');
 
@@ -1463,7 +1345,7 @@ async function handleNotificationClick(notificationId, postId, commentId) {
 
 async function markNotificationRead(event, notificationId) {
     event.stopPropagation();
-    
+
     if (!currentUser) return;
 
     try {
@@ -1495,8 +1377,6 @@ async function markNotificationRead(event, notificationId) {
 async function markAllNotificationsRead() {
 
     if (!currentUser) return;
-
-    
 
     try {
         const response = await fetch('/api/notifications.php', {
@@ -1550,13 +1430,13 @@ async function uploadToImgBB(base64Image) {
                 image: base64Image
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (!data.success) {
             throw new Error(data.error || 'Upload failed');
         }
-        
+
         return {
             displayUrl: data.data.display_url,
             imageUrl: data.data.url,
@@ -1573,13 +1453,13 @@ async function checkForUpdates() {
     try {
         const response = await fetch('/api/changelog.php');
         if (!response.ok) return;
-        
+
         const changelog = await response.json();
         if (changelog.length === 0) return;
-        
+
         const latestEntry = changelog[0];
         const lastSeenVersion = localStorage.getItem('lastSeenChangelogVersion');
-        
+
         // If this is a new version, show notification
         if (!lastSeenVersion || lastSeenVersion !== latestEntry.version) {
             showChangelogNotification(latestEntry);
@@ -1615,7 +1495,7 @@ function showChangelogNotification(entry) {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(notification);
     setTimeout(() => notification.classList.add('show'), 100);
 }

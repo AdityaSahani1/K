@@ -8,8 +8,6 @@ try {
 
     $db = Database::getInstance()->getConnection();
 
-    
-
     $stmt = $db->query("
 
         SELECT id, version, title, description, changes, release_date, created_at
@@ -20,15 +18,9 @@ try {
 
     ");
 
-    
-
     $changelog = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    
-
     echo json_encode($changelog);
-
-    
 
 } catch (PDOException $e) {
 

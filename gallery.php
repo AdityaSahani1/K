@@ -18,14 +18,14 @@ $showSearch = true;
         <div class="container">
             <h1 class="gallery-title">Creative Gallery</h1>
             <p class="gallery-subtitle">Explore our collection of stunning artwork, photography, and design</p>
-            
+
             <!-- Search and Filters -->
             <div class="gallery-search-section">
                 <div class="search-bar-wrapper">
                     <i class="fas fa-search search-icon-left"></i>
-                    <input 
-                        type="text" 
-                        id="gallery-search-input" 
+                    <input
+                        type="text"
+                        id="gallery-search-input"
                         class="gallery-search-input"
                         placeholder="Search by title, description, tags..."
                         autocomplete="off"
@@ -38,7 +38,7 @@ $showSearch = true;
                     </button>
                 </div>
             </div>
-            
+
             <!-- Filters Panel (hidden by default) -->
             <div class="filters-panel" id="filters-panel" style="display: none;">
                 <div class="filters-content">
@@ -53,7 +53,7 @@ $showSearch = true;
                             <button class="filter-chip" data-category="nature">Nature</button>
                         </div>
                     </div>
-                    
+
                     <div class="filter-section">
                         <h3 class="filter-title">Sort By</h3>
                         <div class="sort-filters">
@@ -74,7 +74,7 @@ $showSearch = true;
             <button class="search-modal-close" id="search-close">
                 <i class="fas fa-times"></i>
             </button>
-            
+
             <div class="search-modal-header">
                 <h2><i class="fas fa-search"></i> Search & Discover</h2>
                 <p>Find the perfect creative work</p>
@@ -84,9 +84,9 @@ $showSearch = true;
                 <!-- Search Input with Icon -->
                 <div class="search-input-wrapper">
                     <i class="fas fa-search search-icon"></i>
-                    <input 
-                        type="text" 
-                        id="search-input-popup" 
+                    <input
+                        type="text"
+                        id="search-input-popup"
                         class="search-input-modern"
                         placeholder="Search by title, description, tags..."
                         autocomplete="off"
@@ -204,7 +204,7 @@ $showSearch = true;
             <div class="gallery-grid" id="gallery-grid">
                 <!-- Posts will be loaded dynamically -->
             </div>
-            
+
             <div class="load-more-container">
                 <button class="load-more-btn" id="load-more-btn">Load More</button>
             </div>
@@ -220,7 +220,7 @@ $showSearch = true;
             <button class="modal-close-btn" id="auth-close">
                 <i class="fas fa-times"></i>
             </button>
-            
+
             <!-- Login Form -->
             <div class="auth-form" id="login-form">
                 <h2>Login</h2>
@@ -236,13 +236,13 @@ $showSearch = true;
                     <button type="submit" class="auth-btn">Login</button>
                 </form>
                 <p class="auth-switch">
-                    Don't have an account? 
+                    Don't have an account?
                     <a href="#" id="show-register">Sign up</a>
                     <br>
                     <a href="#" id="forgot-password" style="font-size: 0.9em; color: var(--accent-primary); margin-top: 10px; display: inline-block;">Forgot Password?</a>
                 </p>
             </div>
-            
+
             <!-- Register Form -->
             <div class="auth-form hidden" id="register-form">
                 <h2>Sign Up</h2>
@@ -266,11 +266,11 @@ $showSearch = true;
                     <button type="submit" class="auth-btn" id="register-btn">Sign Up</button>
                 </form>
                 <p class="auth-switch">
-                    Already have an account? 
+                    Already have an account?
                     <a href="#" id="show-login">Login</a>
                 </p>
             </div>
-            
+
             <!-- Forgot Password Form -->
             <div class="auth-form hidden" id="forgot-password-form">
                 <h2>Forgot Password</h2>
@@ -283,11 +283,11 @@ $showSearch = true;
                     <button type="submit" class="auth-btn">Send Reset Link</button>
                 </form>
                 <p class="auth-switch">
-                    Remember your password? 
+                    Remember your password?
                     <a href="#" id="back-to-login">Back to Login</a>
                 </p>
             </div>
-            
+
             <!-- OTP Verification Form -->
             <div class="auth-form hidden" id="otp-form">
                 <h2>Verify Email</h2>
@@ -300,7 +300,7 @@ $showSearch = true;
                     <button type="submit" class="auth-btn">Verify OTP</button>
                 </form>
                 <p class="auth-switch">
-                    Didn't receive the code? 
+                    Didn't receive the code?
                     <a href="#" id="resend-otp">Resend OTP</a>
                     <br>
                     <a href="#" id="back-to-register">Back to Registration</a>

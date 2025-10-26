@@ -536,42 +536,42 @@
         flex-direction: column;
         align-items: center;
     }
-    
+
     .section-header {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .search-bar {
         max-width: none;
     }
-    
+
     .posts-table,
     .users-table {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
-    
+
     .posts-table table,
     .users-table table {
         min-width: 600px;
     }
-    
+
     .users-table th,
     .users-table td {
         padding: var(--spacing-md);
         font-size: 0.9rem;
         white-space: nowrap;
     }
-    
+
     .form-row {
         grid-template-columns: 1fr;
     }
-    
+
     .analytics-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .users-table th:first-child,
     .users-table td:first-child {
         position: sticky;
@@ -579,7 +579,7 @@
         background-color: var(--bg-primary);
         z-index: 1;
     }
-    
+
     .users-table th:first-child {
         background-color: var(--bg-tertiary);
     }
@@ -589,59 +589,59 @@
     .admin-header {
         padding: calc(var(--spacing-xl) + 80px) 0 var(--spacing-md) 0;
     }
-    
+
     .admin-header h1 {
         font-size: 2rem;
     }
-    
+
     .users-table th,
     .users-table td {
         padding: var(--spacing-sm);
         font-size: 0.8rem;
     }
-    
+
     .analytics-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .action-btn {
         width: 100%;
         justify-content: center;
     }
-    
+
     .admin-header p {
         font-size: 1rem;
     }
-    
+
     .action-btn {
         padding: var(--spacing-md) var(--spacing-lg);
         font-size: 0.9rem;
     }
-    
+
     .posts-table th,
     .posts-table td {
         padding: var(--spacing-md);
     }
-    
+
     .post-thumbnail {
         width: 40px;
         height: 40px;
     }
-    
+
     .action-buttons {
         flex-direction: column;
         gap: var(--spacing-xs);
     }
-    
+
     .table-action-btn {
         width: 30px;
         height: 30px;
     }
-    
+
     .analytics-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .form-actions {
         flex-direction: column;
     }

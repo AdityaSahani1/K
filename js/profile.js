@@ -13,12 +13,12 @@ function initProfilePage() {
         window.location.href = 'index.php';
         return;
     }
-    
+
     // Ensure currentUser is set
     if (!currentUser) {
         currentUser = JSON.parse(userData);
     }
-    
+
     loadUserProfile();
     initProfileTabs();
     initEditProfileModal();
@@ -38,15 +38,15 @@ function initResetPasswordButton() {
 async function handleResetPasswordRequest() {
     const resetBtn = document.getElementById('reset-password-btn');
     const originalText = resetBtn.innerHTML;
-    
+
     // Show confirmation dialog
     if (!confirm('Are you sure you want to reset your password? A reset link will be sent to your email.')) {
         return;
     }
-    
+
     resetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
     resetBtn.disabled = true;
-    
+
     try {
         const response = await fetch('/api/auth-actions.php', {
             method: 'POST',
@@ -58,9 +58,9 @@ async function handleResetPasswordRequest() {
                 email: currentUser.email
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
             showNotification('Password reset link has been sent to your email!', 'success');
         } else {
@@ -80,16 +80,16 @@ async function loadUserProfile() {
         // Update profile information from current user data
         document.getElementById('profile-username').textContent = currentUser.name || currentUser.username;
         document.getElementById('profile-email').textContent = currentUser.email;
-        
+
         // Display bio
         const bioElement = document.getElementById('profile-bio');
         if (bioElement) {
             bioElement.textContent = currentUser.bio || 'No bio added yet';
         }
-        
+
         // Update profile picture
         updateProfilePicture();
-        
+
         // Load and display user statistics
         loadUserStats();
     } catch (error) {
@@ -109,12 +109,12 @@ function updateProfilePicture() {
     const profilePic = document.getElementById('profile-picture');
     const defaultAvatar = document.getElementById('default-avatar');
     const profileAvatar = document.getElementById('profile-avatar');
-    
+
     if (currentUser.profilePicture) {
         profilePic.src = currentUser.profilePicture;
         profilePic.style.display = 'block';
         defaultAvatar.style.display = 'none';
-        
+
         // Extract dominant color from image for border
         console.log('Extracting color from:', currentUser.profilePicture);
         extractDominantColor(currentUser.profilePicture, (color) => {
@@ -137,32 +137,32 @@ function updateProfilePicture() {
 function extractDominantColor(imageSrc, callback) {
     const img = new Image();
     img.crossOrigin = 'Anonymous';
-    
+
     img.onload = function() {
         try {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            
+
             // Set canvas size to a small resolution for faster processing
             canvas.width = 50;
             canvas.height = 50;
-            
+
             // Draw image scaled down
             ctx.drawImage(img, 0, 0, 50, 50);
-            
+
             // Get image data
             const imageData = ctx.getImageData(0, 0, 50, 50);
             const pixels = imageData.data;
-            
+
             // Calculate average color (excluding very dark and very light pixels)
             let r = 0, g = 0, b = 0, count = 0;
-            
+
             for (let i = 0; i < pixels.length; i += 4) {
                 const red = pixels[i];
                 const green = pixels[i + 1];
                 const blue = pixels[i + 2];
                 const alpha = pixels[i + 3];
-                
+
                 // Skip transparent or very light/dark pixels
                 if (alpha > 200) {
                     const brightness = (red + green + blue) / 3;
@@ -174,22 +174,22 @@ function extractDominantColor(imageSrc, callback) {
                     }
                 }
             }
-            
+
             if (count > 0) {
                 r = Math.floor(r / count);
                 g = Math.floor(g / count);
                 b = Math.floor(b / count);
-                
+
                 // Create a lighter tint of the dominant color for the border
                 const hsl = rgbToHsl(r, g, b);
-                
+
                 // Increase saturation for vibrancy (but cap it)
                 hsl.s = Math.min(hsl.s * 1.4, 0.75);
-                
+
                 // Make the border color more visible and vibrant
                 // Keep lightness between 60% and 72% for better visibility
                 hsl.l = Math.max(0.60, Math.min(0.72, hsl.l + 0.20));
-                
+
                 const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
                 const colorValue = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
                 console.log('Color extraction successful:', colorValue, 'from RGB:', r, g, b);
@@ -202,13 +202,13 @@ function extractDominantColor(imageSrc, callback) {
             callback('var(--accent-primary)');
         }
     };
-    
+
     img.onerror = function(e) {
         console.error('Error loading image for color extraction:', e);
         console.log('Falling back to default accent color');
         callback('var(--accent-primary)');
     };
-    
+
     img.src = imageSrc;
 }
 
@@ -265,14 +265,14 @@ async function loadUserStats() {
         const likes = userData.likes || [];
         const saves = userData.saves || [];
         const comments = userData.comments || [];
-        
+
         const response = await fetch('/api/posts.php');
         if (!response.ok) throw new Error('Failed to load posts');
         const posts = await response.json();
-        
+
         // Count user's interactions
         const userPosts = posts.filter(post => post.author === currentUser.username || post.author === currentUser.id);
-        
+
         // Update stats display
         // Hide posts count for non-admin users
         const postsStatItem = document.querySelector('.stat-item:has(#posts-count)');
@@ -281,11 +281,11 @@ async function loadUserStats() {
         } else {
             document.getElementById('posts-count').textContent = userPosts.length;
         }
-        
+
         document.getElementById('likes-count').textContent = likes.length;
         document.getElementById('comments-count').textContent = comments.length;
         document.getElementById('saves-count').textContent = saves.length;
-        
+
     } catch (error) {
         console.error('Error loading user stats:', error);
     }
@@ -295,22 +295,22 @@ function initProfileTabs() {
     const tabButtons = document.querySelectorAll('.content-tab');
     const tabPanels = document.querySelectorAll('.content-panel');
     const addPostBtn = document.getElementById('add-post-btn');
-    
+
     tabButtons.forEach(button => {
         button.addEventListener('click', function() {
             const tabName = this.dataset.tab;
-            
+
             // Remove active class from all tabs and panels
             tabButtons.forEach(btn => btn.classList.remove('active'));
             tabPanels.forEach(panel => panel.classList.remove('active'));
-            
+
             // Add active class to clicked tab and corresponding panel
             this.classList.add('active');
             const targetPanel = document.getElementById(`${tabName}-tab`);
             if (targetPanel) {
                 targetPanel.classList.add('active');
             }
-            
+
             // Show/hide Create Post button only for "myposts" tab
             if (addPostBtn) {
                 if (tabName === 'myposts') {
@@ -319,7 +319,7 @@ function initProfileTabs() {
                     addPostBtn.style.display = 'none';
                 }
             }
-            
+
             // Load content for the active tab
             loadTabContent(tabName);
         });
@@ -346,11 +346,11 @@ async function loadTabContent(tabName) {
 async function loadLikedPosts() {
     const container = document.getElementById('liked-posts');
     if (!container) return;
-    
+
     try {
         const userData = await getUserData(currentUser.id, 'all');
         const likes = userData.likes || [];
-        
+
         if (likes.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
@@ -366,15 +366,15 @@ async function loadLikedPosts() {
             `;
             return;
         }
-        
+
         const response = await fetch('/api/posts.php');
         if (!response.ok) throw new Error('Failed to load posts');
         const posts = await response.json();
-        
-        const likedPosts = posts.filter(post => 
+
+        const likedPosts = posts.filter(post =>
             likes.some(like => like.postId === post.id)
         );
-        
+
         if (likedPosts.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
@@ -390,11 +390,11 @@ async function loadLikedPosts() {
             `;
             return;
         }
-        
+
         container.innerHTML = likedPosts.map(post => createProfilePostCard(post)).join('');
         addProfilePostListeners();
         await syncProfileInteractionStates();
-        
+
     } catch (error) {
         console.error('Error loading liked posts:', error);
         container.innerHTML = `
@@ -409,11 +409,11 @@ async function loadLikedPosts() {
 async function loadSavedPosts() {
     const container = document.getElementById('saved-posts');
     if (!container) return;
-    
+
     try {
         const userData = await getUserData(currentUser.id, 'all');
         const saves = userData.saves || [];
-        
+
         if (saves.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
@@ -429,15 +429,15 @@ async function loadSavedPosts() {
             `;
             return;
         }
-        
+
         const response = await fetch('/api/posts.php');
         if (!response.ok) throw new Error('Failed to load posts');
         const posts = await response.json();
-        
-        const savedPosts = posts.filter(post => 
+
+        const savedPosts = posts.filter(post =>
             saves.some(save => save.postId === post.id)
         );
-        
+
         if (savedPosts.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
@@ -453,11 +453,11 @@ async function loadSavedPosts() {
             `;
             return;
         }
-        
+
         container.innerHTML = savedPosts.map(post => createProfilePostCard(post)).join('');
         addProfilePostListeners();
         await syncProfileInteractionStates();
-        
+
     } catch (error) {
         console.error('Error loading saved posts:', error);
         container.innerHTML = `
@@ -472,11 +472,11 @@ async function loadSavedPosts() {
 async function loadUserComments() {
     const container = document.getElementById('user-comments');
     if (!container) return;
-    
+
     try {
         const userData = await getUserData(currentUser.id, 'all');
         const comments = userData.comments || [];
-        
+
         if (comments.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
@@ -492,19 +492,19 @@ async function loadUserComments() {
             `;
             return;
         }
-        
+
         const response = await fetch('/api/posts.php');
         if (!response.ok) throw new Error('Failed to load posts');
         const posts = await response.json();
-        
+
         comments.sort((a, b) => new Date(b.created) - new Date(a.created));
-        
+
         container.innerHTML = comments.map(comment => {
             const post = posts.find(p => p.id === comment.postId);
             const postTitle = post ? post.title : 'Unknown Post';
             const isReply = comment.replyTo ? true : false;
             const replyTag = isReply ? `<span class="reply-tag"><i class="fas fa-reply"></i> Reply to @${comment.replyToUsername}</span>` : '';
-            
+
             return `
                 <div class="user-comment" data-comment-id="${comment.id}" data-post-id="${comment.postId}" onclick="navigateToComment('${comment.postId}', '${comment.id}')">
                     <div class="comment-header">
@@ -518,7 +518,7 @@ async function loadUserComments() {
                 </div>
             `;
         }).join('');
-        
+
     } catch (error) {
         console.error('Error loading user comments:', error);
         container.innerHTML = `
@@ -586,7 +586,7 @@ function addProfilePostListeners() {
 function showProfilePostMenu(event, postId) {
     event.preventDefault();
     event.stopPropagation();
-    
+
     // Remove any existing context menu and active state
     const existingMenu = document.querySelector('.profile-post-context-menu');
     if (existingMenu) {
@@ -596,13 +596,13 @@ function showProfilePostMenu(event, postId) {
     if (existingActive) {
         existingActive.classList.remove('menu-active');
     }
-    
+
     // Add menu-active class to hide hover overlay
     const postItem = event.target.closest('.profile-post-item');
     if (postItem) {
         postItem.classList.add('menu-active');
     }
-    
+
     // Create context menu
     const menu = document.createElement('div');
     menu.className = 'profile-post-context-menu';
@@ -614,15 +614,15 @@ function showProfilePostMenu(event, postId) {
             <i class="fas fa-trash"></i> Delete Post
         </button>
     `;
-    
+
     // Position the menu using fixed positioning
     const rect = event.target.closest('.profile-post-menu-btn').getBoundingClientRect();
     menu.style.position = 'fixed';
     menu.style.top = `${rect.bottom + 5}px`;
     menu.style.right = `${window.innerWidth - rect.right}px`;
-    
+
     document.body.appendChild(menu);
-    
+
     // Close menu on scroll
     const closeOnScroll = () => {
         menu.remove();
@@ -640,19 +640,19 @@ async function editUserPost(postId) {
     if (menu) menu.remove();
     const activeItem = document.querySelector('.profile-post-item.menu-active');
     if (activeItem) activeItem.classList.remove('menu-active');
-    
+
     try {
         const response = await fetch('/api/posts.php');
         if (!response.ok) throw new Error('Failed to load posts');
-        
+
         const posts = await response.json();
         const post = posts.find(p => p.id === postId);
-        
+
         if (!post) {
             showNotification('Post not found', 'error');
             return;
         }
-        
+
         // Parse tags if they're JSON strings
         let tags = post.tags;
         if (typeof tags === 'string') {
@@ -662,7 +662,7 @@ async function editUserPost(postId) {
                 tags = [];
             }
         }
-        
+
         // Populate form
         document.getElementById('user-post-form-title').textContent = 'Edit Post';
         document.getElementById('user-submit-text').textContent = 'Update Post';
@@ -672,7 +672,7 @@ async function editUserPost(postId) {
         document.getElementById('user-post-description').value = post.description || '';
         document.getElementById('user-post-tags').value = Array.isArray(tags) ? tags.join(', ') : '';
         document.getElementById('user-post-id').value = postId;
-        
+
         // Show image preview with the existing image
         const previewContainer = document.getElementById('user-images-preview');
         if (previewContainer && post.imageUrl) {
@@ -685,9 +685,9 @@ async function editUserPost(postId) {
                 </div>
             `;
         }
-        
+
         showModal('user-post-form-modal');
-        
+
     } catch (error) {
         console.error('Error loading post:', error);
         showNotification('Error loading post', 'error');
@@ -700,11 +700,11 @@ async function deleteUserPost(postId) {
     if (menu) menu.remove();
     const activeItem = document.querySelector('.profile-post-item.menu-active');
     if (activeItem) activeItem.classList.remove('menu-active');
-    
+
     if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
         return;
     }
-    
+
     try {
         const response = await fetch('/api/posts.php', {
             method: 'POST',
@@ -713,19 +713,19 @@ async function deleteUserPost(postId) {
             },
             body: JSON.stringify({ action: 'delete', id: postId })
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to delete post');
         }
-        
+
         showNotification('Post deleted successfully', 'success');
-        
+
         // Reload stats immediately to update counters
         await loadUserStats();
-        
+
         // Reload the tab content
         loadTabContent('myposts');
-        
+
     } catch (error) {
         console.error('Error deleting post:', error);
         showNotification('Error deleting post', 'error');
@@ -738,29 +738,29 @@ function initEditProfileModal() {
     const closeBtn = document.getElementById('edit-profile-close');
     const cancelBtn = document.getElementById('cancel-edit');
     const form = document.getElementById('edit-profile-form');
-    
+
     if (editBtn) {
         editBtn.addEventListener('click', function() {
             showEditProfileModal();
         });
     }
-    
+
     if (closeBtn) {
         closeBtn.addEventListener('click', function() {
             hideModal('edit-profile-modal');
         });
     }
-    
+
     if (cancelBtn) {
         cancelBtn.addEventListener('click', function() {
             hideModal('edit-profile-modal');
         });
     }
-    
+
     if (form) {
         form.addEventListener('submit', handleEditProfile);
     }
-    
+
     if (modal) {
         modal.addEventListener('click', function(e) {
             if (e.target === modal) {
@@ -768,14 +768,14 @@ function initEditProfileModal() {
             }
         });
     }
-    
+
     const uploadInput = document.getElementById('edit-profile-pic-upload');
     const avatarOptions = document.querySelectorAll('.avatar-option');
-    
+
     if (uploadInput) {
         uploadInput.addEventListener('change', handleProfilePicUpload);
     }
-    
+
     avatarOptions.forEach(option => {
         option.addEventListener('click', handleDefaultAvatarSelection);
     });
@@ -788,23 +788,23 @@ function showEditProfileModal() {
     const emailField = document.getElementById('edit-email');
     const bioField = document.getElementById('edit-bio');
     const form = document.getElementById('edit-profile-form');
-    
+
     if (nameField) nameField.value = currentUser.name || '';
     if (usernameField) usernameField.value = currentUser.username || '';
     if (emailField) emailField.value = currentUser.email || '';
     if (bioField) bioField.value = currentUser.bio || '';
-    
+
     // Clear any previous selections and uploads
     document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
     if (form) {
         form.dataset.uploadedImage = '';
         form.dataset.selectedAvatar = '';
     }
-    
+
     // Hide preview
     const preview = document.getElementById('profile-pic-preview');
     if (preview) preview.style.display = 'none';
-    
+
     // Highlight currently selected avatar if it's a default one
     if (currentUser.profilePicture && currentUser.profilePicture.includes('/assets/default-avatars/')) {
         const avatarName = currentUser.profilePicture.split('/').pop().replace('.jpg', '');
@@ -813,30 +813,30 @@ function showEditProfileModal() {
             currentAvatarOption.classList.add('selected');
         }
     }
-    
+
     showModal('edit-profile-modal');
 }
 
 async function handleDefaultAvatarSelection(e) {
     const avatarOption = e.target.closest('.avatar-option');
     if (!avatarOption) return;
-    
+
     const avatarValue = avatarOption.dataset.avatar;
     const avatarPath = '/assets/default-avatars/' + avatarValue + '.jpg';
-    
+
     // Remove previous selection
     document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
     avatarOption.classList.add('selected');
-    
+
     // Store the selected avatar for later upload on save
     const form = avatarOption.closest('form');
     form.dataset.selectedAvatar = avatarValue;
     form.dataset.uploadedImage = '';
-    
+
     // Clear file upload
     const uploadInput = document.getElementById('edit-profile-pic-upload');
     if (uploadInput) uploadInput.value = '';
-    
+
     // Hide preview
     const preview = document.getElementById('profile-pic-preview');
     if (preview) preview.style.display = 'none';
@@ -844,43 +844,43 @@ async function handleDefaultAvatarSelection(e) {
 
 async function handleEditProfile(e) {
     e.preventDefault();
-    
+
     const name = document.getElementById('edit-name').value.trim();
     const username = document.getElementById('edit-username').value.trim();
     const email = document.getElementById('edit-email').value.trim();
     const bio = document.getElementById('edit-bio').value.trim();
-    
+
     if (!name) {
         showNotification('Name is required', 'error');
         return;
     }
-    
+
     if (!username) {
         showNotification('Username is required', 'error');
         return;
     }
-    
+
     const form = e.target;
     let profilePicture = currentUser.profilePicture;
-    
+
     try {
         // Upload profile picture if there's a pending upload or selected avatar
         if (form.dataset.pendingUpload) {
             showNotification('Uploading profile picture...', 'info');
-            
+
             const uploadResponse = await fetch('/api/upload-profile-pic.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     image: form.dataset.pendingUpload,
                     userId: currentUser.id
                 })
             });
-            
+
             const uploadData = await uploadResponse.json();
-            
+
             if (uploadData.success) {
                 profilePicture = uploadData.url;
             } else {
@@ -889,20 +889,20 @@ async function handleEditProfile(e) {
             }
         } else if (form.dataset.selectedAvatar) {
             showNotification('Updating avatar...', 'info');
-            
+
             const uploadResponse = await fetch('/api/upload-profile-pic.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     image: form.dataset.selectedAvatar,
                     userId: currentUser.id
                 })
             });
-            
+
             const uploadData = await uploadResponse.json();
-            
+
             if (uploadData.success) {
                 profilePicture = uploadData.url;
             } else {
@@ -910,7 +910,7 @@ async function handleEditProfile(e) {
                 return;
             }
         }
-        
+
         // Update profile with new data
         const response = await fetch('/api/auth-actions.php', {
             method: 'POST',
@@ -927,17 +927,17 @@ async function handleEditProfile(e) {
                 bio: bio
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
             currentUser.name = name;
             currentUser.username = username;
             currentUser.profilePicture = profilePicture;
             currentUser.bio = bio;
-            
+
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            
+
             loadUserProfile();
             hideModal('edit-profile-modal');
             showNotification('Profile updated successfully!', 'success');
@@ -954,7 +954,7 @@ async function loadUserContent() {
     // Check if user has posting permission
     const isAdmin = currentUser && currentUser.role === 'admin';
     let canPost = isAdmin;
-    
+
     if (!isAdmin) {
         try {
             const response = await fetch('/api/get-users.php');
@@ -967,35 +967,35 @@ async function loadUserContent() {
             console.error('Error checking post permissions:', error);
         }
     }
-    
+
     if (canPost) {
         // Show My Posts tab and button
         const myPostsTab = document.getElementById('myposts-tab-btn');
         const addPostBtn = document.getElementById('add-post-btn');
-        
+
         if (myPostsTab) {
             myPostsTab.style.display = 'inline-flex';
             if (addPostBtn) {
                 addPostBtn.style.display = 'inline-flex';
             }
-            
+
             // Set My Posts as active by default
             document.querySelectorAll('.content-tab').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.content-panel').forEach(panel => {
                 panel.classList.remove('active');
             });
-            
+
             myPostsTab.classList.add('active');
             const myPostsPanel = document.getElementById('myposts-tab');
             if (myPostsPanel) {
                 myPostsPanel.classList.add('active');
             }
-            
+
             await loadTabContent('myposts');
             return;
         }
     }
-    
+
     // Default: Load liked posts
     await loadTabContent('liked');
 }
@@ -1006,31 +1006,31 @@ function initChangePasswordModal() {
     const closeBtn = document.getElementById('change-password-close');
     const cancelBtn = document.getElementById('cancel-password');
     const form = document.getElementById('change-password-form');
-    
+
     if (changePasswordBtn) {
         changePasswordBtn.addEventListener('click', function() {
             showModal('change-password-modal');
         });
     }
-    
+
     if (closeBtn) {
         closeBtn.addEventListener('click', function() {
             hideModal('change-password-modal');
             clearPasswordForm();
         });
     }
-    
+
     if (cancelBtn) {
         cancelBtn.addEventListener('click', function() {
             hideModal('change-password-modal');
             clearPasswordForm();
         });
     }
-    
+
     if (form) {
         form.addEventListener('submit', handleChangePassword);
     }
-    
+
     if (modal) {
         modal.addEventListener('click', function(e) {
             if (e.target === modal) {
@@ -1049,47 +1049,47 @@ function clearPasswordForm() {
 
 async function handleChangePassword(e) {
     e.preventDefault();
-    
+
     const currentPassword = document.getElementById('current-password').value.trim();
     const newPassword = document.getElementById('new-password').value.trim();
     const confirmPassword = document.getElementById('confirm-password').value.trim();
-    
+
     // Validation
     if (!currentPassword || !newPassword || !confirmPassword) {
         showNotification('Please fill in all fields', 'error');
         return;
     }
-    
+
     if (newPassword.length < 8) {
         showNotification('New password must be at least 8 characters long', 'error');
         return;
     }
-    
+
     if (!/[A-Z]/.test(newPassword)) {
         showNotification('Password must contain at least one uppercase letter', 'error');
         return;
     }
-    
+
     if (!/[a-z]/.test(newPassword)) {
         showNotification('Password must contain at least one lowercase letter', 'error');
         return;
     }
-    
+
     if (!/[0-9]/.test(newPassword)) {
         showNotification('Password must contain at least one number', 'error');
         return;
     }
-    
+
     if (newPassword !== confirmPassword) {
         showNotification('New passwords do not match', 'error');
         return;
     }
-    
+
     if (currentPassword === newPassword) {
         showNotification('New password must be different from current password', 'error');
         return;
     }
-    
+
     try {
         // Verify current password and change to new one via API
         const response = await fetch('/api/auth-actions.php', {
@@ -1104,9 +1104,9 @@ async function handleChangePassword(e) {
                 newPassword: newPassword
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
             showNotification('Password changed successfully!', 'success');
             clearPasswordForm();
@@ -1114,7 +1114,7 @@ async function handleChangePassword(e) {
         } else {
             showNotification(data.error || 'Failed to change password', 'error');
         }
-        
+
     } catch (error) {
         console.error('Error changing password:', error);
         showNotification('Error changing password', 'error');
@@ -1139,7 +1139,7 @@ async function initPostPermissions() {
     const myPostsTab = document.getElementById('myposts-tab-btn');
     const myPostsPane = document.getElementById('myposts-tab');
     const addPostBtn = document.getElementById('add-post-btn');
-    
+
     // Admin always has posting permission
     if (isAdmin) {
         if (myPostsTab) {
@@ -1156,18 +1156,18 @@ async function initPostPermissions() {
             if (response.ok) {
                 const users = await response.json();
                 const userData = users.find(u => u.id === currentUser.id);
-                
+
                 if (userData && userData.canPost) {
                     // User can post - show My Posts tab button
                     if (myPostsTab) {
                         myPostsTab.style.display = 'inline-block';
                     }
-                    
+
                     // Hide request button
                     if (requestBtn) {
                         requestBtn.style.display = 'none';
                     }
-                    
+
                     // Load user's posts
                     loadMyPosts();
                 } else {
@@ -1182,16 +1182,16 @@ async function initPostPermissions() {
             console.error('Error checking post permissions:', error);
         }
     }
-    
+
     // Initialize post form modal
     if (addPostBtn) {
         addPostBtn.addEventListener('click', () => showAddPostModal());
     }
-    
+
     const postFormClose = document.getElementById('user-post-form-close');
     const cancelUserPost = document.getElementById('cancel-user-post');
     const userPostForm = document.getElementById('user-post-form');
-    
+
     if (postFormClose) {
         postFormClose.addEventListener('click', () => hideModal('user-post-form-modal'));
     }
@@ -1206,10 +1206,10 @@ async function initPostPermissions() {
 async function handleRequestPostPermission() {
     const btn = document.getElementById('request-post-btn');
     const originalText = btn.innerHTML;
-    
+
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
     btn.disabled = true;
-    
+
     try {
         const response = await fetch('/api/auth-actions.php', {
             method: 'POST',
@@ -1223,9 +1223,9 @@ async function handleRequestPostPermission() {
                 userEmail: currentUser.email
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
             showNotification('Request sent to admin successfully!', 'success');
         } else {
@@ -1243,21 +1243,20 @@ async function handleRequestPostPermission() {
 async function loadMyPosts() {
     const myPostsContainer = document.getElementById('my-posts');
     if (!myPostsContainer) return;
-    
+
     try {
         const response = await fetch('/api/posts.php');
         if (!response.ok) throw new Error('Failed to load posts');
-        
+
         const posts = await response.json();
-        
+
         // Filter to show ONLY this user's posts (by user ID or username)
-        const myPosts = posts.filter(post => 
-            post.author === currentUser.id || 
+        const myPosts = posts.filter(post =>
+            post.author === currentUser.id ||
             post.author === currentUser.username ||
             post.authorId === currentUser.id
         );
-        
-        
+
         if (myPosts.length === 0) {
             myPostsContainer.innerHTML = `
                 <div class="empty-state">
@@ -1270,11 +1269,11 @@ async function loadMyPosts() {
             `;
             return;
         }
-        
+
         myPostsContainer.innerHTML = myPosts.map(post => createProfilePostCard(post)).join('');
         addProfilePostListeners();
         await syncProfileInteractionStates();
-        
+
     } catch (error) {
         console.error('Error loading my posts:', error);
         myPostsContainer.innerHTML = `
@@ -1290,21 +1289,21 @@ function showAddPostModal() {
     const form = document.getElementById('user-post-form');
     const uploadInput = document.getElementById('user-post-image-upload');
     const imagesPreview = document.getElementById('user-images-preview');
-    
+
     document.getElementById('user-post-form-title').textContent = 'Create New Post';
     form.reset();
     document.getElementById('user-post-id').value = '';
     document.getElementById('user-post-image').value = '';
-    
+
     if (imagesPreview) {
         imagesPreview.innerHTML = '';
     }
-    
+
     // Clear the upload requirement
     if (uploadInput) {
         uploadInput.removeAttribute('required');
     }
-    
+
     showModal('user-post-form-modal');
 }
 
@@ -1312,21 +1311,21 @@ async function editMyPost(postId) {
     try {
         const response = await fetch('/api/posts.php');
         if (!response.ok) throw new Error('Failed to load post');
-        
+
         const posts = await response.json();
         const post = posts.find(p => p.id === postId);
-        
+
         if (!post) {
             showNotification('Post not found', 'error');
             return;
         }
-        
+
         // Check if user owns this post
         if (post.author !== currentUser.username && post.author !== currentUser.id) {
             showNotification('You can only edit your own posts', 'error');
             return;
         }
-        
+
         // Parse tags
         let tags = [];
         if (typeof post.tags === 'string') {
@@ -1338,7 +1337,7 @@ async function editMyPost(postId) {
         } else if (Array.isArray(post.tags)) {
             tags = post.tags;
         }
-        
+
         // Populate form
         document.getElementById('user-post-form-title').textContent = 'Edit Post';
         document.getElementById('user-post-title').value = post.title || '';
@@ -1348,21 +1347,21 @@ async function editMyPost(postId) {
         document.getElementById('user-post-tags').value = tags.join(', ');
         document.getElementById('user-post-download-url').value = post.downloadUrl || '';
         document.getElementById('user-post-id').value = postId; // Store post ID for edit
-        
+
         // Clear the upload input (user can choose to upload a new image or keep existing)
         const uploadInput = document.getElementById('user-post-image-upload');
         if (uploadInput) {
             uploadInput.value = '';
             uploadInput.removeAttribute('required'); // Make image optional when editing
         }
-        
+
         // Update label to show optional for editing
         const optionalLabel = document.getElementById('image-upload-optional');
         if (optionalLabel) {
             optionalLabel.textContent = '(Optional when editing)';
             optionalLabel.style.color = 'var(--text-muted)';
         }
-        
+
         // Show current image preview
         const previewContainer = document.getElementById('user-image-upload-preview');
         const previewImg = document.getElementById('user-preview-img');
@@ -1370,9 +1369,9 @@ async function editMyPost(postId) {
             previewImg.src = post.imageUrl;
             previewContainer.style.display = 'block';
         }
-        
+
         showModal('user-post-form-modal');
-        
+
     } catch (error) {
         console.error('Error loading post for editing:', error);
         showNotification('Error loading post', 'error');
@@ -1381,18 +1380,18 @@ async function editMyPost(postId) {
 
 async function handleUserPostForm(e) {
     e.preventDefault();
-    
+
     const form = e.target;
     const postId = document.getElementById('user-post-id').value;
     const isEdit = !!postId;
-    
+
     const title = document.getElementById('user-post-title').value.trim();
     const category = document.getElementById('user-post-category').value;
     let imageUrl = document.getElementById('user-post-image').value.trim();
     const description = document.getElementById('user-post-description').value.trim();
     const tagsInput = document.getElementById('user-post-tags').value.trim();
     const downloadUrl = document.getElementById('user-post-download-url').value.trim();
-    
+
     // Check if we need to upload an image
     const userPostUpload = document.getElementById('user-post-image-upload');
     if (userPostUpload && userPostUpload.files && userPostUpload.files[0]) {
@@ -1402,7 +1401,7 @@ async function handleUserPostForm(e) {
             const base64 = await fileToBase64(file);
             const uploadData = await uploadToImgBB(base64);
             imageUrl = uploadData.displayUrl;
-            
+
             // Auto-populate download URL if not set
             if (!downloadUrl && uploadData.imageUrl) {
                 document.getElementById('user-post-download-url').value = uploadData.imageUrl;
@@ -1413,7 +1412,7 @@ async function handleUserPostForm(e) {
             return;
         }
     }
-    
+
     // Validate image: required for new posts, optional for edits
     if (!imageUrl) {
         if (isEdit) {
@@ -1423,10 +1422,10 @@ async function handleUserPostForm(e) {
         }
         return;
     }
-    
+
     // Parse tags
     const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
-    
+
     const postData = {
         title,
         category,
@@ -1437,11 +1436,11 @@ async function handleUserPostForm(e) {
         author: currentUser.username,
         featured: 0
     };
-    
+
     if (isEdit) {
         postData.id = postId;
     }
-    
+
     try {
         const method = isEdit ? 'PUT' : 'POST';
         const response = await fetch('/api/posts.php', {
@@ -1451,21 +1450,21 @@ async function handleUserPostForm(e) {
             },
             body: JSON.stringify(postData)
         });
-        
+
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.error || 'Failed to save post');
         }
-        
+
         showNotification(isEdit ? 'Post updated successfully!' : 'Post created successfully!', 'success');
         hideModal('user-post-form-modal');
-        
+
         // Reload stats immediately to update counters
         await loadUserStats();
-        
+
         // Reload posts
         loadMyPosts();
-        
+
         // Reset form
         form.reset();
         document.getElementById('user-post-id').value = '';
@@ -1474,7 +1473,7 @@ async function handleUserPostForm(e) {
         if (previewContainer) {
             previewContainer.innerHTML = '';
         }
-        
+
     } catch (error) {
         console.error('Error saving post:', error);
         showNotification(error.message || 'Error saving post', 'error');
@@ -1485,25 +1484,25 @@ async function deleteMyPost(postId) {
     if (!confirm('Are you sure you want to delete this post?')) {
         return;
     }
-    
+
     try {
         // Verify ownership first
         const response = await fetch('/api/posts.php');
         if (!response.ok) throw new Error('Failed to load post');
-        
+
         const posts = await response.json();
         const post = posts.find(p => p.id === postId);
-        
+
         if (!post) {
             showNotification('Post not found', 'error');
             return;
         }
-        
+
         if (post.author !== currentUser.username && post.author !== currentUser.id) {
             showNotification('You can only delete your own posts', 'error');
             return;
         }
-        
+
         // Delete the post
         const deleteResponse = await fetch('/api/posts.php', {
             method: 'DELETE',
@@ -1512,19 +1511,19 @@ async function deleteMyPost(postId) {
             },
             body: JSON.stringify({ id: postId })
         });
-        
+
         if (!deleteResponse.ok) {
             throw new Error('Failed to delete post');
         }
-        
+
         showNotification('Post deleted successfully!', 'success');
-        
+
         // Reload stats immediately to update counters
         await loadUserStats();
-        
+
         // Reload posts
         loadMyPosts();
-        
+
     } catch (error) {
         console.error('Error deleting post:', error);
         showNotification('Error deleting post', 'error');
@@ -1535,14 +1534,14 @@ async function deleteMyPost(postId) {
 function togglePostMenu(event, postId) {
     event.stopPropagation();
     const menu = document.getElementById(`menu-${postId}`);
-    
+
     // Close all other menus
     document.querySelectorAll('.menu-dropdown').forEach(m => {
         if (m.id !== `menu-${postId}`) {
             m.classList.remove('show');
         }
     });
-    
+
     menu.classList.toggle('show');
 }
 
@@ -1567,9 +1566,9 @@ async function toggleLike(postId) {
                 userId: currentUser.id
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.status === 'success') {
             if (data.action === 'liked') {
                 showNotification('Post liked!', 'success');
@@ -1601,9 +1600,9 @@ async function toggleSave(postId) {
                 userId: currentUser.id
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.status === 'success') {
             if (data.action === 'saved') {
                 showNotification('Post saved!', 'success');
@@ -1626,18 +1625,18 @@ async function toggleSave(postId) {
 // Convert various image hosting URLs to direct image URLs
 function convertToDirectImageUrl(url) {
     if (!url) return url;
-    
+
     // Google Drive conversion
     const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
     if (driveMatch) {
         return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
     }
-    
+
     // Dropbox conversion
     if (url.includes('dropbox.com')) {
         return url.replace('?dl=0', '?raw=1').replace('www.dropbox.com', 'dl.dropboxusercontent.com');
     }
-    
+
     // OneDrive conversion
     if (url.includes('1drv.ms') || url.includes('onedrive.live.com')) {
         if (url.includes('?')) {
@@ -1646,48 +1645,48 @@ function convertToDirectImageUrl(url) {
             return url + '?embed=1';
         }
     }
-    
+
     // Google Photos warning
     if (url.includes('photos.google.com') || url.includes('photos.app.goo.gl')) {
         showNotification('Google Photos links may not work. Please use Google Drive, Imgur, or ImgBB instead.', 'warning');
     }
-    
+
     return url;
 }
 
 async function handleProfilePicUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     if (!file.type.match('image.*')) {
         showNotification('Please select an image file', 'error');
         return;
     }
-    
+
     if (file.size > 5 * 1024 * 1024) {
         showNotification('Image size must be less than 5MB', 'error');
         return;
     }
-    
+
     document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
-    
+
     const reader = new FileReader();
     reader.onload = function(event) {
         const preview = document.getElementById('profile-pic-preview');
         const previewImg = document.getElementById('profile-preview-img');
-        
+
         if (preview && previewImg) {
             previewImg.src = event.target.result;
             preview.style.display = 'block';
         }
-        
+
         // Store the base64 image for later upload on save
         const base64Image = event.target.result.split(',')[1];
         const form = e.target.closest('form');
         form.dataset.pendingUpload = base64Image;
         form.dataset.selectedAvatar = '';
     };
-    
+
     reader.readAsDataURL(file);
 }
 
@@ -1703,10 +1702,10 @@ document.addEventListener('DOMContentLoaded', function() {
 // Sync interaction button states with database for profile posts
 async function syncProfileInteractionStates() {
     if (!currentUser) return;
-    
+
     try {
         const userData = await getUserData(currentUser.id, 'all');
-        
+
         // Update like buttons
         if (userData.likes && userData.likes.length > 0) {
             userData.likes.forEach(like => {
@@ -1720,7 +1719,7 @@ async function syncProfileInteractionStates() {
                 }
             });
         }
-        
+
         // Update save buttons
         if (userData.saves && userData.saves.length > 0) {
             userData.saves.forEach(save => {

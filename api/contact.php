@@ -59,23 +59,23 @@ if (strlen($message) < 10 || strlen($message) > 2000) {
 try {
     // Get logged-in user email if available
     $userEmail = $input['userEmail'] ?? null;
-    
+
     // Send contact email
     $emailHandler = new EmailHandler();
     $emailSent = $emailHandler->sendContactEmail($name, $email, $subject, $message, $userEmail);
-    
+
     if ($emailSent) {
         // Save contact message to database (using PDO)
         $db = Database::getInstance();
-        
+
         $created = date('Y-m-d H:i:s');
         $status = 'unread';
-        
+
         $db->execute(
             "INSERT INTO contacts (name, email, subject, message, created, status, userEmail) VALUES (?, ?, ?, ?, ?, ?, ?)",
             [$name, $email, $subject, $message, $created, $status, $userEmail]
         );
-        
+
         echo json_encode([
             'status' => 'success',
             'message' => 'Thank you for your message! We will get back to you soon.'

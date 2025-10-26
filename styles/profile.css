@@ -154,7 +154,7 @@
     .profile-actions {
         flex-direction: column;
     }
-    
+
     .edit-profile-btn,
     .change-password-btn,
     .reset-password-btn,
@@ -561,7 +561,7 @@
     #add-post-btn span {
         display: none;
     }
-    
+
     #add-post-btn {
         padding: var(--spacing-md);
         width: auto;
@@ -1081,16 +1081,16 @@
         text-align: center;
         gap: var(--spacing-lg);
     }
-    
+
     .profile-stats {
         justify-content: center;
         gap: var(--spacing-lg);
     }
-    
+
     .posts-grid {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     }
-    
+
     .content-tabs {
         flex-wrap: wrap;
     }
@@ -1102,7 +1102,7 @@
         grid-template-columns: repeat(4, 1fr);
         gap: var(--spacing-sm);
     }
-    
+
     #edit-profile-modal .modal-content {
         max-width: 95%;
     }
@@ -1113,15 +1113,15 @@
     .default-avatars {
         grid-template-columns: repeat(3, 1fr);
     }
-    
+
     .avatar-option {
         max-width: 60px;
     }
-    
+
     .form-actions {
         flex-direction: column;
     }
-    
+
     #edit-profile-modal h2 {
         font-size: 1.5rem;
     }
@@ -1131,76 +1131,76 @@
     .profile-header {
         padding: calc(var(--spacing-xl) + 80px) 0 var(--spacing-xl) 0;
     }
-    
+
     .profile-card {
         padding: var(--spacing-lg);
         text-align: center;
     }
-    
+
     .profile-avatar {
         width: 100px;
         height: 100px;
         margin: 0 auto var(--spacing-lg);
     }
-    
+
     .profile-avatar i {
         font-size: 2.5rem;
     }
-    
+
     .profile-info h1 {
         font-size: 1.5rem;
     }
-    
+
     .profile-stats {
         gap: var(--spacing-xs);
         overflow-x: auto;
         scrollbar-width: none;
         -ms-overflow-style: none;
     }
-    
+
     .profile-stats::-webkit-scrollbar {
         display: none;
     }
-    
+
     .stat-item {
         padding: var(--spacing-sm) var(--spacing-md);
     }
-    
+
     .stat-label {
         font-size: 0.75rem;
     }
-    
+
     .stat-number {
         font-size: 1.2rem;
     }
-    
+
     .posts-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: var(--spacing-md);
     }
-    
+
     .content-tabs {
         gap: var(--spacing-sm);
     }
-    
+
     .content-tab {
         padding: var(--spacing-sm) var(--spacing-md);
         font-size: 0.85rem;
     }
-    
+
     .content-tab span {
         display: none;
     }
-    
+
     .content-tab.active span {
         display: inline-flex;
     }
-    
+
     .panel-header {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .panel-header h2 {
         font-size: 1.25rem;
     }

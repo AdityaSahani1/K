@@ -156,8 +156,6 @@ $showSearch = false;
 
             </button>
 
-            
-
             <!-- Login Form -->
 
             <div class="auth-form" id="login-form">
@@ -188,7 +186,7 @@ $showSearch = false;
 
                 <p class="auth-switch">
 
-                    Don't have an account? 
+                    Don't have an account?
 
                     <a href="#" id="show-register">Sign up</a>
 
@@ -199,8 +197,6 @@ $showSearch = false;
                 </p>
 
             </div>
-
-            
 
             <!-- Register Form -->
 
@@ -248,15 +244,13 @@ $showSearch = false;
 
                 <p class="auth-switch">
 
-                    Already have an account? 
+                    Already have an account?
 
                     <a href="#" id="show-login">Login</a>
 
                 </p>
 
             </div>
-
-            
 
             <!-- Forgot Password Form -->
 
@@ -282,15 +276,13 @@ $showSearch = false;
 
                 <p class="auth-switch">
 
-                    Remember your password? 
+                    Remember your password?
 
                     <a href="#" id="back-to-login">Back to Login</a>
 
                 </p>
 
             </div>
-
-            
 
             <!-- OTP Verification Form -->
 
@@ -316,7 +308,7 @@ $showSearch = false;
 
                 <p class="auth-switch">
 
-                    Didn't receive the code? 
+                    Didn't receive the code?
 
                     <a href="#" id="resend-otp">Resend OTP</a>
 
@@ -343,4 +335,3 @@ $showSearch = false;
 </body>
 
 </html>
-

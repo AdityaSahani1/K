@@ -507,30 +507,30 @@
         text-align: center;
         gap: var(--spacing-xl);
     }
-    
+
     .about-text h1 {
         font-size: 2.5rem;
     }
-    
+
     .skills-grid {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: var(--spacing-lg);
     }
-    
+
     /* Mobile Social Layout */
     .social-network {
         min-height: auto;
         padding: var(--spacing-lg);
         display: block;
     }
-    
+
     .social-center {
         position: relative;
         margin: 0 auto var(--spacing-xl);
         width: 100px;
         height: 100px;
     }
-    
+
     .social-connections {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -538,7 +538,7 @@
         max-width: 400px;
         margin: 0 auto;
     }
-    
+
     .social-node {
         position: relative;
         width: 100%;
@@ -549,32 +549,32 @@
         right: auto !important;
         bottom: auto !important;
     }
-    
+
     .connection-line {
         display: none;
     }
-    
+
     .network-animation {
         display: none;
     }
-    
+
     .node-content i {
         font-size: 1.4rem;
     }
-    
+
     .node-label {
         font-size: 0.8rem;
     }
-    
+
     .node-subtitle {
         font-size: 0.6rem;
     }
-    
+
     .social-stats {
         flex-direction: column;
         gap: var(--spacing-lg);
     }
-    
+
     .stat-number {
         font-size: 2rem;
     }
@@ -584,91 +584,91 @@
     .about-hero {
         padding: calc(var(--spacing-xl) + 80px) 0 var(--spacing-xl) 0;
     }
-    
+
     .profile-circle {
         width: 200px;
         height: 200px;
     }
-    
+
     .profile-circle i {
         font-size: 3rem;
     }
-    
+
     .about-text h1 {
         font-size: 2rem;
     }
-    
+
     .about-text .lead {
         font-size: 1.1rem;
     }
-    
+
     .about-text p {
         font-size: 1rem;
     }
-    
+
     .skills-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .skill-item {
         padding: var(--spacing-xl);
     }
-    
+
     .skill-icon {
         width: 60px;
         height: 60px;
     }
-    
+
     .skill-icon i {
         font-size: 1.5rem;
     }
-    
+
     /* Mobile Social Layout Adjustments */
     .social-network {
         padding: var(--spacing-md);
     }
-    
+
     .social-center {
         width: 80px;
         height: 80px;
         margin-bottom: var(--spacing-lg);
     }
-    
+
     .profile-avatar {
         width: 35px;
         height: 35px;
     }
-    
+
     .profile-avatar i {
         font-size: 1rem;
     }
-    
+
     .profile-name {
         font-size: 0.7rem;
     }
-    
+
     .social-connections {
         grid-template-columns: 1fr;
         gap: var(--spacing-md);
     }
-    
+
     .social-node {
         height: 70px;
     }
-    
+
     .node-content i {
         font-size: 1.2rem;
     }
-    
+
     .node-label {
         font-size: 0.8rem;
     }
-    
+
     .node-subtitle {
         font-size: 0.6rem;
         display: block;
     }
-    
+
     .contact-text {
         font-size: 1.1rem;
     }

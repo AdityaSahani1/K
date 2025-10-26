@@ -56,21 +56,21 @@ function sendOTPForVerification($data) {
     try {
         $email = $data['email'] ?? '';
         $name = $data['name'] ?? '';
-        
+
         if (empty($email) || empty($name)) {
             http_response_code(400);
             echo json_encode(['error' => 'Email and name are required']);
             return;
         }
-        
+
         $otp = sprintf('%06d', mt_rand(0, 999999));
         $db = Database::getInstance();
-        
+
         $user = $db->fetchOne("SELECT id FROM users WHERE email = ? LIMIT 1", [$email]);
-        
+
         $otpExpires = date('Y-m-d H:i:s', time() + 600);
         $otpCreated = date('Y-m-d H:i:s');
-        
+
         if ($user) {
             $db->execute(
                 "UPDATE users SET otpToken = ?, otpExpires = ?, otpCreated = ? WHERE email = ?",
@@ -97,10 +97,10 @@ function sendOTPForVerification($data) {
                 );
             }
         }
-        
+
         $emailHandler = new EmailHandler();
         $emailSent = $emailHandler->sendOTPEmail($email, $name, $otp);
-        
+
         if ($emailSent) {
             echo json_encode(['status' => 'success', 'message' => 'OTP sent successfully']);
         } else {
@@ -118,39 +118,39 @@ function verifyOTP($data) {
     try {
         $email = $data['email'] ?? '';
         $otp = $data['otp'] ?? '';
-        
+
         if (empty($email) || empty($otp)) {
             http_response_code(400);
             echo json_encode(['error' => 'Email and OTP are required']);
             return;
         }
-        
+
         $db = Database::getInstance();
         $user = $db->fetchOne("SELECT * FROM users WHERE email = ? LIMIT 1", [$email]);
-        
+
         if (!$user || !$user['otpToken']) {
             http_response_code(400);
             echo json_encode(['error' => 'OTP not found or expired']);
             return;
         }
-        
+
         if (strtotime($user['otpExpires']) < time()) {
             http_response_code(400);
             echo json_encode(['error' => 'OTP has expired']);
             return;
         }
-        
+
         if ($user['otpToken'] !== $otp) {
             http_response_code(400);
             echo json_encode(['error' => 'Invalid OTP']);
             return;
         }
-        
+
         $db->execute(
             "UPDATE users SET otpToken = NULL, otpExpires = NULL, otpCreated = NULL, isVerified = 1 WHERE email = ?",
             [$email]
         );
-        
+
         echo json_encode([
             'status' => 'success',
             'message' => 'Email verified successfully',
@@ -167,16 +167,16 @@ function resendOTP($data) {
     try {
         $email = $data['email'] ?? '';
         $name = $data['name'] ?? '';
-        
+
         if (empty($email) || empty($name)) {
             http_response_code(400);
             echo json_encode(['error' => 'Email and name are required']);
             return;
         }
-        
+
         $db = Database::getInstance();
         $user = $db->fetchOne("SELECT otpCreated FROM users WHERE email = ? LIMIT 1", [$email]);
-        
+
         if ($user && $user['otpCreated']) {
             $otpAge = time() - strtotime($user['otpCreated']);
             if ($otpAge < 60) {
@@ -185,7 +185,7 @@ function resendOTP($data) {
                 return;
             }
         }
-        
+
         sendOTPForVerification($data);
     } catch (Exception $e) {
         http_response_code(500);
@@ -197,33 +197,33 @@ function resendOTP($data) {
 function handleForgotPassword($data) {
     try {
         $email = $data['email'] ?? '';
-        
+
         if (empty($email)) {
             http_response_code(400);
             echo json_encode(['error' => 'Email is required']);
             return;
         }
-        
+
         $db = Database::getInstance();
         $user = $db->fetchOne("SELECT * FROM users WHERE email = ? LIMIT 1", [$email]);
-        
+
         if (!$user) {
             http_response_code(404);
             echo json_encode(['error' => 'User not found']);
             return;
         }
-        
+
         $resetToken = bin2hex(random_bytes(32));
         $resetExpires = date('Y-m-d H:i:s', time() + 3600);
-        
+
         $db->execute(
             "UPDATE users SET passwordResetToken = ?, passwordResetExpires = ? WHERE email = ?",
             [$resetToken, $resetExpires, $email]
         );
-        
+
         $emailHandler = new EmailHandler();
         $emailSent = $emailHandler->sendPasswordResetEmail($email, $user['name'] ?? $user['username'], $resetToken);
-        
+
         if ($emailSent) {
             echo json_encode(['status' => 'success', 'message' => 'Password reset link sent to your email']);
         } else {
@@ -241,34 +241,34 @@ function handlePasswordReset($data) {
     try {
         $token = $data['token'] ?? '';
         $newPassword = $data['password'] ?? '';
-        
+
         if (empty($token) || empty($newPassword)) {
             http_response_code(400);
             echo json_encode(['error' => 'Token and new password are required']);
             return;
         }
-        
+
         $db = Database::getInstance();
         $user = $db->fetchOne("SELECT * FROM users WHERE passwordResetToken = ? LIMIT 1", [$token]);
-        
+
         if (!$user) {
             http_response_code(400);
             echo json_encode(['error' => 'Invalid or expired reset token']);
             return;
         }
-        
+
         if (strtotime($user['passwordResetExpires']) < time()) {
             http_response_code(400);
             echo json_encode(['error' => 'Reset token has expired']);
             return;
         }
-        
+
         $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
         $db->execute(
             "UPDATE users SET password = ?, passwordResetToken = NULL, passwordResetExpires = NULL WHERE passwordResetToken = ?",
             [$hashedPassword, $token]
         );
-        
+
         echo json_encode(['status' => 'success', 'message' => 'Password reset successfully']);
     } catch (Exception $e) {
         http_response_code(500);
@@ -282,37 +282,37 @@ function handleChangePassword($data) {
         $userId = $data['userId'] ?? '';
         $currentPassword = $data['currentPassword'] ?? '';
         $newPassword = $data['newPassword'] ?? '';
-        
+
         if (empty($userId) || empty($currentPassword) || empty($newPassword)) {
             http_response_code(400);
             echo json_encode(['error' => 'All fields are required']);
             return;
         }
-        
+
         if (strlen($newPassword) < 6) {
             http_response_code(400);
             echo json_encode(['error' => 'New password must be at least 6 characters long']);
             return;
         }
-        
+
         $db = Database::getInstance();
         $user = $db->fetchOne("SELECT password FROM users WHERE id = ? LIMIT 1", [$userId]);
-        
+
         if (!$user) {
             http_response_code(404);
             echo json_encode(['error' => 'User not found']);
             return;
         }
-        
+
         if (!password_verify($currentPassword, $user['password'])) {
             http_response_code(401);
             echo json_encode(['error' => 'Current password is incorrect']);
             return;
         }
-        
+
         $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
         $db->execute("UPDATE users SET password = ? WHERE id = ?", [$hashedPassword, $userId]);
-        
+
         echo json_encode(['status' => 'success', 'message' => 'Password changed successfully']);
     } catch (Exception $e) {
         http_response_code(500);
@@ -329,31 +329,31 @@ function handleUpdateProfile($data) {
         $email = $data['email'] ?? '';
         $bio = $data['bio'] ?? '';
         $profilePicture = $data['profilePicture'] ?? '';
-        
+
         if (empty($userId) || empty($username) || empty($email)) {
             http_response_code(400);
             echo json_encode(['error' => 'User ID, username, and email are required']);
             return;
         }
-        
+
         $db = Database::getInstance();
-        
+
         $existingUser = $db->fetchOne(
             "SELECT id FROM users WHERE (username = ? OR email = ?) AND id != ? LIMIT 1",
             [$username, $email, $userId]
         );
-        
+
         if ($existingUser) {
             http_response_code(409);
             echo json_encode(['error' => 'Username or email already exists']);
             return;
         }
-        
+
         $db->execute(
             "UPDATE users SET name = ?, username = ?, email = ?, bio = ?, profilePicture = ? WHERE id = ?",
             [$name, $username, $email, $bio, $profilePicture, $userId]
         );
-        
+
         echo json_encode(['status' => 'success', 'message' => 'Profile updated successfully']);
     } catch (Exception $e) {
         http_response_code(500);
@@ -367,24 +367,24 @@ function handleRequestPostPermission($data) {
         $userId = $data['userId'] ?? '';
         $userName = $data['userName'] ?? '';
         $userEmail = $data['userEmail'] ?? '';
-        
+
         if (empty($userId) || empty($userName) || empty($userEmail)) {
             http_response_code(400);
             echo json_encode(['error' => 'User information is required']);
             return;
         }
-        
+
         $db = Database::getInstance();
-        
+
         // Get admin email
         $admin = $db->fetchOne("SELECT email, name FROM users WHERE role = 'admin' LIMIT 1");
-        
+
         if (!$admin) {
             http_response_code(500);
             echo json_encode(['error' => 'Admin not found']);
             return;
         }
-        
+
         $emailHandler = new EmailHandler();
         $emailSent = $emailHandler->sendPostPermissionRequestEmail(
             $admin['email'],
@@ -393,7 +393,7 @@ function handleRequestPostPermission($data) {
             $userEmail,
             $userId
         );
-        
+
         if ($emailSent) {
             echo json_encode(['status' => 'success', 'message' => 'Request sent to admin successfully']);
         } else {

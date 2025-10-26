@@ -14,7 +14,7 @@ function initHomePage() {
 function updateJoinCommunityButton() {
     const joinButton = document.querySelector('.cta-btn-secondary');
     if (!joinButton) return;
-    
+
     if (currentUser) {
         joinButton.style.display = 'none';
     } else {
@@ -27,17 +27,17 @@ async function loadLatestPosts() {
         const response = await fetch('/api/posts.php');
         if (!response.ok) throw new Error('Failed to load posts');
         const posts = await response.json();
-        
+
         const postsGrid = document.getElementById('posts-grid');
-        
+
         if (!postsGrid) return;
-        
+
         // Filter for featured posts, sort by date (newest first) and take first 6
         const latestPosts = posts
             .filter(post => post.featured === true)
             .sort((a, b) => new Date(b.created) - new Date(a.created))
             .slice(0, 6);
-        
+
         if (latestPosts.length === 0) {
             postsGrid.innerHTML = `
                 <div class="no-posts">
@@ -47,17 +47,17 @@ async function loadLatestPosts() {
             `;
             return;
         }
-        
+
         postsGrid.innerHTML = latestPosts.map(post => createPostCard(post)).join('');
-        
+
         // Add event listeners for post interactions
         addPostInteractionListeners();
-        
+
         // Sync interaction states with database
         if (currentUser) {
             await syncInteractionStates();
         }
-        
+
     } catch (error) {
         console.error('Error loading latest posts:', error);
         const postsGrid = document.getElementById('posts-grid');
@@ -112,7 +112,7 @@ function createPostCard(post) {
 
 function initCategoryNavigation() {
     const categoryItems = document.querySelectorAll('.category-item');
-    
+
     categoryItems.forEach(item => {
         item.addEventListener('click', function() {
             const category = this.dataset.category;
@@ -128,44 +128,44 @@ function addPostInteractionListeners() {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             if (!requireAuth()) return;
-            
+
             const postId = this.dataset.postId;
             toggleLike(postId, this);
         });
     });
-    
+
     // Save button listeners
     document.querySelectorAll('.save-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             if (!requireAuth()) return;
-            
+
             const postId = this.dataset.postId;
             toggleSave(postId, this);
         });
     });
-    
+
     // Share button listeners
     document.querySelectorAll('.share-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             const postId = this.dataset.postId;
             showShareMenu(postId, this);
         });
     });
-    
+
     // Post card click listeners
     document.querySelectorAll('.post-card').forEach(card => {
         card.addEventListener('click', function(e) {
             // Don't navigate if clicking on action buttons
             if (e.target.closest('.post-actions')) return;
-            
+
             const postId = this.dataset.postId;
             openPostDetail(postId);
         });
@@ -183,9 +183,9 @@ async function toggleLike(postId, button) {
                 userId: currentUser.id
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.status === 'success') {
             if (data.action === 'liked') {
                 button.innerHTML = '<i class="fas fa-heart"></i>';
@@ -196,7 +196,7 @@ async function toggleLike(postId, button) {
                 button.classList.remove('liked');
                 showNotification('Post unliked', 'success');
             }
-            
+
             // Update post like count in UI
             updatePostLikeCount(postId);
         } else {
@@ -219,9 +219,9 @@ async function toggleSave(postId, button) {
                 userId: currentUser.id
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.status === 'success') {
             if (data.action === 'saved') {
                 button.innerHTML = '<i class="fas fa-bookmark"></i>';
@@ -248,7 +248,7 @@ async function updatePostLikeCount(postId) {
         const posts = await response.json();
         const post = posts.find(p => p.id === postId);
         const postLikes = post ? (post.likes || 0) : 0;
-        
+
         // Update like count in post meta - more robust selector
         const likeCountElements = document.querySelectorAll(`[data-post-id="${postId}"] .post-meta span:first-child, [data-post-id="${postId}"] .post-stats span:first-child`);
         likeCountElements.forEach(element => {
@@ -269,12 +269,12 @@ async function openPostDetail(postId) {
 // Load user's liked and saved posts status
 async function loadUserInteractions() {
     if (!currentUser) return;
-    
+
     try {
         const userData = await getUserData(currentUser.id, 'all');
         const likes = userData.likes || [];
         const saves = userData.saves || [];
-        
+
         // Update like buttons
         likes.forEach(like => {
             const likeBtn = document.querySelector(`[data-post-id="${like.postId}"].like-btn`);
@@ -283,7 +283,7 @@ async function loadUserInteractions() {
                 likeBtn.classList.add('liked');
             }
         });
-        
+
         // Update save buttons
         saves.forEach(save => {
             const saveBtn = document.querySelector(`[data-post-id="${save.postId}"].save-btn`);
@@ -304,10 +304,10 @@ setTimeout(loadUserInteractions, 500);
 // Sync interaction button states with database
 async function syncInteractionStates() {
     if (!currentUser) return;
-    
+
     try {
         const userData = await getUserData(currentUser.id, 'all');
-        
+
         // Update like buttons
         if (userData.likes && userData.likes.length > 0) {
             userData.likes.forEach(like => {
@@ -322,7 +322,7 @@ async function syncInteractionStates() {
                 }
             });
         }
-        
+
         // Update save buttons
         if (userData.saves && userData.saves.length > 0) {
             userData.saves.forEach(save => {

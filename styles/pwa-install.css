@@ -1,0 +1,104 @@
+.pwa-install-card {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(150%);
+    max-width: 400px;
+    width: calc(100% - 40px);
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 40px var(--shadow-color);
+    z-index: 10000;
+    transition: transform 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+.pwa-install-card.show {
+    transform: translateX(-50%) translateY(0);
+}
+.pwa-install-content {
+    padding: 24px;
+    position: relative;
+}
+.pwa-install-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+    transition: color 0.2s;
+}
+.pwa-install-close:hover {
+    color: var(--text-primary);
+}
+.pwa-install-icon {
+    text-align: center;
+    margin-bottom: 16px;
+}
+.pwa-install-icon img {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-md);
+}
+.pwa-install-content h3 {
+    font-size: 20px;
+    margin: 0 0 8px 0;
+    text-align: center;
+    color: var(--text-primary);
+}
+.pwa-install-content p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-align: center;
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+}
+.pwa-install-buttons {
+    display: flex;
+    gap: 12px;
+}
+.pwa-install-btn,
+.pwa-dismiss-btn {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.pwa-install-btn {
+    background: var(--primary-color);
+    color: white;
+}
+.pwa-install-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+.pwa-dismiss-btn {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+.pwa-dismiss-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+@media (max-width: 768px) {
+    .pwa-install-card {
+        bottom: 10px;
+        width: calc(100% - 20px);
+    }
+    .pwa-install-content {
+        padding: 20px;
+    }
+}

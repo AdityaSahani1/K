@@ -29,24 +29,24 @@ if (empty($username) || empty($password)) {
 
 try {
     $db = Database::getInstance();
-    
+
     $user = $db->fetchOne(
         "SELECT * FROM users WHERE username = ? OR email = ? LIMIT 1",
         [$username, $username]
     );
-    
+
     if (!$user) {
         http_response_code(401);
         echo json_encode(['error' => 'Invalid username or password']);
         exit();
     }
-    
+
     if (!password_verify($password, $user['password'])) {
         http_response_code(401);
         echo json_encode(['error' => 'Invalid username or password']);
         exit();
     }
-    
+
     if (!$user['isVerified']) {
         http_response_code(403);
         echo json_encode([
@@ -57,15 +57,15 @@ try {
         ]);
         exit();
     }
-    
+
     $sessionToken = bin2hex(random_bytes(32));
     $lastLogin = date('Y-m-d H:i:s');
-    
+
     $db->execute(
         "UPDATE users SET lastLogin = ? WHERE id = ?",
         [$lastLogin, $user['id']]
     );
-    
+
     echo json_encode([
         'status' => 'success',
         'message' => 'Login successful',
@@ -80,7 +80,7 @@ try {
             'profilePicture' => $user['profilePicture'] ?? ''
         ]
     ]);
-    
+
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['error' => 'Server error']);

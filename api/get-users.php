@@ -15,7 +15,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 try {
     $db = Database::getInstance();
-    
+
     switch ($method) {
         case 'GET':
             getUsers($db);
@@ -23,7 +23,7 @@ try {
         case 'POST':
             $input = json_decode(file_get_contents('php://input'), true);
             $action = $input['action'] ?? 'update';
-            
+
             switch ($action) {
                 case 'update':
                     updateUser($db);
@@ -52,7 +52,7 @@ function getUsers($db) {
     $users = $db->fetchAll(
         "SELECT id, name, username, email, role, created, bio, isVerified, profilePicture, canPost FROM users ORDER BY created DESC"
     );
-    
+
     $result = array_map(function($row) {
         return [
             'id' => $row['id'],
@@ -67,13 +67,13 @@ function getUsers($db) {
             'canPost' => (bool)($row['canPost'] ?? 0)
         ];
     }, $users);
-    
+
     echo json_encode($result);
 }
 
 function updateUser($db) {
     $input = json_decode(file_get_contents('php://input'), true);
-    
+
     $id = $input['id'] ?? '';
     $name = $input['name'] ?? '';
     $username = $input['username'] ?? '';
@@ -83,18 +83,18 @@ function updateUser($db) {
     $role = $input['role'] ?? 'user';
     $isVerified = isset($input['isVerified']) ? ($input['isVerified'] ? 1 : 0) : 0;
     $canPost = isset($input['canPost']) ? ($input['canPost'] ? 1 : 0) : 0;
-    
+
     if (empty($id) || empty($username) || empty($email)) {
         http_response_code(400);
         echo json_encode(['error' => 'ID, username, and email are required']);
         return;
     }
-    
+
     $db->execute(
         "UPDATE users SET name = ?, username = ?, email = ?, bio = ?, profilePicture = ?, role = ?, isVerified = ?, canPost = ? WHERE id = ?",
         [$name, $username, $email, $bio, $profilePicture, $role, $isVerified, $canPost, $id]
     );
-    
+
     echo json_encode([
         'status' => 'success',
         'message' => 'User updated successfully'
@@ -104,23 +104,23 @@ function updateUser($db) {
 function deleteUser($db) {
     $input = json_decode(file_get_contents('php://input'), true);
     $id = $input['id'] ?? $_GET['id'] ?? '';
-    
+
     if (empty($id)) {
         http_response_code(400);
         echo json_encode(['error' => 'User ID is required']);
         return;
     }
-    
+
     $user = $db->fetchOne("SELECT role FROM users WHERE id = ?", [$id]);
-    
+
     if ($user && $user['role'] === 'admin') {
         http_response_code(403);
         echo json_encode(['error' => 'Cannot delete admin users']);
         return;
     }
-    
+
     $db->execute("DELETE FROM users WHERE id = ?", [$id]);
-    
+
     echo json_encode([
         'status' => 'success',
         'message' => 'User deleted successfully'

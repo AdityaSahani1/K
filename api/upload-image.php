@@ -21,32 +21,32 @@ try {
     // Load configuration
     $config = require __DIR__ . '/../config/config.php';
     $apiKey = $config['IMGBB_API_KEY'] ?? '';
-    
+
     if (empty($apiKey)) {
         throw new Exception('ImgBB API key not configured');
     }
-    
+
     // Get the image data from request
     $input = json_decode(file_get_contents('php://input'), true);
-    
+
     if (!isset($input['image'])) {
         throw new Exception('No image data provided');
     }
-    
+
     $imageData = $input['image'];
     $expiration = $input['expiration'] ?? null; // Optional expiration in seconds
-    
+
     // Prepare the API request
     $url = 'https://api.imgbb.com/1/upload';
     $postData = [
         'key' => $apiKey,
         'image' => $imageData
     ];
-    
+
     if ($expiration !== null) {
         $postData['expiration'] = $expiration;
     }
-    
+
     // Make the request to ImgBB API
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -54,27 +54,27 @@ try {
     curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-    
+
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    
+
     if (curl_errno($ch)) {
         throw new Exception('cURL error: ' . curl_error($ch));
     }
-    
+
     curl_close($ch);
-    
+
     if ($httpCode !== 200) {
         throw new Exception('ImgBB API error: HTTP ' . $httpCode);
     }
-    
+
     $result = json_decode($response, true);
-    
+
     if (!$result || !isset($result['success']) || !$result['success']) {
         $errorMsg = $result['error']['message'] ?? 'Unknown error';
         throw new Exception('ImgBB upload failed: ' . $errorMsg);
     }
-    
+
     // Return the image URL and other data
     echo json_encode([
         'success' => true,
@@ -86,7 +86,7 @@ try {
             'medium_url' => $result['data']['medium']['url'] ?? null,
         ]
     ]);
-    
+
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([

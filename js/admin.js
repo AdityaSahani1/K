@@ -819,12 +819,12 @@ function initImageUpload() {
     const imagePreview = document.getElementById('image-upload-preview');
     const previewImg = document.getElementById('preview-img');
     const removeUpload = document.getElementById('remove-upload');
-    
+
     if (postImageUpload) {
         postImageUpload.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-            
+
             // Show preview only
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -834,7 +834,7 @@ function initImageUpload() {
             reader.readAsDataURL(file);
         });
     }
-    
+
     if (removeUpload) {
         removeUpload.addEventListener('click', function() {
             postImageUpload.value = '';
@@ -843,19 +843,19 @@ function initImageUpload() {
             postImageUrl.setAttribute('required', '');
         });
     }
-    
+
     // User profile picture upload (in edit user modal)
     const userPicUpload = document.getElementById('edit-user-profile-pic-upload');
     const userPicUrl = document.getElementById('edit-user-profile-pic');
     const userPicPreview = document.getElementById('user-pic-preview');
     const userPreviewImg = document.getElementById('user-preview-img');
     const removeUserUpload = document.getElementById('remove-user-upload');
-    
+
     if (userPicUpload) {
         userPicUpload.addEventListener('change', async function(e) {
             const file = e.target.files[0];
             if (!file) return;
-            
+
             // Show preview
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -863,7 +863,7 @@ function initImageUpload() {
                 userPicPreview.style.display = 'block';
             };
             reader.readAsDataURL(file);
-            
+
             // Upload to ImgBB
             try {
                 const base64 = await fileToBase64(file);
@@ -877,7 +877,7 @@ function initImageUpload() {
             }
         });
     }
-    
+
     if (removeUserUpload) {
         removeUserUpload.addEventListener('click', function() {
             userPicUpload.value = '';
@@ -913,13 +913,13 @@ async function uploadToImgBB(base64Image) {
                 image: base64Image
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (!data.success) {
             throw new Error(data.error || 'Upload failed');
         }
-        
+
         // Return full data object with display_url and image URL
         return {
             displayUrl: data.data.display_url,
@@ -946,7 +946,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         observer.observe(postFormModal, { attributes: true, attributeFilter: ['class'] });
     }
-    
+
     // Initialize when edit user modal is shown
     const editUserModal = document.getElementById('edit-user-modal');
     if (editUserModal) {

@@ -10,7 +10,7 @@ $showSearch = $showSearch ?? false;
                 <span>SnapSera</span>
             </a>
         </div>
-        
+
         <div class="nav-menu" id="nav-menu">
             <ul class="nav-list">
                 <li class="nav-item">
@@ -30,7 +30,7 @@ $showSearch = $showSearch ?? false;
                 </li>
             </ul>
         </div>
-        
+
         <div class="nav-actions">
             <button class="theme-toggle" id="theme-toggle">
                 <i class="fas fa-moon"></i>

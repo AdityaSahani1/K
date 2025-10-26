@@ -16,21 +16,21 @@ $showSearch = false;
                 <h1>Reset Password</h1>
                 <p>Enter your new password below</p>
             </div>
-            
+
             <form id="reset-password-form">
                 <div class="form-group">
                     <input type="password" id="new-password" placeholder="New Password" autocomplete="new-password" required minlength="6">
                     <i class="fas fa-lock"></i>
                 </div>
-                
+
                 <div class="form-group">
                     <input type="password" id="confirm-password" placeholder="Confirm New Password" autocomplete="new-password" required minlength="6">
                     <i class="fas fa-lock"></i>
                 </div>
-                
+
                 <button type="submit" class="auth-btn" id="reset-btn">Reset Password</button>
             </form>
-            
+
             <div class="auth-links">
                 <a href="index.php">Back to Home</a>
             </div>
@@ -38,15 +38,15 @@ $showSearch = false;
     </div>
 
     <?php include 'components/scripts.php'; ?>
-    
+
     <script>
         let resetToken = '';
-        
+
         // Get token from URL
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             resetToken = urlParams.get('token');
-            
+
             if (!resetToken) {
                 showNotification('Invalid or missing reset token', 'error');
                 setTimeout(() => {
@@ -55,28 +55,28 @@ $showSearch = false;
                 return;
             }
         });
-        
+
         // Handle form submission
         document.getElementById('reset-password-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const newPassword = document.getElementById('new-password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
             const resetBtn = document.getElementById('reset-btn');
-            
+
             if (newPassword !== confirmPassword) {
                 showNotification('Passwords do not match', 'error');
                 return;
             }
-            
+
             if (newPassword.length < 6) {
                 showNotification('Password must be at least 6 characters long', 'error');
                 return;
             }
-            
+
             resetBtn.disabled = true;
             resetBtn.textContent = 'Resetting...';
-            
+
             try {
                 const response = await fetch('/api/auth-actions.php', {
                     method: 'POST',
@@ -89,9 +89,9 @@ $showSearch = false;
                         password: newPassword
                     })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok && data.status === 'success') {
                     showNotification('Password reset successfully! Redirecting to login...', 'success');
                     setTimeout(() => {

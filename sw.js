@@ -39,9 +39,9 @@ self.addEventListener('fetch', (event) => {
   }
 
   const url = new URL(event.request.url);
-  
+
   // Never cache API requests, user data, or dynamic content
-  const skipCache = url.pathname.startsWith('/api/') || 
+  const skipCache = url.pathname.startsWith('/api/') ||
                     url.pathname.includes('profile') ||
                     url.pathname.includes('admin') ||
                     url.search !== '';

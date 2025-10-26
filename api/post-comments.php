@@ -29,7 +29,7 @@ if (empty($postId)) {
 try {
     $db = Database::getInstance();
     $conn = $db->getConnection();
-    
+
     $stmt = $conn->prepare("
         SELECT c.id, c.postId, c.userId, c.text, c.created, c.likes,
                c.replyTo, c.replyToUsername,
@@ -41,7 +41,7 @@ try {
     ");
     $stmt->execute([$postId]);
     $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     // Add isLiked flag for each comment if userId is provided
     if ($userId) {
         foreach ($comments as &$comment) {
@@ -50,7 +50,7 @@ try {
             $comment['isLiked'] = $stmt->fetch(PDO::FETCH_ASSOC) ? true : false;
         }
     }
-    
+
     echo json_encode($comments);
 } catch (Exception $e) {
     http_response_code(500);

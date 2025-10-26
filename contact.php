@@ -26,8 +26,6 @@ $showSearch = false;
 
     <?php include 'components/navbar.php'; ?>
 
-
-
     <!-- Contact Header -->
 
     <section class="contact-header">
@@ -41,8 +39,6 @@ $showSearch = false;
         </div>
 
     </section>
-
-
 
     <!-- Contact Content -->
 
@@ -59,8 +55,6 @@ $showSearch = false;
                     <h2>Let's Connect</h2>
 
                     <p>Whether you have a project in mind, need creative consultation, or just want to say hello, don't hesitate to reach out.</p>
-
-                    
 
                     <div class="contact-methods">
 
@@ -82,8 +76,6 @@ $showSearch = false;
 
                         </div>
 
-                        
-
                         <div class="contact-item">
 
                             <div class="contact-icon">
@@ -101,8 +93,6 @@ $showSearch = false;
                             </div>
 
                         </div>
-
-                        
 
                         <div class="contact-item">
 
@@ -123,8 +113,6 @@ $showSearch = false;
                         </div>
 
                     </div>
-
-                    
 
                     <div class="social-links">
 
@@ -162,8 +150,6 @@ $showSearch = false;
 
                 </div>
 
-                
-
                 <!-- Contact Form -->
 
                 <div class="contact-form-container">
@@ -171,8 +157,6 @@ $showSearch = false;
                     <form class="contact-form" id="contact-form">
 
                         <h2>Send a Message</h2>
-
-                        
 
                         <div class="form-group">
 
@@ -182,8 +166,6 @@ $showSearch = false;
 
                         </div>
 
-                        
-
                         <div class="form-group">
 
                             <label for="contact-email">Email *</label>
@@ -192,8 +174,6 @@ $showSearch = false;
 
                         </div>
 
-                        
-
                         <div class="form-group">
 
                             <label for="contact-subject">Subject *</label>
@@ -201,8 +181,6 @@ $showSearch = false;
                             <input type="text" id="contact-subject" name="subject" required maxlength="200" placeholder="What's this about?">
 
                         </div>
-
-                        
 
                         <div class="form-group">
 
@@ -213,8 +191,6 @@ $showSearch = false;
                             <small class="char-counter">0/2000 characters</small>
 
                         </div>
-
-                        
 
                         <button type="submit" class="submit-btn" id="submit-btn">
 
@@ -234,8 +210,6 @@ $showSearch = false;
 
     </section>
 
-
-
     <!-- FAQ Section -->
 
     <section class="faq-section">
@@ -254,8 +228,6 @@ $showSearch = false;
 
                 </div>
 
-                
-
                 <div class="faq-item">
 
                     <h3>Do you work with clients internationally?</h3>
@@ -264,8 +236,6 @@ $showSearch = false;
 
                 </div>
 
-                
-
                 <div class="faq-item">
 
                     <h3>What information should I include in my message?</h3>
@@ -273,8 +243,6 @@ $showSearch = false;
                     <p>Please include details about your project, timeline, budget range, and any specific requirements or inspiration you have in mind.</p>
 
                 </div>
-
-                
 
                 <div class="faq-item">
 
@@ -290,11 +258,7 @@ $showSearch = false;
 
     </section>
 
-
-
     <?php include 'components/footer.php'; ?>
-
-
 
     <!-- Auth Modal -->
 
@@ -307,8 +271,6 @@ $showSearch = false;
                 <i class="fas fa-times"></i>
 
             </button>
-
-            
 
             <!-- Login Form -->
 
@@ -351,8 +313,6 @@ $showSearch = false;
                 </p>
 
             </div>
-
-            
 
             <!-- Register Form -->
 
@@ -408,8 +368,6 @@ $showSearch = false;
 
             </div>
 
-            
-
             <!-- Forgot Password Form -->
 
             <div class="auth-form hidden" id="forgot-password-form">
@@ -441,8 +399,6 @@ $showSearch = false;
                 </p>
 
             </div>
-
-            
 
             <!-- OTP Verification Form -->
 
@@ -483,10 +439,6 @@ $showSearch = false;
         </div>
 
     </div>
-
-
-
-
 
     <?php include 'components/scripts.php'; ?>
 

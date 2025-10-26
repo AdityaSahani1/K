@@ -165,7 +165,6 @@ $showSearch = false;
         </div>
     </section>
 
-
     <?php include 'components/footer.php'; ?>
 
     <!-- Auth Modal -->

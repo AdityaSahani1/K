@@ -67,22 +67,22 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
 try {
     $db = Database::getInstance();
-    
+
     $existing = $db->fetchOne(
         "SELECT id FROM users WHERE username = ? OR email = ? LIMIT 1",
         [$username, $email]
     );
-    
+
     if ($existing) {
         http_response_code(400);
         echo json_encode(['error' => 'Username or email already exists']);
         exit();
     }
-    
+
     $userId = uniqid('user_');
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
     $created = date('Y-m-d H:i:s');
-    
+
     echo json_encode([
         'status' => 'success',
         'message' => 'Validation successful',
@@ -97,7 +97,7 @@ try {
             'bio' => ''
         ]
     ]);
-    
+
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['error' => 'Server error']);

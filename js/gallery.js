@@ -1,7 +1,5 @@
 // Gallery page JavaScript
 
-
-
 let allPosts = [];
 
 let filteredPosts = [];
@@ -10,20 +8,16 @@ let currentPage = 1;
 
 const postsPerPage = 30;
 
-
 // Search and filter state
 let currentSearchTerm = '';
 let currentCategory = '';
 let currentSortBy = 'newest';
-
 
 document.addEventListener('DOMContentLoaded', function() {
 
     initGalleryPage();
 
 });
-
-
 
 function initGalleryPage() {
 
@@ -42,8 +36,6 @@ function initGalleryPage() {
     initGallerySearch();
 }
 
-
-
 async function loadAllPosts() {
 
     try {
@@ -54,23 +46,17 @@ async function loadAllPosts() {
 
         filteredPosts = [...allPosts];
 
-        
-
         updateCategoryCounts();
         loadGalleryPosts();
-        
+
         // Update like/save button states based on user's interactions
         if (currentUser) {
             await updateInteractionStates();
         }
 
-        
-
         // Check for post parameter after posts are loaded
 
         checkForPostParameter();
-
-        
 
     } catch (error) {
 
@@ -82,15 +68,11 @@ async function loadAllPosts() {
 
 }
 
-
-
 function loadTopPosts() {
 
     const topPostsGrid = document.getElementById('top-posts-grid');
 
     if (!topPostsGrid) return;
-
-    
 
     // Sort by likes and take top 3
 
@@ -99,8 +81,6 @@ function loadTopPosts() {
         .sort((a, b) => (b.likes || 0) - (a.likes || 0))
 
         .slice(0, 3);
-
-    
 
     if (topPosts.length === 0) {
 
@@ -119,8 +99,6 @@ function loadTopPosts() {
         return;
 
     }
-
-    
 
     // Create special layout for most liked posts
 
@@ -188,8 +166,6 @@ function loadTopPosts() {
 
                 </article>
 
-                
-
                 <!-- Second post - left side below -->
 
                 <article class="top-post-card side-post silver left-post" data-post-id="${topPosts[1].id}">
@@ -247,8 +223,6 @@ function loadTopPosts() {
                     </div>
 
                 </article>
-
-                
 
                 <!-- Third post - right side -->
 
@@ -322,8 +296,6 @@ function loadTopPosts() {
 
             const rankNumber = index + 1;
 
-            
-
             return `
 
                 <article class="top-post-card ${rank}" data-post-id="${post.id}">
@@ -388,13 +360,9 @@ function loadTopPosts() {
 
     }
 
-    
-
     addPostInteractionListeners();
 
 }
-
-
 
 function loadGalleryPosts() {
 
@@ -402,19 +370,13 @@ function loadGalleryPosts() {
 
     const loadMoreBtn = document.getElementById('load-more-btn');
 
-    
-
     if (!galleryGrid) return;
-
-    
 
     const startIndex = (currentPage - 1) * postsPerPage;
 
     const endIndex = startIndex + postsPerPage;
 
     const postsToShow = filteredPosts.slice(startIndex, endIndex);
-
-    
 
     if (currentPage === 1 && postsToShow.length === 0) {
 
@@ -440,8 +402,6 @@ function loadGalleryPosts() {
 
     }
 
-    
-
     if (currentPage === 1) {
 
         galleryGrid.innerHTML = postsToShow.map(post => createGalleryPostCard(post)).join('');
@@ -453,8 +413,6 @@ function loadGalleryPosts() {
         galleryGrid.insertAdjacentHTML('beforeend', newPostsHTML);
 
     }
-
-    
 
     // Show/hide load more button
 
@@ -474,23 +432,17 @@ function loadGalleryPosts() {
 
     }
 
-    
-
     addPostInteractionListeners();
 
     addPostMenuListeners();
 
 }
 
-
-
 function createGalleryPostCard(post) {
 
     const ratios = ['', 'ratio-square', 'ratio-portrait', 'ratio-wide', 'ratio-tall'];
 
     const randomRatio = ratios[Math.floor(Math.random() * ratios.length)];
-
-    
 
     return `
 
@@ -521,7 +473,6 @@ function createGalleryPostCard(post) {
                                 <i class="fas fa-share-alt"></i>
                             </button>
 
-
                         </div>
 
                     </div>
@@ -550,8 +501,6 @@ function createGalleryPostCard(post) {
 
 }
 
-
-
 function initFilters() {
 
     // Initialize category filters
@@ -578,8 +527,6 @@ function initFilters() {
 
     });
 
-
-
     // Initialize sort options
 
     const sortOptions = document.querySelectorAll('.sort-option');
@@ -601,8 +548,6 @@ function initFilters() {
         });
 
     });
-
-
 
     // Initialize view options
 
@@ -626,15 +571,11 @@ function initFilters() {
 
     });
 
-
-
     // Initialize search clear button
 
     const searchClear = document.getElementById('search-clear');
 
     const searchInput = document.getElementById('search-input');
-
-    
 
     if (searchClear && searchInput) {
 
@@ -647,8 +588,6 @@ function initFilters() {
             applyFilters();
 
         });
-
-
 
         searchInput.addEventListener('input', function() {
 
@@ -666,8 +605,6 @@ function initFilters() {
 
     }
 
-
-
     // Initialize filter reset
 
     const filterReset = document.getElementById('filter-reset');
@@ -677,8 +614,6 @@ function initFilters() {
         filterReset.addEventListener('click', resetAllFilters);
 
     }
-
-
 
     // Check for URL parameters
 
@@ -700,8 +635,6 @@ function initFilters() {
 
     }
 
-
-
     // Initialize counts
 
     updateCategoryCounts();
@@ -709,8 +642,6 @@ function initFilters() {
     updateResultsCount();
 
 }
-
-
 
 function updateCategoryCounts() {
 
@@ -728,8 +659,6 @@ function updateCategoryCounts() {
 
     };
 
-
-
     Object.entries(counts).forEach(([category, count]) => {
 
         const countElement = document.getElementById(`count-${category || 'all'}`);
@@ -744,8 +673,6 @@ function updateCategoryCounts() {
 
 }
 
-
-
 function updateResultsCount() {
 
     const resultsCount = document.getElementById('results-count');
@@ -757,8 +684,6 @@ function updateResultsCount() {
     }
 
 }
-
-
 
 function resetAllFilters() {
 
@@ -776,15 +701,11 @@ function resetAllFilters() {
 
     }
 
-
-
     // Reset category filter to "All"
 
     document.querySelectorAll('.category-filter').forEach(f => f.classList.remove('active'));
 
     document.querySelector('[data-category=""]').classList.add('active');
-
-
 
     // Reset sort to "Newest"
 
@@ -792,13 +713,9 @@ function resetAllFilters() {
 
     document.querySelector('[data-sort="newest"]').classList.add('active');
 
-
-
     applyFilters();
 
 }
-
-
 
 function changeView(viewType) {
 
@@ -806,27 +723,19 @@ function changeView(viewType) {
 
     if (!galleryGrid) return;
 
-
-
     // Remove existing view classes
 
     galleryGrid.classList.remove('grid-view', 'list-view', 'masonry-view');
 
-    
-
     // Add new view class
 
     galleryGrid.classList.add(`${viewType}-view`);
-
-
 
     // Reload posts with new view
 
     loadGalleryPosts();
 
 }
-
-
 
 function checkForPostParameter() {
 
@@ -843,8 +752,6 @@ function checkForPostParameter() {
     }
 
 }
-
-
 
 function initSearch() {
 
@@ -869,8 +776,6 @@ function initSearch() {
     }
 
 }
-
-
 
 function applyFilters() {
 
@@ -921,8 +826,6 @@ function loadMorePosts() {
 
 }
 
-
-
 function addPostInteractionListeners() {
 
     // Like button listeners
@@ -935,11 +838,7 @@ function addPostInteractionListeners() {
 
             e.stopPropagation();
 
-            
-
             if (!requireAuth()) return;
-
-            
 
             const postId = this.dataset.postId;
 
@@ -948,8 +847,6 @@ function addPostInteractionListeners() {
         });
 
     });
-
-    
 
     // Save button listeners
 
@@ -961,11 +858,7 @@ function addPostInteractionListeners() {
 
             e.stopPropagation();
 
-            
-
             if (!requireAuth()) return;
-
-            
 
             const postId = this.dataset.postId;
 
@@ -984,12 +877,6 @@ function addPostInteractionListeners() {
         });
     });
 
-    
-
-    
-
-    
-
     // Post card click listeners
 
     document.querySelectorAll('.gallery-post-card, .top-post-card').forEach(card => {
@@ -1000,8 +887,6 @@ function addPostInteractionListeners() {
 
             if (e.target.closest('.overlay-actions, .post-menu, .menu-dropdown, .post-menu-btn, .post-menu-dropdown, .gallery-post-info')) return;
 
-            
-
             const postId = this.dataset.postId;
 
             openPostModal(postId);
@@ -1011,8 +896,6 @@ function addPostInteractionListeners() {
     });
 
 }
-
-
 
 function addPostMenuListeners() {
 
@@ -1026,11 +909,7 @@ function addPostMenuListeners() {
 
             e.stopPropagation();
 
-            
-
             const postId = this.dataset.postId;
-
-            
 
             // Close all other dropdowns
 
@@ -1040,21 +919,17 @@ function addPostMenuListeners() {
 
             });
 
-            
-
             // Create dropdown with Share option
-            
+
             // Find the post to check if it has a download URL
             const post = allPosts.find(p => p.id == postId);
             const hasDownloadUrl = post && post.downloadUrl;
-            
 
             const dropdown = document.createElement('div');
 
             dropdown.className = 'post-menu-dropdown';
 
             dropdown.innerHTML = `
-
 
                 <button class="post-menu-item" data-action="share-whatsapp" data-post-id="${postId}">
 
@@ -1088,10 +963,7 @@ function addPostMenuListeners() {
 
                 </button>
 
-
             `;
-
-            
 
             // Position dropdown below button
 
@@ -1100,8 +972,6 @@ function addPostMenuListeners() {
             if (infoSection) {
 
                 infoSection.appendChild(dropdown);
-
-                
 
                 // Add event listeners to menu items
 
@@ -1113,19 +983,13 @@ function addPostMenuListeners() {
 
                         e.stopPropagation();
 
-                        
-
                         const action = this.dataset.action;
 
                         const pid = this.dataset.postId;
 
-                        
-
                         // Remove dropdown
 
                         dropdown.remove();
-
-                        
 
                         // Handle action
 
@@ -1140,10 +1004,6 @@ function addPostMenuListeners() {
         });
 
     });
-
-    
-
-    
 
     // Close menus when clicking outside
 
@@ -1168,8 +1028,6 @@ function addPostMenuListeners() {
     });
 
 }
-
-
 
 // Handle post menu actions
 
@@ -1243,7 +1101,7 @@ function handlePostMenuAction(action, postId) {
                 const url = `${window.location.origin}/gallery.php?post=${postId}`;
                 const post = allPosts.find(p => p.id === postId);
                 const title = post ? post.title : 'Check out this post';
-                
+
                 if (navigator.share) {
                     navigator.share({
                         title: title,
@@ -1275,7 +1133,7 @@ function sharePostDirect(postId) {
     const url = `${window.location.origin}/gallery.php?post=${postId}`;
     const post = allPosts.find(p => p.id === postId);
     const title = post ? post.title : 'Check out this post';
-    
+
     if (navigator.share) {
         navigator.share({
             title: title,
@@ -1291,9 +1149,6 @@ function sharePostDirect(postId) {
         showNotification('Link copied to clipboard!', 'success');
     }
 }
-
-
-
 
 // Toggle like from menu (when like button not visible)
 async function toggleLikeFromMenu(postId) {
@@ -1356,51 +1211,44 @@ async function toggleSaveFromMenu(postId) {
     }
 }
 
-
-
-
-
-
 // Download post from gallery
 
 async function downloadPostFromGallery(postId) {
     try {
         const post = allPosts?.find(p => p.id === postId);
-        
+
         if (!post || !post.imageUrl) {
             showNotification('Download not available for this post', 'warning');
             return;
         }
-        
+
         showNotification('Preparing download...', 'info');
-        
+
         const imgResponse = await fetch(post.imageUrl);
         if (!imgResponse.ok) throw new Error('Failed to fetch image');
-        
+
         const blob = await imgResponse.blob();
         const url = window.URL.createObjectURL(blob);
-        
+
         const link = document.createElement('a');
         link.href = url;
-        
+
         const urlPath = post.imageUrl.split('?')[0];
         const extension = urlPath.substring(urlPath.lastIndexOf('.')) || '.jpg';
         link.download = `${post.title}${extension}`;
-        
+
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
+
         setTimeout(() => window.URL.revokeObjectURL(url), 100);
-        
+
         showNotification('Download started!', 'success');
     } catch (error) {
         console.error('Error downloading post:', error);
         showNotification('Error starting download', 'error');
     }
 }
-
-
 
 // Copy to clipboard helper
 
@@ -1425,8 +1273,6 @@ function copyToClipboard(text) {
     }
 
 }
-
-
 
 function fallbackCopyToClipboard(text) {
 
@@ -1458,11 +1304,7 @@ function fallbackCopyToClipboard(text) {
 
 }
 
-
-
 // Post modal functions now handled by post-modal.js
-
-
 
 function showErrorState() {
 
@@ -1485,11 +1327,6 @@ function showErrorState() {
     }
 
 }
-
-
-
-
-
 
 // Like and Save functionality
 async function toggleLike(postId, button) {
@@ -1560,8 +1397,6 @@ async function toggleSave(postId, button) {
     }
 }
 
-
-
 async function updatePostLikeCount(postId) {
     try {
         const response = await fetch('/api/posts.php');
@@ -1569,13 +1404,13 @@ async function updatePostLikeCount(postId) {
         const posts = await response.json();
         const post = posts.find(p => p.id === postId);
         const postLikes = post ? (post.likes || 0) : 0;
-        
+
         // Update like count in all instances of this post across the page
         const likeCountElements = document.querySelectorAll(`[data-post-id="${postId}"] .post-stats span:first-child, [data-post-id="${postId}"] .post-meta span:first-child`);
         likeCountElements.forEach(element => {
             element.innerHTML = `<i class="far fa-heart"></i> ${postLikes}`;
         });
-        
+
         // Also update the modal view if it's open
         const modalDetailElements = document.querySelectorAll('#post-detail .post-detail-meta span:nth-child(3)');
         modalDetailElements.forEach(element => {
@@ -1588,8 +1423,6 @@ async function updatePostLikeCount(postId) {
     }
 }
 
-
-
 // Search toggle functionality
 
 function initSearchToggle() {
@@ -1597,8 +1430,6 @@ function initSearchToggle() {
     const searchBtn = document.getElementById('search-btn');
 
     const filterBar = document.querySelector('.filter-bar');
-
-    
 
     // Only initialize if filter-bar element exists (for responsive layouts)
 
@@ -1611,8 +1442,6 @@ function initSearchToggle() {
             e.stopPropagation();
 
             filterBar.classList.toggle('show');
-
-            
 
             // Focus search input when shown
 
@@ -1634,8 +1463,6 @@ function initSearchToggle() {
 
 }
 
-
-
 // Search popup functionality
 
 function initSearchPopup() {
@@ -1655,8 +1482,6 @@ function initSearchPopup() {
     const clearFiltersBtn = document.getElementById('clear-filters');
 
     const filterBar = document.querySelector('.filter-bar');
-
-    
 
     // Only attach popup handler if filter-bar doesn't exist (mutually exclusive with toggle)
 
@@ -1686,8 +1511,6 @@ function initSearchPopup() {
 
     }
 
-    
-
     // Close search popup
 
     if (searchClose) {
@@ -1700,8 +1523,6 @@ function initSearchPopup() {
 
     }
 
-    
-
     // Handle search submission
 
     if (searchSubmit) {
@@ -1709,8 +1530,6 @@ function initSearchPopup() {
         searchSubmit.addEventListener('click', performSearch);
 
     }
-
-    
 
     if (searchInputPopup) {
 
@@ -1726,8 +1545,6 @@ function initSearchPopup() {
 
     }
 
-    
-
     // Apply filters button
 
     if (applyFiltersBtn) {
@@ -1736,8 +1553,6 @@ function initSearchPopup() {
 
     }
 
-    
-
     // Clear filters button
 
     if (clearFiltersBtn) {
@@ -1745,8 +1560,6 @@ function initSearchPopup() {
         clearFiltersBtn.addEventListener('click', clearAllFiltersFromPopup);
 
     }
-
-    
 
     // Close modal when clicking outside
 
@@ -1764,45 +1577,31 @@ function initSearchPopup() {
 
     }
 
-    
-
     // Initialize popup filters
 
     initPopupFilters();
 
 }
 
-
-
 function performSearch() {
 
     const searchInputPopup = document.getElementById('search-input-popup');
-
-    
 
     if (searchInputPopup) {
 
         const searchTerm = searchInputPopup.value.trim();
 
-        
-
         // Update the global search term
 
         currentSearchTerm = searchTerm;
-
-        
 
         // Hide the search modal
 
         hideModal('search-modal');
 
-        
-
         // Apply filters with the new search term
 
         applyFilters();
-
-        
 
         // Clear the popup search input
 
@@ -1811,8 +1610,6 @@ function performSearch() {
     }
 
 }
-
-
 
 // Initialize filters in the popup modal
 
@@ -1838,8 +1635,6 @@ function initPopupFilters() {
 
     });
 
-    
-
     // Initialize sort options in popup
 
     const popupSortOptions = document.querySelectorAll('#search-modal .sort-option');
@@ -1862,8 +1657,6 @@ function initPopupFilters() {
 
 }
 
-
-
 // Apply filters from popup and close modal
 
 function applyFiltersFromPopup() {
@@ -1874,8 +1667,6 @@ function applyFiltersFromPopup() {
 
     const activeSort = document.querySelector('#search-modal .sort-option.active');
 
-    
-
     // Update global filter state
 
     if (searchInputPopup) {
@@ -1884,15 +1675,11 @@ function applyFiltersFromPopup() {
 
     }
 
-    
-
     if (activeCategory) {
 
         currentCategory = activeCategory.getAttribute('data-category') || '';
 
     }
-
-    
 
     if (activeSort) {
 
@@ -1900,19 +1687,13 @@ function applyFiltersFromPopup() {
 
     }
 
-    
-
     // Close modal
 
     hideModal('search-modal');
 
-    
-
     // Apply filters
 
     applyFilters();
-
-    
 
     // Clear search input
 
@@ -1923,8 +1704,6 @@ function applyFiltersFromPopup() {
     }
 
 }
-
-
 
 // Clear all filters from popup
 
@@ -1939,8 +1718,6 @@ function clearAllFiltersFromPopup() {
         searchInputPopup.value = '';
 
     }
-
-    
 
     // Reset category to "All"
 
@@ -1958,8 +1735,6 @@ function clearAllFiltersFromPopup() {
 
     });
 
-    
-
     // Reset sort to "Newest"
 
     const popupSortOptions = document.querySelectorAll('#search-modal .sort-option');
@@ -1976,8 +1751,6 @@ function clearAllFiltersFromPopup() {
 
     });
 
-    
-
     // Reset global filter state
 
     currentSearchTerm = '';
@@ -1986,13 +1759,9 @@ function clearAllFiltersFromPopup() {
 
     currentSortBy = 'newest';
 
-    
-
     // Close modal
 
     hideModal('search-modal');
-
-    
 
     // Apply cleared filters
 
@@ -2000,15 +1769,11 @@ function clearAllFiltersFromPopup() {
 
 }
 
-
-
 // Update category counts in search popup
 
 function updateCategoryCounts() {
 
     if (!allPosts || allPosts.length === 0) return;
-
-    
 
     // Count posts by category
 
@@ -2026,8 +1791,6 @@ function updateCategoryCounts() {
 
     };
 
-    
-
     allPosts.forEach(post => {
 
         if (post.category && categoryCounts.hasOwnProperty(post.category)) {
@@ -2037,9 +1800,6 @@ function updateCategoryCounts() {
         }
 
     });
-
-    
-
 
     // Update counts in popup (with null checks)
 
@@ -2130,20 +1890,20 @@ function initGallerySearch() {
 // Update interaction states (like/save buttons) based on user data
 async function updateInteractionStates() {
     if (!currentUser) return;
-    
+
     try {
         const response = await fetch(`/api/user-data.php?userId=${currentUser.id}&type=all`);
         if (!response.ok) return;
-        
+
         const userData = await response.json();
         const likes = userData.likes || [];
         const saves = userData.saves || [];
-        
+
         // Update all like buttons
         document.querySelectorAll('.like-btn').forEach(btn => {
             const postId = btn.dataset.postId;
             const isLiked = likes.some(like => like.postId === postId);
-            
+
             if (isLiked) {
                 btn.classList.add('liked');
                 const icon = btn.querySelector('i');
@@ -2158,12 +1918,12 @@ async function updateInteractionStates() {
                 }
             }
         });
-        
+
         // Update all save buttons
         document.querySelectorAll('.save-btn').forEach(btn => {
             const postId = btn.dataset.postId;
             const isSaved = saves.some(save => save.postId === postId);
-            
+
             if (isSaved) {
                 btn.classList.add('saved');
                 const icon = btn.querySelector('i');
@@ -2178,7 +1938,7 @@ async function updateInteractionStates() {
                 }
             }
         });
-        
+
     } catch (error) {
         console.error('Error updating interaction states:', error);
     }
