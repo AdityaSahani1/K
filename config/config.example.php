@@ -6,7 +6,19 @@
 
 
 
+
+
+
+
+
+
+
+
 return [
+
+
+
+
 
 
 
@@ -14,7 +26,15 @@ return [
 
 
 
+
+
+
+
     
+
+
+
+
 
 
 
@@ -22,7 +42,15 @@ return [
 
 
 
+
+
+
+
     'MYSQL_PORT' => 3306,
+
+
+
+
 
 
 
@@ -30,7 +58,15 @@ return [
 
 
 
+
+
+
+
     'MYSQL_USERNAME' => 'your_username',
+
+
+
+
 
 
 
@@ -38,7 +74,15 @@ return [
 
 
 
+
+
+
+
     
+
+
+
+
 
 
 
@@ -46,7 +90,15 @@ return [
 
 
 
+
+
+
+
     'SMTP_PORT' => 587,
+
+
+
+
 
 
 
@@ -54,7 +106,15 @@ return [
 
 
 
+
+
+
+
     'SMTP_USERNAME' => 'your-email@gmail.com',
+
+
+
+
 
 
 
@@ -62,17 +122,36 @@ return [
 
 
 
+
+
+
+
     'SMTP_FROM_EMAIL' => 'your-email@gmail.com',
 
 
 
+
+
+
+
     'SMTP_FROM_NAME' => 'SnapSera',
+
     
+
     'IMGBB_API_KEY' => 'your-imgbb-api-key'
+
+
+    'SnapSera_version' => 'version here'
+
+
 
 
 
 ];
+
+
+
+
 
 
 
