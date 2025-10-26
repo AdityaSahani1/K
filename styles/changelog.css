@@ -134,6 +134,14 @@
 
 }
 
+.changelog-version-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+    display: block;
+}
+
 .changelog-date {
 
     color: var(--text-secondary);
@@ -146,7 +154,7 @@
 
 .changelog-title {
 
-    font-size: 1.5rem;
+    font-size: 1.3rem;
 
     font-weight: 600;
 

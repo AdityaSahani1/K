@@ -4,34 +4,32 @@ let installPromptShown = false;
 
 // Initialize PWA install functionality
 function initPWAInstall() {
-    // Check if already installed
+    // Check if already installed in standalone mode
     if (isAppInstalled()) {
+        console.log('App is already installed');
         return;
     }
+    
     // Check if prompt was dismissed recently
     const dismissedTime = localStorage.getItem('pwa-dismissed');
     if (dismissedTime) {
         const daysSinceDismissed = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60 * 24);
         if (daysSinceDismissed < 7) {
+            console.log('Install prompt dismissed recently');
             return;
         }
     }
-    // Show prompt after delay on first visit or returning users
-    const hasVisitedBefore = localStorage.getItem('has-visited');
-    const delay = hasVisitedBefore ? 30000 : 10000;
-    setTimeout(() => {
-        if (deferredPrompt && !installPromptShown) {
-            showInstallPrompt();
-        }
-    }, delay);
+    
     localStorage.setItem('has-visited', 'true');
 }
 
 // Check if app is already installed
 function isAppInstalled() {
+    // Only check if running in standalone mode
     if (window.matchMedia('(display-mode: standalone)').matches) {
         return true;
     }
+    // iOS Safari check
     if (window.navigator.standalone === true) {
         return true;
     }
@@ -40,13 +38,27 @@ function isAppInstalled() {
 
 // Capture beforeinstallprompt event
 window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('beforeinstallprompt event fired');
     e.preventDefault();
     deferredPrompt = e;
+    
+    // Only show prompt if app is not installed
     if (!installPromptShown && !isAppInstalled()) {
         const hasVisitedBefore = localStorage.getItem('has-visited');
+        const dismissedTime = localStorage.getItem('pwa-dismissed');
+        
+        // Don't show if recently dismissed
+        if (dismissedTime) {
+            const daysSinceDismissed = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60 * 24);
+            if (daysSinceDismissed < 7) {
+                return;
+            }
+        }
+        
+        // Show prompt after delay
         const delay = hasVisitedBefore ? 30000 : 10000;
         setTimeout(() => {
-            if (!installPromptShown) {
+            if (!installPromptShown && deferredPrompt && !isAppInstalled()) {
                 showInstallPrompt();
             }
         }, delay);
@@ -125,5 +137,17 @@ window.addEventListener('appinstalled', () => {
 document.addEventListener('DOMContentLoaded', () => {
     if ('serviceWorker' in navigator) {
         initPWAInstall();
+        
+        // Add click listener to footer PWA install button
+        const footerPWAButton = document.getElementById('pwa-install-btn');
+        if (footerPWAButton) {
+            footerPWAButton.addEventListener('click', function() {
+                if (deferredPrompt) {
+                    installPWA();
+                } else {
+                    showNotification('Installation is not available on this device. Try using Chrome or Edge browser.', 'info');
+                }
+            });
+        }
     }
 });

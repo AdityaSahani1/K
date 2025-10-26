@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
     await loadChangelog();
-    checkForNewChangelog();
 });
 
 async function loadChangelog() {
@@ -22,12 +21,12 @@ async function loadChangelog() {
 
         container.innerHTML = changelog.map(entry => `
             <div class="changelog-entry">
-                <span class="version-badge">v${escapeHtml(entry.version)}</span>
+                <h2 class="changelog-version-title">${escapeHtml(entry.version)}</h2>
                 <div class="changelog-date">
                     <i class="far fa-calendar"></i>
                     ${formatDate(entry.release_date)}
                 </div>
-                <h2 class="changelog-title">${escapeHtml(entry.title)}</h2>
+                <h3 class="changelog-title">${escapeHtml(entry.title)}</h3>
                 <p class="changelog-description">${escapeHtml(entry.description)}</p>
                 ${entry.changes ? renderChanges(entry.changes) : ''}
             </div>

@@ -2,11 +2,23 @@
 
 
 
+
+
+
+
 vendor/
 
 
 
+
+
+
+
 composer.lock
+
+
+
+
 
 
 
@@ -18,7 +30,19 @@ composer.lock
 
 
 
+
+
+
+
+
+
+
+
 # Replit
+
+
+
+
 
 
 
@@ -26,7 +50,15 @@ composer.lock
 
 
 
+
+
+
+
 replit.nix
+
+
+
+
 
 
 
@@ -34,7 +66,15 @@ replit.nix
 
 
 
+
+
+
+
 .upm/
+
+
+
+
 
 
 
@@ -46,7 +86,19 @@ replit.nix
 
 
 
+
+
+
+
+
+
+
+
 # IDE
+
+
+
+
 
 
 
@@ -54,7 +106,15 @@ replit.nix
 
 
 
+
+
+
+
 .idea/
+
+
+
+
 
 
 
@@ -62,7 +122,15 @@ replit.nix
 
 
 
+
+
+
+
 *.swo
+
+
+
+
 
 
 
@@ -72,11 +140,25 @@ replit.nix
 
 
 
+
+
+
+
+
+
 # OS
 
 
 
+
+
+
+
 .DS_Store
+
+
+
+
 
 
 
@@ -88,11 +170,27 @@ Thumbs.db
 
 
 
+
+
+
+
+
+
+
+
 # Environment
 
 
 
+
+
+
+
 .env
+
+
+
+
 
 
 
@@ -104,11 +202,27 @@ config/config.php
 
 
 
+
+
+
+
+
+
+
+
 # Database (keep schema but not actual db)
 
 
 
+
+
+
+
 data/*.db
+
+
+
+
 
 
 
@@ -120,11 +234,27 @@ data/*.sqlite
 
 
 
+
+
+
+
+
+
+
+
 # Uploads
 
 
 
+
+
+
+
 uploads/*
+
+
+
+
 
 
 
@@ -136,7 +266,19 @@ uploads/*
 
 
 
+
+
+
+
+
+
+
+
 # Temporary files
+
+
+
+
 
 
 
@@ -144,11 +286,35 @@ uploads/*
 
 
 
+
+
+
+
 *.bak
 
 
 
+
+
+
+
 *.bak2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

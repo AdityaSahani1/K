@@ -1450,6 +1450,12 @@ async function uploadToImgBB(base64Image) {
 
 // Changelog auto-detection
 async function checkForUpdates() {
+    // Don't show notification on the changelog page itself
+    const currentPath = window.location.pathname;
+    if (currentPath.includes('changelog.php')) {
+        return;
+    }
+
     try {
         const response = await fetch('/api/changelog.php');
         if (!response.ok) return;
@@ -1526,8 +1532,13 @@ function addChangelogButton() {
     }
 }
 
-// Initialize changelog features
-document.addEventListener('DOMContentLoaded', function() {
+// Initialize changelog features on page load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        checkForUpdates();
+        addChangelogButton();
+    });
+} else {
     checkForUpdates();
     addChangelogButton();
-});
+}
