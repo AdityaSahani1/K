@@ -1,0 +1,111 @@
+.changelog-notification {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 10px 40px var(--shadow-color);
+    max-width: 380px;
+    z-index: 9999;
+    transform: translateX(420px);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.changelog-notification.show {
+    transform: translateX(0);
+}
+
+.changelog-notif-content {
+    padding: var(--spacing-lg);
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: flex-start;
+    position: relative;
+}
+
+.changelog-notif-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.changelog-notif-text {
+    flex: 1;
+}
+
+.changelog-notif-text h4 {
+    margin: 0 0 0.3rem 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.changelog-notif-text p {
+    margin: 0 0 0.8rem 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.changelog-notif-btn {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.changelog-notif-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.changelog-notif-close {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+}
+
+.changelog-notif-close:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+@media (max-width: 640px) {
+    .changelog-notification {
+        top: 80px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        transform: translateY(-150%);
+    }
+    
+    .changelog-notification.show {
+        transform: translateY(0);
+    }
+}

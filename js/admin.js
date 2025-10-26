@@ -349,11 +349,11 @@ async function deletePost(postId) {
     
     try {
         const response = await fetch('/api/posts.php', {
-            method: 'DELETE',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ id: postId })
+            body: JSON.stringify({ action: 'delete', id: postId })
         });
         
         if (!response.ok) {
@@ -386,13 +386,13 @@ async function handlePostForm(e) {
     const featured = document.getElementById('post-featured').checked;
     
     // Validation
-    if (!title || !category || !imageUrl) {
+    if (!title || !category || (mode === 'add' && !imageUrl)) {
         showNotification('Please fill in all required fields', 'error');
         return;
     }
     
     // Convert image URL to direct link if from supported platforms
-    imageUrl = convertToDirectImageUrl(imageUrl);
+    if (imageUrl) { imageUrl = convertToDirectImageUrl(imageUrl); }
     
     try {
         const postData = {
@@ -412,7 +412,7 @@ async function handlePostForm(e) {
             postData.id = 'post_' + Date.now();
         } else if (mode === 'edit') {
             postData.id = postId;
-            method = 'PUT';
+            postData.action = 'update'; method = 'POST';
         }
         
         const response = await fetch('/api/posts.php', {
@@ -549,7 +549,7 @@ async function handleEditUserForm(e) {
         };
         
         const response = await fetch('/api/get-users.php', {
-            method: 'PUT',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -712,7 +712,7 @@ async function grantPostPermission(userId) {
         }
         
         const updateResponse = await fetch('/api/get-users.php', {
-            method: 'PUT',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -749,7 +749,7 @@ async function deleteUser(userId) {
     
     try {
         const response = await fetch('/api/get-users.php', {
-            method: 'DELETE',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },

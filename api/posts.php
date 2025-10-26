@@ -3,7 +3,7 @@ require_once __DIR__ . '/../config/database.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -26,15 +26,24 @@ try {
             break;
             
         case 'POST':
-            createPost($db);
-            break;
+            $input = json_decode(file_get_contents('php://input'), true);
+            $action = $input['action'] ?? 'create';
             
-        case 'PUT':
-            updatePost($db);
-            break;
-            
-        case 'DELETE':
-            deletePost($db);
+            switch ($action) {
+                case 'create':
+                    createPost($db);
+                    break;
+                case 'update':
+                    updatePost($db);
+                    break;
+                case 'delete':
+                    deletePost($db);
+                    break;
+                default:
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Invalid action']);
+                    break;
+            }
             break;
             
         default:
@@ -118,6 +127,15 @@ function updatePost($db) {
     $tags = json_encode($input['tags'] ?? []);
     $featured = $input['featured'] ?? 0;
     $downloadUrl = $input['downloadUrl'] ?? null;
+    
+    if (empty($imageUrl)) {
+        $stmt = $db->getConnection()->prepare("SELECT imageUrl FROM posts WHERE id = ?");
+        $stmt->execute([$id]);
+        $existingPost = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($existingPost) {
+            $imageUrl = $existingPost['imageUrl'];
+        }
+    }
     
     $db->execute(
         "UPDATE posts SET title = ?, description = ?, imageUrl = ?, category = ?, tags = ?, featured = ?, downloadUrl = ? WHERE id = ?",

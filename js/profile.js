@@ -707,11 +707,11 @@ async function deleteUserPost(postId) {
     
     try {
         const response = await fetch('/api/posts.php', {
-            method: 'DELETE',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ id: postId })
+            body: JSON.stringify({ action: 'delete', id: postId })
         });
         
         if (!response.ok) {

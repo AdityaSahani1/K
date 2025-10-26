@@ -615,6 +615,15 @@
     .post-actions-bar .action-btn {
         font-size: 0.85rem;
         padding: var(--spacing-sm);
+        flex: 1 1 calc(33.333% - var(--spacing-md));
+        min-width: 0;
+    }
+    
+    .post-actions-bar .action-btn.download-btn {
+        flex: 1 1 100%;
+        margin-top: var(--spacing-sm);
+        font-size: 0.9rem;
+        padding: var(--spacing-md);
     }
 }
 

@@ -3,7 +3,7 @@ require_once __DIR__ . '/../config/database.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -20,11 +20,22 @@ try {
         case 'GET':
             getUsers($db);
             break;
-        case 'PUT':
-            updateUser($db);
-            break;
-        case 'DELETE':
-            deleteUser($db);
+        case 'POST':
+            $input = json_decode(file_get_contents('php://input'), true);
+            $action = $input['action'] ?? 'update';
+            
+            switch ($action) {
+                case 'update':
+                    updateUser($db);
+                    break;
+                case 'delete':
+                    deleteUser($db);
+                    break;
+                default:
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Invalid action']);
+                    break;
+            }
             break;
         default:
             http_response_code(405);

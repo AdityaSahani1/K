@@ -788,12 +788,15 @@ async function getCurrentPost(postId) {
 
 async function showShareMenu(postId, button) {
 
-    const existingMenu = document.querySelector('.share-menu');
+    const existingMenu = document.querySelector('.share-menu-dropdown');
+    const existingBackdrop = document.querySelector('.share-menu-backdrop');
 
     if (existingMenu) {
-
         existingMenu.remove();
-
+    }
+    
+    if (existingBackdrop) {
+        existingBackdrop.remove();
     }
 
     
@@ -809,6 +812,11 @@ async function showShareMenu(postId, button) {
     const url = `${window.location.origin}/gallery.php?post=${postId}`;
 
     
+    
+    // Create backdrop
+    const backdrop = document.createElement('div');
+    backdrop.className = 'share-menu-backdrop';
+    document.body.appendChild(backdrop);
 
     const shareMenu = document.createElement('div');
 
@@ -816,11 +824,7 @@ async function showShareMenu(postId, button) {
 
     shareMenu.innerHTML = `
 
-        <button class="share-menu-close">
-
-            <i class="fas fa-times"></i>
-
-        </button>
+        <h3 class="share-menu-header">Share "${title}"</h3>
 
         <button class="share-menu-item" data-platform="whatsapp">
 
@@ -862,21 +866,27 @@ async function showShareMenu(postId, button) {
 
     
 
-    // Show menu with animation
+    // Show menu and backdrop with animation
 
-    setTimeout(() => shareMenu.classList.add('show'), 10);
+    setTimeout(() => {
+        shareMenu.classList.add('show');
+        backdrop.classList.add('show');
+    }, 10);
 
     
 
-    // Add close button listener
-
-    const closeBtn = shareMenu.querySelector('.share-menu-close');
-
-    if (closeBtn) {
-
-        closeBtn.addEventListener('click', () => shareMenu.remove());
-
-    }
+    // Function to close menu
+    const closeMenu = () => {
+        shareMenu.classList.remove('show');
+        backdrop.classList.remove('show');
+        setTimeout(() => {
+            shareMenu.remove();
+            backdrop.remove();
+        }, 400);
+    };
+    
+    // Add backdrop click listener
+    backdrop.addEventListener('click', closeMenu);
 
     
 
@@ -894,7 +904,7 @@ async function showShareMenu(postId, button) {
 
             const platform = this.dataset.platform;
 
-            shareMenu.remove();
+            closeMenu();
 
             
 
@@ -961,26 +971,6 @@ async function showShareMenu(postId, button) {
         });
 
     });
-
-    
-
-    // Close menu when clicking outside
-
-    setTimeout(() => {
-
-        document.addEventListener('click', function closeShareMenu(e) {
-
-            if (!shareMenu.contains(e.target)) {
-
-                shareMenu.remove();
-
-                document.removeEventListener('click', closeShareMenu);
-
-            }
-
-        });
-
-    }, 100);
 
 }
 
@@ -1661,127 +1651,3 @@ document.addEventListener('DOMContentLoaded', function() {
     checkForUpdates();
     addChangelogButton();
 });
-
-// PWA Installation Handling
-let deferredPrompt = null;
-let isPWAInstalled = false;
-
-// Check if PWA is already installed
-async function checkPWAInstalled() {
-    // Check if running in standalone mode (actually installed and launched as app)
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                        window.navigator.standalone === true;
-    
-    if (isStandalone) {
-        isPWAInstalled = true;
-        return true;
-    }
-    
-    // Check using getInstalledRelatedApps if available
-    if ('getInstalledRelatedApps' in navigator) {
-        try {
-            const relatedApps = await navigator.getInstalledRelatedApps();
-            if (relatedApps && relatedApps.length > 0) {
-                isPWAInstalled = true;
-                return true;
-            }
-        } catch (error) {
-            console.log('Error checking installed apps:', error);
-        }
-    }
-    
-    // Not installed - app is running in browser
-    isPWAInstalled = false;
-    return false;
-}
-
-// Listen for beforeinstallprompt event - this means the app is installable
-window.addEventListener('beforeinstallprompt', (e) => {
-    console.log('beforeinstallprompt event fired - app is installable');
-    e.preventDefault();
-    deferredPrompt = e;
-    isPWAInstalled = false;
-    showInstallButton();
-});
-
-// Listen for appinstalled event - this means the user just installed the app
-window.addEventListener('appinstalled', () => {
-    console.log('appinstalled event fired - app was just installed');
-    isPWAInstalled = true;
-    deferredPrompt = null;
-    hideInstallButton();
-    showNotification('App installed successfully!', 'success');
-});
-
-function showInstallButton() {
-    let installBtn = document.getElementById('pwa-install-btn');
-    if (!installBtn) {
-        const navIcons = document.querySelector('.nav-icons') || document.querySelector('.nav-actions');
-        if (navIcons) {
-            installBtn = document.createElement('button');
-            installBtn.id = 'pwa-install-btn';
-            installBtn.className = 'icon-btn';
-            installBtn.title = 'Install App';
-            installBtn.innerHTML = '<i class="fas fa-download"></i>';
-            installBtn.onclick = installPWA;
-            navIcons.insertBefore(installBtn, navIcons.firstChild);
-        }
-    }
-}
-
-function hideInstallButton() {
-    const installBtn = document.getElementById('pwa-install-btn');
-    if (installBtn) {
-        installBtn.remove();
-    }
-}
-
-async function installPWA() {
-    if (!deferredPrompt) {
-        console.log('Install button clicked but no deferred prompt available');
-        if (isPWAInstalled) {
-            showNotification('App is already installed!', 'info');
-        } else {
-            showNotification('Installation prompt is not available. Try refreshing the page.', 'info');
-        }
-        return;
-    }
-    
-    try {
-        // Show the install prompt
-        await deferredPrompt.prompt();
-        
-        // Wait for the user to respond to the prompt
-        const { outcome } = await deferredPrompt.userChoice;
-        
-        if (outcome === 'accepted') {
-            console.log('User accepted the install prompt');
-            hideInstallButton();
-        } else {
-            console.log('User dismissed the install prompt');
-        }
-        
-        // Clear the deferredPrompt since it can only be used once
-        deferredPrompt = null;
-    } catch (error) {
-        console.error('Error during PWA installation:', error);
-        showNotification('Failed to install app. Please try again.', 'error');
-    }
-}
-
-// Initialize PWA check on page load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializePWACheck);
-} else {
-    initializePWACheck();
-}
-
-async function initializePWACheck() {
-    const isInstalled = await checkPWAInstalled();
-    console.log('PWA installation check:', isInstalled ? 'installed' : 'not installed');
-    
-    if (isInstalled) {
-        hideInstallButton();
-    }
-    // If not installed, we wait for the beforeinstallprompt event to show the button
-}

@@ -53,7 +53,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     deferredPrompt = e;
     
     // Only enable if not already installed
-    if (true) {
+    if (!isInstalled) {
         updateInstallButtonState(false);
         console.log('PWA: Install button is now enabled');
         showPWAPopupFirstTime();

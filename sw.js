@@ -1,4 +1,4 @@
-const CACHE_NAME = 'snapsera-v4';
+const CACHE_NAME = 'snapsera-v5';
 const urlsToCache = [
   '/',
   '/index.php',

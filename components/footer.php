@@ -34,6 +34,7 @@
                     <li><a href="gallery.php">Gallery</a></li>
                     <li><a href="about.php">About</a></li>
                     <li><a href="contact.php">Contact</a></li>
+                    <li><a href="changelog.php">Changelog</a></li>
                 </ul>
             </div>
             <div class="footer-section">

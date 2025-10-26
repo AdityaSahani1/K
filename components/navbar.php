@@ -25,6 +25,9 @@ $showSearch = $showSearch ?? false;
                 <li class="nav-item">
                     <a href="contact.php" class="nav-link <?= $currentPage === 'contact' ? 'active' : '' ?>">Contact</a>
                 </li>
+                <li class="nav-item">
+                    <a href="changelog.php" class="nav-link <?= $currentPage === 'changelog' ? 'active' : '' ?>">Changelog</a>
+                </li>
             </ul>
         </div>
         
