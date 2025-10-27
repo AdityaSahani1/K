@@ -77,12 +77,14 @@
     gap: 8px;
 }
 .pwa-install-btn {
-    background: var(--primary-color);
+    background: linear-gradient(135deg, #6C5CE7, #5B4FD8);
     color: white;
+    box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3);
 }
 .pwa-install-btn:hover {
-    background: var(--primary-dark);
+    background: linear-gradient(135deg, #5B4FD8, #4A3EC7);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
 }
 .pwa-dismiss-btn {
     background: transparent;

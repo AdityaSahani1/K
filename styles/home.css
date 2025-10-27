@@ -754,7 +754,17 @@
 }
 
 .pwa-install-btn i {
-    color: var(--accent-secondary);
+    color: #5B4FD8;
+}
+
+.pwa-install-btn.download-btn {
+    background: linear-gradient(135deg, rgba(108, 92, 231, 0.12), rgba(91, 79, 216, 0.08));
+    border-color: rgba(108, 92, 231, 0.3);
+}
+
+.pwa-install-btn.download-btn:hover {
+    background: linear-gradient(135deg, rgba(108, 92, 231, 0.18), rgba(91, 79, 216, 0.12));
+    border-color: #6C5CE7;
 }
 
 .android-download-btn i {

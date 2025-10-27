@@ -66,3 +66,26 @@
 <button class="scroll-to-top" id="scroll-to-top" title="Scroll to top">
     <i class="fas fa-chevron-up"></i>
 </button>
+
+<!-- PWA Install Card (Slide-up) -->
+<div class="pwa-install-card" id="pwa-install-card">
+    <div class="pwa-install-content">
+        <button class="pwa-install-close" id="card-close-btn">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="pwa-install-icon">
+            <img src="/assets/pwa-icons/icon-192x192.png" alt="SnapSera Icon">
+        </div>
+        <h3>Install SnapSera</h3>
+        <p>Install our app for a faster, better experience. Access it anytime, even offline!</p>
+        <div class="pwa-install-buttons">
+            <button class="pwa-install-btn" id="card-install-btn">
+                <i class="fas fa-download"></i>
+                Install Now
+            </button>
+            <button class="pwa-dismiss-btn" id="card-dismiss-btn">
+                Not Now
+            </button>
+        </div>
+    </div>
+</div>

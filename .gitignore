@@ -4,8 +4,6 @@ composer.lock
 *.log
 
 # Replit
-.replit
-replit.nix
 .config/
 .upm/
 .cache/
