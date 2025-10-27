@@ -19,16 +19,27 @@ async function loadChangelog() {
             return;
         }
 
-        container.innerHTML = changelog.map(entry => `
-            <div class="changelog-entry">
-                <h2 class="changelog-version-title">${escapeHtml(entry.version)}</h2>
-                <div class="changelog-date">
-                    <i class="far fa-calendar"></i>
-                    ${formatDate(entry.release_date)}
+        container.innerHTML = changelog.map((entry, index) => `
+            <div class="changelog-card">
+                <div class="changelog-card-header" onclick="toggleChangelog(${index})">
+                    <div class="changelog-card-title">
+                        <h3>
+                            <span class="changelog-version-badge">${escapeHtml(entry.version)}</span>
+                            ${escapeHtml(entry.title)}
+                        </h3>
+                    </div>
+                    <div class="changelog-card-meta">
+                        <span class="changelog-date">
+                            <i class="far fa-calendar"></i>
+                            ${formatDate(entry.release_date)}
+                        </span>
+                        <i class="fas fa-chevron-down changelog-toggle-icon"></i>
+                    </div>
                 </div>
-                <h3 class="changelog-title">${escapeHtml(entry.title)}</h3>
-                <p class="changelog-description">${escapeHtml(entry.description)}</p>
-                ${entry.changes ? renderChanges(entry.changes) : ''}
+                <div class="changelog-card-content" id="changelog-content-${index}">
+                    ${entry.description ? `<p class="changelog-description">${escapeHtml(entry.description)}</p>` : ''}
+                    ${entry.changes ? renderChanges(entry.changes) : ''}
+                </div>
             </div>
         `).join('');
     } catch (error) {
@@ -39,6 +50,20 @@ async function loadChangelog() {
                 <p>Failed to load changelog</p>
             </div>
         `;
+    }
+}
+
+function toggleChangelog(index) {
+    const content = document.getElementById(`changelog-content-${index}`);
+    const card = content.closest('.changelog-card');
+    const icon = card.querySelector('.changelog-toggle-icon');
+    
+    if (content.style.maxHeight) {
+        content.style.maxHeight = null;
+        card.classList.remove('expanded');
+    } else {
+        content.style.maxHeight = content.scrollHeight + 'px';
+        card.classList.add('expanded');
     }
 }
 
@@ -76,10 +101,10 @@ function showChangelogNotification(version) {
             <div class="changelog-notif-text">
                 <h4>New Update Available!</h4>
                 <p>SnapSera v${version} is now live with new features and improvements</p>
+                <button class="changelog-notif-btn" onclick="window.location.href='changelog.php'">
+                    View Changelog
+                </button>
             </div>
-            <button class="changelog-notif-btn" onclick="window.location.href='changelog.php'">
-                View Changelog
-            </button>
             <button class="changelog-notif-close" onclick="this.closest('.changelog-notification').remove()">
                 <i class="fas fa-times"></i>
             </button>
@@ -111,18 +136,18 @@ function renderChanges(changesJson) {
             html += '</ul>';
         }
 
-        if (changes.fixes && changes.fixes.length > 0) {
-            html += '<h4><i class="fas fa-wrench"></i> Fixes</h4><ul>';
-            changes.fixes.forEach(fix => {
-                html += `<li><span class="change-type fix">Fix</span>${escapeHtml(fix)}</li>`;
-            });
-            html += '</ul>';
-        }
-
         if (changes.improvements && changes.improvements.length > 0) {
             html += '<h4><i class="fas fa-arrow-up"></i> Improvements</h4><ul>';
             changes.improvements.forEach(improvement => {
                 html += `<li><span class="change-type improvement">Improvement</span>${escapeHtml(improvement)}</li>`;
+            });
+            html += '</ul>';
+        }
+
+        if (changes.fixes && changes.fixes.length > 0) {
+            html += '<h4><i class="fas fa-wrench"></i> Fixes</h4><ul>';
+            changes.fixes.forEach(fix => {
+                html += `<li><span class="change-type fix">Fix</span>${escapeHtml(fix)}</li>`;
             });
             html += '</ul>';
         }

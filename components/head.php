@@ -19,7 +19,6 @@ if (!is_array($pageSpecificCSS)) {
 <link rel="icon" type="image/png" sizes="512x512" href="/assets/pwa-icons/icon-512x512.png">
 <link rel="stylesheet" href="styles/main.css">
 <link rel="stylesheet" href="styles/changelog-notification.css">
-<link rel="stylesheet" href="styles/pwa-install.css">
 <?php foreach ($pageSpecificCSS as $css): ?>
 <?php if ($css): ?>
 <link rel="stylesheet" href="styles/<?= htmlspecialchars($css) ?>">

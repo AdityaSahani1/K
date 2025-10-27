@@ -1,357 +1,274 @@
 .changelog-container {
-
     max-width: 1000px;
-
     margin: 100px auto 60px;
-
     padding: 20px;
-
 }
 
 .changelog-header {
-
     text-align: center;
-
     margin-bottom: 60px;
-
 }
 
 .changelog-header h1 {
-
     font-size: 3rem;
-
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
     -webkit-background-clip: text;
-
     -webkit-text-fill-color: transparent;
-
     background-clip: text;
-
     margin-bottom: 10px;
-
 }
 
 .changelog-header .subtitle {
-
     font-size: 1.2rem;
-
     color: var(--text-secondary);
-
 }
 
 .changelog-timeline {
-
-    position: relative;
-
-    padding-left: 40px;
-
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-.changelog-timeline::before {
-
-    content: '';
-
-    position: absolute;
-
-    left: 15px;
-
-    top: 0;
-
-    bottom: 0;
-
-    width: 2px;
-
-    background: linear-gradient(to bottom, var(--primary-color), transparent);
-
-}
-
-.changelog-entry {
-
-    position: relative;
-
-    margin-bottom: 40px;
-
-    padding: 25px;
-
-    background: var(--card-bg);
-
+.changelog-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
-
-    box-shadow: var(--shadow);
-
+    box-shadow: 0 2px 8px var(--shadow-color);
+    overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-
 }
 
-.changelog-entry:hover {
-
+.changelog-card:hover {
     transform: translateY(-2px);
-
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-
+    box-shadow: 0 8px 20px var(--shadow-hover);
 }
 
-.changelog-entry::before {
-
-    content: '';
-
-    position: absolute;
-
-    left: -29px;
-
-    top: 30px;
-
-    width: 12px;
-
-    height: 12px;
-
-    border-radius: 50%;
-
-    background: var(--primary-color);
-
-    border: 3px solid var(--bg-primary);
-
+.changelog-card-header {
+    padding: 20px 25px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    transition: background 0.2s ease;
 }
 
-.version-badge {
+.changelog-card-header:hover {
+    background: var(--bg-secondary);
+}
 
-    display: inline-block;
+.changelog-card-title {
+    flex: 1;
+    min-width: 0;
+}
 
-    padding: 6px 12px;
-
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-
-    color: white;
-
-    border-radius: 20px;
-
-    font-size: 0.9rem;
-
+.changelog-card-title h3 {
+    font-size: 1.3rem;
     font-weight: 600;
-
-    margin-bottom: 10px;
-
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
-.changelog-version-title {
-    font-size: 1.8rem;
+.changelog-version-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    border-radius: 20px;
+    font-size: 0.75rem;
     font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 10px;
-    display: block;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.changelog-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 0;
 }
 
 .changelog-date {
-
     color: var(--text-secondary);
-
     font-size: 0.9rem;
-
-    margin-bottom: 15px;
-
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
 }
 
-.changelog-title {
+.changelog-toggle-icon {
+    color: var(--text-secondary);
+    transition: transform 0.3s ease;
+    font-size: 0.9rem;
+}
 
-    font-size: 1.3rem;
+.changelog-card.expanded .changelog-toggle-icon {
+    transform: rotate(180deg);
+}
 
-    font-weight: 600;
+.changelog-card-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
 
-    color: var(--text-primary);
+.changelog-card-content > * {
+    padding: 0 25px;
+}
 
-    margin-bottom: 15px;
-
+.changelog-card-content > *:last-child {
+    padding-bottom: 25px;
 }
 
 .changelog-description {
-
     color: var(--text-secondary);
-
     line-height: 1.6;
-
-    margin-bottom: 20px;
-
+    margin: 0 0 20px 0;
 }
 
 .changelog-changes {
-
-    margin-top: 20px;
-
+    margin: 0;
 }
 
 .changelog-changes h4 {
-
     color: var(--text-primary);
-
     font-size: 1rem;
-
-    margin-bottom: 10px;
-
+    margin: 15px 0 10px 0;
     display: flex;
-
     align-items: center;
-
     gap: 8px;
-
 }
 
 .changelog-changes ul {
-
     list-style: none;
-
     padding: 0;
-
+    margin: 0 0 15px 0;
 }
 
 .changelog-changes li {
-
     padding: 8px 0;
-
     padding-left: 25px;
-
     position: relative;
-
     color: var(--text-secondary);
-
 }
 
 .changelog-changes li::before {
-
     content: '\f058';
-
     font-family: 'Font Awesome 6 Free';
-
     font-weight: 900;
-
     position: absolute;
-
     left: 0;
-
-    color: var(--primary-color);
-
+    color: var(--accent-primary);
 }
 
 .change-type {
-
     display: inline-block;
-
     padding: 3px 8px;
-
     border-radius: 4px;
-
     font-size: 0.75rem;
-
     font-weight: 600;
-
     margin-right: 8px;
-
 }
 
 .change-type.feature {
-
     background: rgba(52, 152, 219, 0.1);
-
     color: #3498db;
+}
 
+[data-theme="dark"] .change-type.feature {
+    background: rgba(52, 152, 219, 0.2);
+    color: #60a5fa;
 }
 
 .change-type.fix {
-
     background: rgba(46, 204, 113, 0.1);
-
     color: #2ecc71;
+}
 
+[data-theme="dark"] .change-type.fix {
+    background: rgba(46, 204, 113, 0.2);
+    color: #4ade80;
 }
 
 .change-type.improvement {
-
     background: rgba(155, 89, 182, 0.1);
-
     color: #9b59b6;
+}
 
+[data-theme="dark"] .change-type.improvement {
+    background: rgba(155, 89, 182, 0.2);
+    color: #c084fc;
 }
 
 .change-type.breaking {
-
     background: rgba(231, 76, 60, 0.1);
-
     color: #e74c3c;
+}
 
+[data-theme="dark"] .change-type.breaking {
+    background: rgba(231, 76, 60, 0.2);
+    color: #f87171;
 }
 
 .loading-state,
-
 .error-state,
-
 .empty-state {
-
     text-align: center;
-
     padding: 60px 20px;
-
     color: var(--text-secondary);
-
 }
 
 .loading-state i,
-
 .error-state i,
-
 .empty-state i {
-
     font-size: 3rem;
-
     margin-bottom: 20px;
-
-    color: var(--primary-color);
-
+    color: var(--accent-primary);
 }
 
 .error-state i {
-
-    color: #e74c3c;
-
+    color: var(--accent-danger);
 }
 
 @media (max-width: 768px) {
-
     .changelog-container {
-
         margin-top: 80px;
-
         padding: 15px;
-
     }
 
     .changelog-header h1 {
-
         font-size: 2rem;
-
     }
 
     .changelog-header .subtitle {
-
         font-size: 1rem;
-
     }
 
-    .changelog-timeline {
-
-        padding-left: 30px;
-
+    .changelog-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
     }
 
-    .changelog-entry {
-
-        padding: 20px;
-
+    .changelog-card-title h3 {
+        font-size: 1.1rem;
+        gap: 8px;
     }
 
-    .changelog-title {
-
-        font-size: 1.2rem;
-
+    .changelog-version-badge {
+        font-size: 0.7rem;
+        padding: 5px 12px;
     }
 
+    .changelog-card-meta {
+        width: 100%;
+        justify-content: space-between;
+    }
 }
