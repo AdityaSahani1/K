@@ -21,6 +21,7 @@ Thumbs.db
 
 # Environment
 .env
+env.txt
 config/config.php
 
 # Database (keep schema but not actual db)

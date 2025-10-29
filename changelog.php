@@ -1,4 +1,3 @@
-
 <?php
 
 $pageTitle = 'Changelog - SnapSera';
